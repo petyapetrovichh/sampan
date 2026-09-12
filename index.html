@@ -24659,6 +24659,8 @@
   var BANNER2_CN = __ICON_SVG("#333", "2");
   var BANNER3_EN = __ICON_SVG("#666", "3");
   var BANNER3_CN = __ICON_SVG("#666", "3");
+  var APP_ICON_180 = __ICON_SVG("#F6DF51", "S");
+  var APP_ICON_512 = __ICON_SVG("#F6DF51", "S");
   var IS_H5 = true;
   var SQUIRCLE_D = "M1.00000,0.50000 L0.99885,0.66544 L0.99540,0.72961 L0.98963,0.77744 L0.98150,0.81646 L0.97096,0.84949 L0.95793,0.87794 L0.94231,0.90258 L0.92393,0.92393 L0.90258,0.94231 L0.87794,0.95793 L0.84949,0.97096 L0.81646,0.98150 L0.77744,0.98963 L0.72961,0.99540 L0.66544,0.99885 L0.50000,1.00000 L0.33456,0.99885 L0.27039,0.99540 L0.22256,0.98963 L0.18354,0.98150 L0.15051,0.97096 L0.12206,0.95793 L0.09742,0.94231 L0.07607,0.92393 L0.05769,0.90258 L0.04207,0.87794 L0.02904,0.84949 L0.01850,0.81646 L0.01037,0.77744 L0.00460,0.72961 L0.00115,0.66544 L0.00000,0.50000 L0.00115,0.33456 L0.00460,0.27039 L0.01037,0.22256 L0.01850,0.18354 L0.02904,0.15051 L0.04207,0.12206 L0.05769,0.09742 L0.07607,0.07607 L0.09742,0.05769 L0.12206,0.04207 L0.15051,0.02904 L0.18354,0.01850 L0.22256,0.01037 L0.27039,0.00460 L0.33456,0.00115 L0.50000,0.00000 L0.66544,0.00115 L0.72961,0.00460 L0.77744,0.01037 L0.81646,0.01850 L0.84949,0.02904 L0.87794,0.04207 L0.90258,0.05769 L0.92393,0.07607 L0.94231,0.09742 L0.95793,0.12206 L0.97096,0.15051 L0.98150,0.18354 L0.98963,0.22256 L0.99540,0.27039 L0.99885,0.33456 L1.00000,0.50000 Z";
   var C = {
@@ -25010,6 +25012,19 @@ input,button{font-family:inherit}
 `;
   var Logo = ({ s = 28 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: s, display: "inline-flex", alignItems: "center" }, dangerouslySetInnerHTML: { __html: SAMPAN_LOCKUP_SVG } });
   var LogoMark = ({ s = 28 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: s, height: s, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: SAMPAN_ICON_SVG } });
+  var SAMPAN_LOCKUP_GREY_SVG = `<svg width="auto" height="100%" viewBox="0 0 1717 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M475.2 62.1C456.6 64.3 437.2 71.3 425.7 80C409.1 92.6 400.4 107.9 399.3 126.6C397.9 148.9 406.3 168 423.3 181.6C437.4 192.8 453.7 199.3 485.5 206.5C510.9 212.2 518.9 216.1 521 224.1C523.8 234.5 513.9 241.9 496 242.8C478.9 243.6 460.5 238.6 439 227.3C433.2 224.2 428 221.3 427.4 220.8C426.6 220.2 424.1 222.9 419.7 229.2C416.1 234.3 412.2 239.7 411.1 241.1C409.9 242.6 405.6 248.6 401.5 254.6L393.9 265.3L396.2 267.7C402.1 274 423.3 284.8 440.6 290.5C491.5 307.1 548.4 297.8 574.4 268.8C592.7 248.4 597 216 584.5 193.5C580.5 186.3 571.4 176.1 565.3 171.9C553.8 163.9 535.2 157 511 151.5C488.5 146.5 478.3 143 473.9 139.1C466.1 132.2 468.1 123.1 478.5 118.1C484.7 115.1 497.6 114.2 508.8 116C521.7 118.1 541.9 125.9 552.6 133L555.8 135.1L559.2 130.3C563 125 574.9 107.5 582.2 96.3L587 89.1L578.7 84.2C569.6 78.9 554.9 72.3 545 69.2C522.9 62.1 497.4 59.5 475.2 62.1ZM671.5 113.7C658.3 116.5 641.4 125.2 631.1 134.5C611 152.7 599.7 181.9 601.3 211.3C603.9 259.5 638.5 294.6 685.6 296.7C701 297.4 711.4 295.5 722.1 289.9C729 286.3 732.5 283.1 758.6 256.7C774.5 240.6 791.9 222.7 797.3 216.9L807 206.3V160.6V115H773.8H740.5V122.4C740.5 126.5 740.2 130.2 739.8 130.5C739.4 130.9 737 129.4 734.3 127.1C728.1 121.6 715.3 115.3 706.5 113.5C697.6 111.6 680.6 111.7 671.5 113.7ZM717.3 170.4C725.9 174.6 732.4 181 736.6 189.5C740.1 196.7 740.2 197.2 739.8 205.7C739.3 215.9 736.6 222.2 729.7 229.7C721.4 238.8 711.8 242.5 699.1 241.8C685.8 241 674 232.9 667.8 220.2C664.8 214.2 664.5 212.7 664.5 204.5C664.5 196.5 664.9 194.8 667.6 189C671.3 181.3 674 178.3 681.2 173.6C689.1 168.6 695.1 167 704.1 167.3C710 167.6 713.1 168.3 717.3 170.4ZM918.8 113.6C912 115.2 901 120.6 895.5 125L891.5 128.2L890.7 123.8C890.3 121.5 890.1 118.5 890.3 117.2L890.7 115H859.4H828V202.7C828 256.3 828.4 291.1 829 292C829.8 293.3 834.6 293.5 860 293.8L890 294.1L890.2 257.3C890.6 186.4 890.5 189.9 892.3 184.4C894.1 179 899.4 172.9 904.3 170.4C912.2 166.2 922.9 167.9 929.2 174.2C937.1 182.1 936.8 179.8 937.1 240.2L937.4 294L967.6 293.9L997.8 293.8L998.4 288.6C998.8 285.8 999 262.1 998.9 236L998.6 188.5L1000.9 183.3C1004.8 174.5 1013.6 168 1021.8 168C1030.6 168 1038.8 173.3 1042.6 181.4L1045 186.5V239.7C1045 269 1045.3 293 1045.8 293C1055.7 293.4 1106 293.3 1106.4 292.9C1106.8 292.6 1107.1 265.1 1107.1 231.9L1107.3 171.5L1104.7 161.8C1101.2 148.4 1096.5 140 1087.7 131.1C1079.2 122.5 1067 115.9 1055 113.4C1043.9 111.1 1026.9 111.9 1016.5 115.3C1007.3 118.3 995.6 124.9 989 130.7L984.6 134.7L977 128.4C968.2 121 957.6 115.4 948.2 113.4C939.8 111.7 926.3 111.7 918.8 113.6ZM1221.5 112.6C1209.9 115.1 1198 120.6 1190.8 126.9C1188.3 129.2 1185.9 131 1185.6 131C1185.3 131 1185 127.4 1185 123V115H1154.5H1124.1L1124.4 232.2C1124.6 296.7 1124.8 351.9 1124.9 354.7L1125 360H1155H1185V319.5C1185 285.2 1185.2 279 1186.4 279C1187.2 279 1188 279.4 1188.2 279.8C1188.9 281.6 1200.1 289.2 1206.1 291.9C1223.9 300 1248.9 298.4 1269.1 287.9C1288.8 277.6 1305 255.9 1311.3 231.2C1313.1 223.8 1313.5 219.9 1313.4 204.5C1313.4 188.1 1313.1 185.6 1310.6 176.5C1305.6 158.3 1294.3 140.2 1281.5 129.7C1273.8 123.4 1257.5 115.4 1248.5 113.5C1242.1 112.2 1226.3 111.7 1221.5 112.6ZM1232.4 169.5C1237.4 171.6 1245.9 178.4 1248.7 182.5C1254.9 191.6 1256.8 200.6 1255 211.3C1251.4 231.7 1231.9 245.5 1212.9 241C1204.8 239.1 1200.9 236.7 1194.8 230.1C1187.5 222.2 1184.8 215.4 1184.8 204.4C1184.7 197.3 1185.1 195.3 1187.8 189.7C1194.9 174.4 1208.3 166.2 1223.8 167.7C1226.7 167.9 1230.6 168.8 1232.4 169.5ZM1388.2 113.5C1358.8 120.2 1335.1 143.3 1326.6 173.6C1322.8 187.1 1321.7 196.5 1322.2 210.2C1323.9 254.6 1347.8 285.6 1387.7 295.1C1404.5 299.1 1426.1 296.4 1439.4 288.6C1441.7 287.3 1447 282.9 1451.2 278.8C1462.1 268.4 1509.2 218.9 1514 212.9L1518 207.8V161.4V115H1486.1H1454.2L1453.8 122.4C1453.6 126.5 1453.1 130.2 1452.8 130.6C1452.4 131 1450.1 129.5 1447.7 127.3C1442.2 122.3 1435.6 118.3 1427.1 115.2C1421.6 113.2 1418.3 112.7 1407.5 112.4C1398.7 112.2 1392.5 112.5 1388.2 113.5ZM1430 169.5C1439.6 172.9 1448.6 182 1452.5 192.2C1455 198.9 1454.2 212.6 1451 219.4C1447.4 226.9 1439.1 235.2 1431.8 238.6C1426.3 241.1 1424.3 241.5 1416.5 241.5C1408.3 241.5 1406.8 241.2 1400.8 238.2C1393.4 234.6 1387.6 228.5 1383.2 219.8C1380.9 215.2 1380.5 213.3 1380.5 205C1380.5 196.4 1380.8 194.9 1383.6 189C1388.4 179 1396.5 171.8 1406.6 168.6C1412.4 166.7 1423.3 167.1 1430 169.5ZM1633.5 113C1623.7 115.1 1610.1 122 1605.1 127.4C1601 131.8 1600 130.9 1600 122.5V115H1569.8H1539.5L1539.8 202.7C1540 251 1540.5 291.1 1541 291.9C1541.6 293.1 1547.1 293.4 1571.8 293.6L1601.9 293.8L1602.2 242.6C1602.5 192.1 1602.5 191.4 1604.8 185.9C1607.6 178.9 1615.9 170.7 1621.6 169.1C1634.3 165.6 1646.7 171.3 1652.1 183.2L1654.5 188.5L1654.8 241L1655.1 293.5L1686 293.7L1717 293.9V237C1717 174.7 1716.7 170.7 1710.6 154.6C1705.9 142.3 1693.4 127.8 1681.6 121C1671.2 115.1 1662.8 112.8 1649.5 112.4C1642.9 112.3 1635.7 112.5 1633.5 113ZM807.1 231.5C807.1 231.5 764.8 274.1 753.5 287L748.7 292.5L752.1 293.2C755.7 294 807.6 292.8 807.6 292.8C807.6 292.8 807.9 278.4 807.7 261.4C807.6 244.4 807.1 231.5 807.1 231.5ZM1497.5 254.7C1467.7 285.4 1461 292.5 1461 293.2C1461 293.5 1474.4 293.7 1490.8 293.6L1520.5 293.4L1520.8 277.7C1520.9 269.1 1520.9 255 1520.8 246.5L1520.5 231L1497.5 254.7Z" fill="#D4D6DC"/>
+<g clip-path="url(#clip0_302_5)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M131.786 140.362C135.594 139.669 140.707 141.407 144.368 142.502C157.271 146.365 167.805 154.421 173.103 167.123C174.574 170.651 175.515 174.238 176.291 177.951C176.831 180.541 177.082 183.212 175.01 185.253C172.189 188.037 167.223 187.237 165.371 183.745C164.549 182.197 164.528 180.305 164.145 178.628C163.495 175.774 162.612 172.926 161.324 170.29C157.182 161.797 150.554 157.285 141.857 154.173C139.26 153.244 136.247 152.275 133.457 152.297C130.836 152.318 127.991 153.266 125.544 154.136C116.316 157.417 109.277 163.042 105.562 172.288C104.483 174.971 103.597 177.742 103.014 180.584C102.622 182.494 102.619 184.649 101.579 186.363C99.3413 190.057 94.0193 190.419 91.5023 186.789C90.0246 184.662 90.4691 182.319 90.9321 179.965C91.5115 177.019 92.1093 174.155 93.075 171.295C96.3185 161.66 102.401 153.456 110.896 147.824C117.064 143.734 124.609 141.671 131.786 140.362ZM197.898 206.628C198.521 207.492 199.348 208.28 199.676 209.341C200.63 212.422 198.931 216.229 195.614 216.996C193.661 217.446 191.638 217.48 189.658 217.725C182.904 218.565 176.144 219.218 169.292 219.501C159.197 219.917 149.101 219.145 139.116 218.084C119.845 216.039 101.242 212.051 82.7742 205.815C76.9677 203.856 71.0968 202.081 65.4253 199.711C61.5103 198.074 58.8033 197.587 57.7671 192.973C54.8362 191.835 47.92 189.738 45.8659 187.709C43.1313 185.008 43.3827 180.103 46.9543 178.181C50.5749 176.234 54.3825 178.699 57.81 180.066C66.2101 183.417 74.696 186.418 83.3597 188.877C113.1 197.317 144.067 200.61 175.028 198.393C198.051 196.744 220.539 187.304 237.887 171.871C243.265 167.086 248.259 161.65 252.624 155.939C254.737 153.171 256.536 150.114 258.719 147.404C260.721 144.915 264.378 144.047 267.113 145.942C269.354 147.496 270.12 150.316 269.323 152.852C268.775 154.593 267.242 156.276 266.199 157.751C263.655 161.344 260.929 164.912 258.054 168.242C246.655 181.424 233.044 192.231 217.258 199.696C213.153 201.637 208.812 203.366 204.465 204.644C202.34 205.269 199.857 205.613 197.898 206.628Z" fill="#D4D6DC" stroke="#D4D6DC" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_302_5">
+<rect width="313.93" height="313.93" fill="white" transform="translate(0 23)"/>
+</clipPath>
+</defs>
+</svg>
+`;
+  var GreyLogo = ({ s = 20 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: s, display: "inline-flex", alignItems: "center", opacity: 0.85 }, dangerouslySetInnerHTML: { __html: SAMPAN_LOCKUP_GREY_SVG } });
   var USDT_ICON = "data:image/png;base64,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";
   function Swipe({ label, color, onConfirm, disabled }) {
     const ref = (0, import_react4.useRef)();
@@ -25710,12 +25725,13 @@ input,button{font-family:inherit}
   var CoinIcon = ({ img, bg, emoji }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 70, height: 70, clipPath: "url(#squircle)", background: bg, display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden" }, children: img ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: img, alt: "", style: { width: "100%", height: "100%", objectFit: "cover" } }) : emoji ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 32, color: "#fff" }, children: emoji }) : null });
   function feedToMarket(mk, i) {
     const rw = mk.rows[i];
+    const pmSource = mk.contracts && mk.contracts.length >= 2 ? mk : null;
     if (rw.px !== void 0) {
       const opts2 = [
         { n: "Yes", p: rw.pct, dir: rw.dir, px: rw.px },
         { n: "No", p: 100 - rw.pct, dir: rw.dir, px: rw.px }
       ];
-      return { id: mk.id, cat: "Prediction", league: mk.token, emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: mk.token, t: "24h", vol: 1e6, opts: opts2, yesno: true };
+      return { id: mk.id, cat: "Prediction", league: mk.token, emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: mk.token, t: "24h", vol: 1e6, opts: opts2, yesno: true, pmSource };
     }
     if (rw.yesNo) {
       if (rw.binary) {
@@ -25724,16 +25740,77 @@ input,button{font-family:inherit}
           { n: "Yes", p: yesPct },
           { n: "No", p: 100 - yesPct }
         ];
-        return { id: mk.id + "-" + i, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts: opts3, yesno: true };
+        return { id: mk.id + "-" + i, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts: opts3, yesno: true, pmSource };
       }
       const opts2 = [
         { n: "Yes", p: rw.pct, sub: rw.label },
         { n: "No", p: 100 - rw.pct, sub: rw.label }
       ];
-      return { id: mk.id + "-" + i, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts: opts2, yesno: true, resolution: rw.label };
+      return { id: mk.id + "-" + i, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts: opts2, yesno: true, resolution: rw.label, pmSource };
     }
     const opts = mk.rows.map((r) => ({ n: r.label, p: r.pct, sub: r.label }));
-    return { id: mk.id + "-" + i, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts, yesno: false };
+    return { id: mk.id + "-" + i, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts, yesno: false, pmSource };
+  }
+  function contractToMarket(mk, c) {
+    const opts = [
+      { n: "Yes", p: c.pct, sub: c.label },
+      { n: "No", p: 100 - c.pct, sub: c.label }
+    ];
+    return { id: c.id, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts, yesno: true, resolution: c.label, pmSource: mk };
+  }
+  function contractArrowFn(contracts) {
+    const numeric = contracts.map((c) => parseNumLabel(c.label)).filter((v) => v !== null);
+    const avg = numeric.length >= 2 ? numeric.reduce((a, b) => a + b, 0) / numeric.length : null;
+    return (c) => {
+      const v = parseNumLabel(c.label);
+      if (v === null || avg === null) return null;
+      return v >= avg ? "\u2191" : "\u2193";
+    };
+  }
+  function ContractRow({ c, arrowFor, onPredict }) {
+    const low = c.pct < 1;
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "14px 0", borderBottom: `1px dashed ${C.line}`, minWidth: 0 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, minWidth: 0, marginBottom: 10 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { minWidth: 0, flex: 1 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 16, fontWeight: 700, color: C.ink, display: "flex", alignItems: "center", gap: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
+            arrowFor(c) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flexShrink: 0 }, children: arrowFor(c) }),
+            c.label
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, fontWeight: 500, color: C.mute, marginTop: 2 }, children: [
+            c.vol,
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Vol." })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 24, fontWeight: 700, fontFamily: MONO, color: low ? C.mute : C.ink, flexShrink: 0 }, children: [
+          low ? "<1" : c.pct,
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "%" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => onPredict(c, 0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 8, cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predict Yes" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => onPredict(c, 1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 8, cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predict No" }) })
+      ] })
+    ] });
+  }
+  function AllContractsSheet({ mk, contracts, onBack, onDone }) {
+    const [closing, setClosing] = (0, import_react4.useState)(false);
+    const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
+    const arrowFor = (0, import_react4.useMemo)(() => contractArrowFn(contracts), [contracts]);
+    const predict = (c, side) => setLocalTrade({ m: contractToMarket(mk, c), side });
+    const goBack = () => setClosing(true);
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sd" : "su", onAnimationEnd: () => closing && onBack(), style: { position: "absolute", inset: 0, background: "#fff", zIndex: 32, display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 12px" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 40 } }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 20, fontWeight: 800 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Select a contract" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: contracts.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContractRow, { c, arrowFor, onPredict: predict }, c.id)) }),
+      localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
+        setLocalTrade(null);
+        onDone && onDone(...a);
+      } }, localTrade.m.id + "-" + localTrade.side)
+    ] });
   }
   var TypePill = ({ label, emoji }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 5, background: C.cardPill, color: C.ink, borderRadius: 999, padding: "4px 10px", fontSize: 13, fontWeight: 700, lineHeight: 1, flexShrink: 0 }, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15 }, children: emoji }),
@@ -26008,7 +26085,12 @@ input,button{font-family:inherit}
     }
     if (!prices.length || prices.length !== outs.length) return null;
     const isYesNo = outs.length === 2 && outs.map((x) => x.toLowerCase()).sort().join() === "no,yes";
-    return { outs, prices: prices.map((p) => Math.round(parseFloat(p) * 100)), isYesNo, tokenIds };
+    const raw = prices.map((p) => parseFloat(p));
+    return { outs, prices: raw.map((p) => Math.round(p * 100)), rawPrices: raw, isYesNo, tokenIds };
+  }
+  function fmtVol(vol) {
+    const v = Number(vol || 0);
+    return v >= 1e6 ? `$${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v / 1e3).toFixed(1)}k` : `$${v.toFixed(0)}`;
   }
   function pmMapEvent(ev) {
     const tradable = (mk) => {
@@ -26017,13 +26099,13 @@ input,button{font-family:inherit}
       const parsed = pmParseOutcome(mk);
       if (!parsed) return false;
       const yesIdx = parsed.outs.findIndex((o) => o.toLowerCase() === "yes");
-      const yp = parsed.prices[yesIdx < 0 ? 0 : yesIdx];
-      return yp > 0 && yp < 100;
+      const yp = parsed.rawPrices[yesIdx < 0 ? 0 : yesIdx];
+      return yp > 1e-3 && yp < 0.999;
     };
     const children = (ev.markets || []).filter(tradable);
     if (!children.length) return null;
     const vol = Number(ev.volume || ev.volumeNum || 0);
-    const volStr = vol >= 1e6 ? `$${(vol / 1e6).toFixed(1)}M` : vol >= 1e3 ? `$${(vol / 1e3).toFixed(1)}k` : `$${vol.toFixed(0)}`;
+    const volStr = fmtVol(vol);
     const GENERIC = /* @__PURE__ */ new Set(["politics", "sports", "crypto", "tech", "pop-culture", "economy", "geopolitics", "elections", "finance", "esports", "weather", "ipo", "world", "2025-predictions", "2026-predictions"]);
     const tagLabel = (ev.tags || []).map((t) => ({ l: t.label, s: (t.slug || "").toLowerCase() })).find((t) => t.l && !GENERIC.has(t.s));
     const base = { id: "pm" + ev.id, icon: ev.icon || ev.image || "", iconBg: "#EDEBE6", q: ev.title || "", vol: volStr, token: tagLabel ? tagLabel.l : "", desc: ev.description || "" };
@@ -26044,9 +26126,10 @@ input,button{font-family:inherit}
         const rows3 = [{ dir: "up", label, pct: yesPct, mkt: children[0], yesNo: true }];
         return { ...base, rows: rows3 };
       }
+      const mktVol = fmtVol(children[0].volume || children[0].volumeNum || 0);
       const rankedAll = parsed.outs.map((n, i) => ({ n, p: parsed.prices[i], tokenId: parsed.tokenIds[i] })).sort((a, b) => b.p - a.p);
       const rows2 = rankedAll.slice(0, 2).map((o) => ({ dir: "up", label: o.n, pct: o.p, mkt: children[0], optName: o.n, yesNo: false }));
-      const contracts2 = rankedAll.map((o, i) => ({ id: base.id + "-c" + i, label: o.n, pct: o.p, mkt: children[0], tokenId: o.tokenId }));
+      const contracts2 = rankedAll.map((o, i) => ({ id: base.id + "-c" + i, label: o.n, pct: o.p, mkt: children[0], tokenId: o.tokenId, vol: mktVol }));
       return { ...base, rows: rows2, contracts: contracts2 };
     }
     const rows = children.slice(0, 2).map((mk) => {
@@ -26060,7 +26143,7 @@ input,button{font-family:inherit}
       const yesIdx = parsed ? parsed.outs.findIndex((o) => o.toLowerCase() === "yes") : 0;
       const yesPct = parsed ? parsed.prices[yesIdx < 0 ? 0 : yesIdx] : 0;
       const tokenId = parsed ? parsed.tokenIds[yesIdx < 0 ? 0 : yesIdx] : null;
-      return { label: mk.groupItemTitle || mk.question || "", pct: yesPct, mkt: mk, tokenId };
+      return { label: mk.groupItemTitle || mk.question || "", pct: yesPct, mkt: mk, tokenId, vol: fmtVol(mk.volume || mk.volumeNum || 0) };
     }).sort((a, b) => b.pct - a.pct).map((c, i) => ({ ...c, id: base.id + "-c" + i }));
     return { ...base, rows, contracts };
   }
@@ -26207,7 +26290,7 @@ input,button{font-family:inherit}
       pcts.push(i === 0 ? p0 : Math.max(1, Math.round(pcts[i - 1] * (0.35 + rnd() * 0.45))));
     }
     pcts.sort((a, b) => b - a);
-    return prices.map((price, i) => ({ price, pct: pcts[i] })).sort((a, b) => b.pct - a.pct).map((c, i) => ({ id: "d" + seed + "-c" + i, label: c.price.toLocaleString(), pct: c.pct }));
+    return prices.map((price, i) => ({ price, pct: pcts[i] })).sort((a, b) => b.pct - a.pct).map((c, i) => ({ id: "d" + seed + "-c" + i, label: c.price.toLocaleString(), pct: c.pct, vol: fmtVol(4e5 + rnd() * 4e6) }));
   }
   var BTC_FEED = (() => {
     const out = [];
@@ -26532,49 +26615,68 @@ input,button{font-family:inherit}
     }, [text]);
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref, style: { fontSize: font, fontWeight: 900, lineHeight: 1.25, letterSpacing: -0.4, display: "-webkit-box", WebkitLineClamp: lines, WebkitBoxOrient: "vertical", overflow: "hidden", ...style }, children: text });
   }
-  function pathSegment(vals, W, h, from, to) {
+  function pathSegment(vals, W, h, from, to, yMin, yMax) {
     const n = vals.length;
-    const X2 = (i) => i / (n - 1) * W;
-    const Y = (v) => h - v / 100 * h;
+    const INSET = 1.5;
+    const X2 = (i) => INSET + i / (n - 1) * (W - INSET * 2);
+    const Y = (v) => h - (v - yMin) / (yMax - yMin) * h;
     if (to <= from) return "";
+    if (to - from < 2) return `M ${X2(from)} ${Y(vals[from])} L ${X2(to)} ${Y(vals[to])}`;
     let d = `M ${X2(from)} ${Y(vals[from])}`;
-    for (let i = from; i < to; i++) d += ` L ${X2(i + 1)} ${Y(vals[i])} L ${X2(i + 1)} ${Y(vals[i + 1])}`;
+    for (let i = from; i < to; i++) {
+      const xMid = (X2(i) + X2(i + 1)) / 2, yMid = (Y(vals[i]) + Y(vals[i + 1])) / 2;
+      d += ` Q ${X2(i)} ${Y(vals[i])} ${xMid} ${yMid}`;
+    }
+    d += ` L ${X2(to)} ${Y(vals[to])}`;
     return d;
   }
   var CHART_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  function fmtChartDate(d) {
+  function fmtChartDate(d, withSeconds) {
     let hh = d.getHours();
     const ampm = hh >= 12 ? "PM" : "AM";
     hh = hh % 12 || 12;
     const mm = String(d.getMinutes()).padStart(2, "0");
-    return `${CHART_MONTHS[d.getMonth()]} ${d.getDate()}, ${hh}:${mm} ${ampm}`;
+    const ss = String(d.getSeconds()).padStart(2, "0");
+    const time = withSeconds ? `${hh}:${mm}:${ss} ${ampm}` : `${hh}:${mm} ${ampm}`;
+    return `${CHART_MONTHS[d.getMonth()]} ${d.getDate()}, ${time}`;
   }
+  var KCHART_DOT = 9;
+  var KCHART_GAP = 5;
+  var KCHART_PILL_W = 46;
+  var KCHART_GROUP_W = KCHART_DOT + KCHART_GAP + KCHART_PILL_W;
   var KCHART_GUTTER = 64;
-  var KCHART_N = 40;
-  var CLOB_CACHE = {};
-  function clobParams(tf) {
-    const now = Math.floor(Date.now() / 1e3);
+  var KCHART_LINE_EXTEND = KCHART_GUTTER - KCHART_GROUP_W + KCHART_DOT / 2;
+  function kchartSpec(tf, spanSec) {
     switch (tf) {
       case "1m":
-        return { interval: "1m", fidelity: 1 };
+        return { n: 60, stepSec: 1 };
       case "5m":
-        return { startTs: now - 5 * 60, endTs: now, fidelity: 1 };
+        return { n: 60, stepSec: 5 };
       case "15m":
-        return { startTs: now - 15 * 60, endTs: now, fidelity: 1 };
+        return { n: 60, stepSec: 15 };
       case "1H":
-        return { interval: "1h", fidelity: 1 };
+        return { n: 60, stepSec: 60 };
       case "1D":
-        return { interval: "1d", fidelity: 5 };
-      default:
-        return { interval: "max", fidelity: 60 };
+        return { n: 288, stepSec: 5 * 60 };
+      default: {
+        const span = spanSec || 30 * 24 * 3600;
+        const stepSec = span <= 7 * 24 * 3600 ? 30 * 60 : 12 * 60 * 60;
+        const n = Math.max(20, Math.min(200, Math.round(span / stepSec)));
+        return { n, stepSec };
+      }
     }
   }
-  async function fetchClobHistory(tokenId, tf) {
-    const key = tokenId + "|" + tf;
+  var CLOB_CACHE = {};
+  function clobBucketFor(tf) {
+    if (tf === "1D") return { key: "1d_f5", interval: "1d", fidelity: 5 };
+    if (tf === "All") return { key: "max_f60", interval: "max", fidelity: 60 };
+    return { key: "1h_f1", interval: "1h", fidelity: 1 };
+  }
+  async function fetchClobBucket(tokenId, bucket) {
+    const key = tokenId + "|" + bucket.key;
     if (CLOB_CACHE[key] !== void 0) return CLOB_CACHE[key];
     try {
-      const params = clobParams(tf);
-      const qs = new URLSearchParams({ market: tokenId, ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])) });
+      const qs = new URLSearchParams({ market: tokenId, interval: bucket.interval, fidelity: String(bucket.fidelity) });
       const r = await fetch(`https://clob.polymarket.com/prices-history?${qs}`);
       if (!r.ok) throw new Error("bad status");
       const data = await r.json();
@@ -26584,6 +26686,13 @@ input,button{font-family:inherit}
       CLOB_CACHE[key] = null;
     }
     return CLOB_CACHE[key];
+  }
+  function trimHistory(history, tf) {
+    const windowSec = { "1m": 60, "5m": 5 * 60, "15m": 15 * 60, "1H": 60 * 60 }[tf];
+    if (!windowSec) return history;
+    const lastT = history[history.length - 1].t;
+    const trimmed = history.filter((p) => p.t >= lastT - windowSec);
+    return trimmed.length >= 2 ? trimmed : history;
   }
   function resampleClob(history, n) {
     if (!history || history.length < 2) return null;
@@ -26601,22 +26710,32 @@ input,button{font-family:inherit}
   function KLineChart({ items, tf, h = 170 }) {
     const W = 320;
     const [liveArrs, setLiveArrs] = (0, import_react4.useState)(null);
+    const [realSpanSec, setRealSpanSec] = (0, import_react4.useState)(null);
     (0, import_react4.useEffect)(() => {
       if (!IS_H5 || !items.length) {
         setLiveArrs(null);
+        setRealSpanSec(null);
         return;
       }
       let cancelled = false;
       (async () => {
-        const results = await Promise.all(items.map((it) => it.tokenId ? fetchClobHistory(it.tokenId, tf) : Promise.resolve(null)));
+        const bucket = clobBucketFor(tf);
+        const results = await Promise.all(items.map((it) => it.tokenId ? fetchClobBucket(it.tokenId, bucket) : Promise.resolve(null)));
         if (cancelled) return;
-        const resampled = results.map((hist) => resampleClob(hist, KCHART_N));
+        const trimmed = results.map((hist) => hist ? trimHistory(hist, tf) : null);
+        const spans = trimmed.filter(Boolean).map((hh) => hh[hh.length - 1].t - hh[0].t);
+        const spanSec = spans.length ? Math.max(...spans) : null;
+        const spec2 = kchartSpec(tf, spanSec);
+        const resampled = trimmed.map((hist) => resampleClob(hist, spec2.n));
+        if (cancelled) return;
+        setRealSpanSec(spanSec);
         setLiveArrs(resampled.every(Boolean) ? resampled : null);
       })();
       return () => {
         cancelled = true;
       };
     }, [items, tf]);
+    const spec = (0, import_react4.useMemo)(() => kchartSpec(tf, realSpanSec), [tf, realSpanSec]);
     const enriched = (0, import_react4.useMemo)(() => items.map((it, idx) => {
       if (liveArrs && liveArrs[idx]) {
         const arr2 = liveArrs[idx].slice();
@@ -26625,7 +26744,7 @@ input,button{font-family:inherit}
       }
       let s = Math.round((it.pct + 1) * (idx + 7) * 977) % 2147483647 || 1;
       const rnd = () => (s = s * 16807 % 2147483647) / 2147483647;
-      const n2 = KCHART_N;
+      const n2 = spec.n;
       const arr = [];
       let v = it.pct + (rnd() - 0.5) * 18;
       let i = 0;
@@ -26637,8 +26756,16 @@ input,button{font-family:inherit}
       }
       arr[n2 - 1] = it.pct;
       return { ...it, arr };
-    }), [items, liveArrs]);
-    const n = enriched[0] ? enriched[0].arr.length : KCHART_N;
+    }), [items, liveArrs, spec.n]);
+    const [yMin, yMax] = (0, import_react4.useMemo)(() => {
+      const all = enriched.flatMap((it) => it.arr);
+      if (!all.length) return [0, 100];
+      const mn = Math.min(...all), mx = Math.max(...all);
+      const range = mx - mn;
+      const pad = Math.max(8, range * 0.25);
+      return [Math.max(0, mn - pad), Math.min(100, mx + pad)];
+    }, [enriched]);
+    const n = enriched[0] ? enriched[0].arr.length : spec.n;
     const [selIdx, setSelIdx] = (0, import_react4.useState)(n - 1);
     const [dragging, setDragging] = (0, import_react4.useState)(false);
     (0, import_react4.useEffect)(() => {
@@ -26667,57 +26794,83 @@ input,button{font-family:inherit}
     };
     const effIdx = dragging ? selIdx : n - 1;
     const live = !dragging;
-    const dateLabel = (0, import_react4.useMemo)(() => fmtChartDate(new Date(Date.now() - (n - 1 - effIdx) * 5 * 6e4)), [effIdx, n]);
+    const dateLabel = (0, import_react4.useMemo)(() => {
+      const d = new Date(Date.now() - (n - 1 - effIdx) * spec.stepSec * 1e3);
+      return fmtChartDate(d, spec.stepSec < 60);
+    }, [effIdx, n, spec.stepSec]);
     if (!items.length) return null;
     const ordered = [...enriched].reverse();
     const xPct = effIdx / (n - 1) * 100;
-    const labelShift = effIdx === 0 ? "0%" : live ? "-100%" : "-50%";
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { onPointerDown: onDown, onPointerMove: onMove, onPointerUp: release, onPointerLeave: release, onPointerCancel: release, style: { position: "relative", height: h + 24, minWidth: 0, paddingTop: 24, touchAction: "none", userSelect: "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: `0 0 ${W} ${h}`, style: { width: "100%", height: h, display: "block", overflow: "visible" }, preserveAspectRatio: "none", children: ordered.map((it, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: pathSegment(it.arr, W, h, 0, effIdx), fill: "none", stroke: it.color, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" }),
-        dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: pathSegment(it.arr, W, h, effIdx, n - 1), fill: "none", stroke: it.color, strokeOpacity: 0.22, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" })
-      ] }, i)) }),
-      dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xPct}%`, top: 0, bottom: 0, width: 1, transform: "translateX(-0.5px)", background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
-      dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xPct}%`, top: -22, transform: `translateX(${labelShift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: dateLabel }),
-      ordered.map((it, i) => {
-        const val = it.arr[effIdx];
-        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${xPct}%`, top: `${100 - val}%`, transform: "translate(-4.5px,-50%)", display: "flex", alignItems: "center", gap: 5, zIndex: i, whiteSpace: "nowrap", pointerEvents: "none" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", width: 9, height: 9, flexShrink: 0 }, children: [
-            live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, whiteSpace: "nowrap" }, children: [
-            Math.round(val),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "100%" }, children: "%" })
-          ] })
-        ] }, i);
-      })
-    ] }) });
+    const xLeft = `calc(${xPct}% + ${(xPct / 100 * KCHART_LINE_EXTEND).toFixed(3)}px)`;
+    const labelShift = xPct < 15 ? "0%" : xPct > 85 ? "-100%" : "-50%";
+    const yPx = (v) => h - (v - yMin) / (yMax - yMin) * h;
+    const PILL_MIN_GAP = 22;
+    const pillLayout = ordered.map((it, i) => ({ i, val: it.arr[effIdx], y: yPx(it.arr[effIdx]) }));
+    const byY = [...pillLayout].sort((a, b) => a.y - b.y);
+    for (let k = 1; k < byY.length; k++) {
+      if (byY[k].y - byY[k - 1].y < PILL_MIN_GAP) byY[k].y = byY[k - 1].y + PILL_MIN_GAP;
+    }
+    if (byY.length) {
+      const overflow = byY[byY.length - 1].y - (h - 6);
+      if (overflow > 0) for (const p of byY) p.y -= overflow;
+    }
+    const pillY = Object.fromEntries(pillLayout.map((p) => [p.i, p.y]));
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "div",
+      {
+        onPointerDown: onDown,
+        onPointerMove: onMove,
+        onPointerUp: release,
+        onPointerCancel: release,
+        style: { position: "relative", height: h + 24, minWidth: 0, paddingTop: 24, touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none", cursor: "pointer" },
+        children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: `0 0 ${W} ${h}`, style: { width: `calc(100% + ${KCHART_LINE_EXTEND}px)`, height: h, display: "block" }, preserveAspectRatio: "none", children: ordered.map((it, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: pathSegment(it.arr, W, h, 0, effIdx, yMin, yMax), fill: "none", stroke: it.color, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" }),
+            dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: pathSegment(it.arr, W, h, effIdx, n - 1, yMin, yMax), fill: "none", stroke: it.color, strokeOpacity: 0.22, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" })
+          ] }, i)) }),
+          dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: xLeft, top: 0, bottom: 0, width: 1, transform: "translateX(-0.5px)", background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
+          dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: xLeft, top: -22, transform: `translateX(${labelShift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: dateLabel }),
+          ordered.flatMap((it, i) => {
+            const val = it.arr[effIdx];
+            const dotTopPx = yPx(val);
+            return [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: xLeft, top: `${dotTopPx}px`, transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, zIndex: i, pointerEvents: "none" }, children: [
+                live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } })
+              ] }, "dot" + i),
+              // live/at-rest: pill hugs the app's standard right inset (same edge as the star icon
+              // / timeframe pills). While dragging it just trails right after the dot instead.
+              // Vertically it uses the collision-avoided `pillY`, not the dot's own true position.
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: `${pillY[i]}px`, zIndex: i, pointerEvents: "none", whiteSpace: "nowrap", ...live ? { right: -KCHART_GUTTER, transform: "translateY(-50%)" } : { left: xLeft, transform: `translate(${KCHART_DOT / 2 + KCHART_GAP}px,-50%)` } }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, textAlign: "center", whiteSpace: "nowrap" }, children: [
+                Math.round(val),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "100%" }, children: "%" })
+              ] }) }, "pill" + i)
+            ];
+          })
+        ] })
+      }
+    );
   }
   var IconOnlyBtn = ({ children, onClick }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap", style: { border: "none", background: "none", padding: 4, margin: -4, display: "grid", placeItems: "center", cursor: "pointer" }, children });
-  function PredMarket({ mk, onBack, onToast }) {
+  function PredMarket({ mk, onBack, onToast, onDone }) {
     const { lang } = useLang();
     const [fav, setFav] = (0, import_react4.useState)(false);
     const [tf, setTf] = (0, import_react4.useState)("1m");
-    const [showAll, setShowAll] = (0, import_react4.useState)(false);
+    const [showAllSheet, setShowAllSheet] = (0, import_react4.useState)(false);
     const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
     const [closing, setClosing] = (0, import_react4.useState)(false);
+    const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
     const contracts = mk.contracts || [];
     const [trFilter, setTrFilter] = (0, import_react4.useState)(contracts[0]?.id);
-    const visible = showAll ? contracts : contracts.slice(0, 5);
-    const numeric = contracts.map((c) => parseNumLabel(c.label)).filter((v) => v !== null);
-    const avg = numeric.length >= 2 ? numeric.reduce((a, b) => a + b, 0) / numeric.length : null;
-    const arrowFor = (c) => {
-      const v = parseNumLabel(c.label);
-      if (v === null || avg === null) return null;
-      return v >= avg ? "\u2191" : "\u2193";
-    };
+    const visible = contracts.slice(0, 5);
+    const arrowFor = (0, import_react4.useMemo)(() => contractArrowFn(contracts), [contracts]);
     const labelOf = (c) => (arrowFor(c) ? arrowFor(c) + " " : "") + c.label;
-    const chartItems = (0, import_react4.useMemo)(() => contracts.slice(0, 3).map((c, i) => ({ pct: c.pct, color: KLINE_COLORS[i], tokenId: c.tokenId })), [contracts]);
-    const pillStyle = (i) => ({ background: i < 3 ? KLINE_COLORS[i] : C.amber, color: i < 3 ? "#fff" : C.ink, fontFamily: MONO, fontWeight: 700, fontSize: 14, padding: "6px 13px", borderRadius: 8, minWidth: 54, textAlign: "center", flexShrink: 0 });
+    const top3 = contracts.slice(0, 3);
+    const chartItems = (0, import_react4.useMemo)(() => top3.map((c, i) => ({ pct: c.pct, color: KLINE_COLORS[i], tokenId: c.tokenId })), [contracts]);
+    const predict = (c, side) => setLocalTrade({ m: contractToMarket(mk, c), side });
     const goBack = () => setClosing(true);
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", minHeight: "100%", position: "relative", zIndex: 1 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "sticky", top: 0, zIndex: 20, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px 12px" }, children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", height: "100%", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, zIndex: 20, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px 12px" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontWeight: 800, fontSize: 15, pointerEvents: "none" }, children: "Market" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 18, alignItems: "center" }, children: [
@@ -26728,12 +26881,26 @@ input,button{font-family:inherit}
           }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { size: 20, fill: fav ? C.amber : "none", color: fav ? C.amber : C.ink, strokeWidth: fav ? 1.5 : 2, strokeLinejoin: "round" }) })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 26, minWidth: 0, alignItems: "center" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u{1F52E}" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q }) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+          top3.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, marginBottom: 10, minWidth: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gap: 3, minWidth: 0 }, children: top3.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 9, height: 9, borderRadius: 5, background: KLINE_COLORS[i], flexShrink: 0 } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 14, color: C.ink, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
+                c.label,
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { style: { fontWeight: 700 }, children: [
+                  c.pct,
+                  "%"
+                ] })
+              ] })
+            ] }, c.id)) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
+          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: [
@@ -26748,17 +26915,8 @@ input,button{font-family:inherit}
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Select a contract" }) }),
-          visible.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "14px 0", borderBottom: `1px dashed ${C.line}`, minWidth: 0 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
-              arrowFor(c) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flexShrink: 0 }, children: arrowFor(c) }),
-              c.label
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: pillStyle(i), children: [
-              c.pct,
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "70%", opacity: 0.7 }, children: "%" })
-            ] })
-          ] }, c.id)),
-          !showAll && contracts.length > 5 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "14px 0", minWidth: 0 }, children: [
+          visible.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContractRow, { c, arrowFor, onPredict: predict }, c.id)),
+          contracts.length > 5 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { onClick: () => setShowAllSheet(true), className: "tap", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "14px 0", minWidth: 0, cursor: "pointer" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 10, fontWeight: 700, fontSize: 15, minWidth: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { width: 32, height: 32, borderRadius: 11, background: C.soft, display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexShrink: 0 }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 3, height: 3, borderRadius: 2, background: C.ink2 } }),
@@ -26773,7 +26931,7 @@ input,button{font-family:inherit}
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "contracts" })
               ] })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setShowAll(true), className: "tap", style: { flexShrink: 0, width: 40, height: 40, borderRadius: 20, border: "none", background: "#fff", display: "grid", placeItems: "center", cursor: "pointer", boxShadow: "inset 0 2px 3px rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.14), inset 0 0 0 1px rgba(0,0,0,.06)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { size: 17, color: C.ink }) })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flexShrink: 0, width: 40, height: 40, borderRadius: 20, background: "#fff", display: "grid", placeItems: "center", boxShadow: "inset 0 2px 3px rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.14), inset 0 0 0 1px rgba(0,0,0,.06)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { size: 17, color: C.ink }) })
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
@@ -26802,7 +26960,12 @@ input,button{font-family:inherit}
             return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTrFilter(c.id), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.filterOn : C.filterOff, borderRadius: 14, padding: "6px 13px", fontSize: 14, fontWeight: 550, color: on ? "#fff" : C.mute, whiteSpace: "nowrap", cursor: "pointer" }, children: labelOf(c) }, c.id);
           }) })
         ] })
-      ] })
+      ] }),
+      localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
+        setLocalTrade(null);
+        onDone && onDone(...a);
+      } }, localTrade.m.id + "-" + localTrade.side),
+      showAllSheet && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllContractsSheet, { mk, contracts, onBack: () => setShowAllSheet(false), onDone })
     ] });
   }
   function LeveragePill({ value, max, onChange }) {
@@ -26843,7 +27006,7 @@ input,button{font-family:inherit}
       ] })
     ] });
   }
-  function Trade({ m, side: s0, onClose, onDone }) {
+  function Trade({ m, side: s0, onClose, onDone, onOpenMarket }) {
     const { lang } = useLang();
     const [side, setSide] = (0, import_react4.useState)(s0);
     const [amtStr, setAmtStr] = (0, import_react4.useState)("");
@@ -26936,7 +27099,7 @@ input,button{font-family:inherit}
       setTimeout(() => onDone(m, side, amt), 3400);
     };
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sd" : "su", onAnimationEnd: () => closing && onClose(), style: { position: "absolute", inset: 0, background: "#fff", zIndex: 30, paddingTop: IS_H5 ? "env(safe-area-inset-top)" : 54, display: "flex", flexDirection: "column" }, children: [
-      stage > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Signing, { stage, m, o, amt, col }) : orderMode === "limit" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LimitOrder, { m, side, setSide, isYesNo, o, onOpenModes: () => setSheet(true), onOrderBook: goOrderBook, onClose: close, presetPrice: obPrice, onPresetPriceUsed: () => setObPrice(null) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      stage > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Signing, { stage, m, o, amt, col }) : orderMode === "limit" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LimitOrder, { m, side, setSide, isYesNo, o, onOpenModes: () => setSheet(true), onOrderBook: goOrderBook, onClose: close, presetPrice: obPrice, onPresetPriceUsed: () => setObPrice(null), onOpenMarket }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 6px" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: () => setSheet(true), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "3", y1: "6.5", x2: "17", y2: "6.5", stroke: C.ink, strokeWidth: "1.4", strokeLinecap: "round" }),
@@ -26944,7 +27107,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "13", cy: "6.5", r: "3", fill: "#fff", stroke: C.ink, strokeWidth: "1.4" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "7", cy: "13.5", r: "3", fill: "#fff", stroke: C.ink, strokeWidth: "1.4" })
           ] }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, paddingRight: 12 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { onClick: () => m.pmSource && onOpenMarket && onOpenMarket(m.pmSource), style: { flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, paddingRight: 12, cursor: m.pmSource ? "pointer" : "default" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 40, height: 40, clipPath: "url(#squircle)", flexShrink: 0, display: "grid", placeItems: "center", overflow: "hidden", background: m.bg || m.cover || m.iconBg || C.soft }, children: m.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: m.icon, alt: "", style: { width: "100%", height: "100%", objectFit: "cover" } }) : m.sym ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: "#fff", fontSize: m.sym.length > 5 ? 9 : 12, fontWeight: 800, letterSpacing: -0.3, textAlign: "center", lineHeight: 1, padding: 2 }, children: m.sym }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18 }, children: m.emoji }) }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 500, color: C.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }, children: m.title }),
@@ -27129,7 +27292,7 @@ input,button{font-family:inherit}
   function Caret({ active }) {
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", width: 2, height: 22, background: "#2F80FF", marginLeft: 2, borderRadius: 1, flexShrink: 0, opacity: active ? 1 : 0, animation: active ? "caretFade 1.2s ease-in-out infinite" : "none" } });
   }
-  function LimitOrder({ m, side, setSide, isYesNo, o, onOpenModes, onOrderBook, onClose, presetPrice, onPresetPriceUsed }) {
+  function LimitOrder({ m, side, setSide, isYesNo, o, onOpenModes, onOrderBook, onClose, presetPrice, onPresetPriceUsed, onOpenMarket }) {
     const { lang } = useLang();
     const t = (s) => translate(lang, s);
     const YEL = "#F7E054";
@@ -27205,7 +27368,7 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "13", cy: "6.5", r: "3", fill: "#fff", stroke: C.ink, strokeWidth: "1.4" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "7", cy: "13.5", r: "3", fill: "#fff", stroke: C.ink, strokeWidth: "1.4" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, paddingRight: 12 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { onClick: () => m.pmSource && onOpenMarket && onOpenMarket(m.pmSource), style: { flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, paddingRight: 12, cursor: m.pmSource ? "pointer" : "default" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 40, height: 40, clipPath: "url(#squircle)", flexShrink: 0, display: "grid", placeItems: "center", overflow: "hidden", background: m.bg || m.cover || m.iconBg || C.soft }, children: m.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: m.icon, alt: "", style: { width: "100%", height: "100%", objectFit: "cover" } }) : m.sym ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: "#fff", fontSize: m.sym.length > 5 ? 9 : 12, fontWeight: 800, letterSpacing: -0.3, textAlign: "center", lineHeight: 1, padding: 2 }, children: m.sym }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18 }, children: m.emoji }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 500, color: C.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }, children: m.title }),
@@ -28739,6 +28902,8 @@ input,button{font-family:inherit}
     const openM = (m) => push("detail", m);
     const openT = (t) => push("trader", t);
     const openPM = (mk) => push("predmarket", mk);
+    const [pmFromTrade, setPmFromTrade] = (0, import_react4.useState)(null);
+    const openPMFromTrade = (mk) => setPmFromTrade(mk);
     const isBroker = true;
     const needCode = (fn) => hasCode ? fn() : push("applycode", fn);
     let screen;
@@ -28751,7 +28916,7 @@ input,button{font-family:inherit}
       setInvited(true);
     } });
     else if (top?.s === "detail") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Detail, { m: top.p, onBack: pop, onTrade: (m, i) => setTrade({ m, side: i }), onToast: say, onTrader: openT }, top.p.id);
-    else if (top?.s === "predmarket") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PredMarket, { mk: top.p, onBack: pop, onToast: say }, top.p.id);
+    else if (top?.s === "predmarket") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PredMarket, { mk: top.p, onBack: pop, onToast: say, onDone }, top.p.id);
     else if (top?.s === "trader") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trader, { t: top.p, onBack: pop, onCopy: (m, i) => setTrade({ m, side: i }), onOpen: openM }, top.p.id);
     else if (top?.s === "board") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Board, { onBack: pop, onTrader: openT });
     else if (top?.s === "topics") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Topics, { onBack: pop, onToast: say });
@@ -28791,7 +28956,8 @@ input,button{font-family:inherit}
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", inset: 0, top: !IS_H5 && logged ? 54 : "env(safe-area-inset-top)", bottom: 0, overflowY: "auto", paddingBottom: showTabs ? 96 : 0 }, children: screen }),
-        trade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: trade.m, side: trade.side, onClose: () => setTrade(null), onDone }, trade.m.id + "-" + trade.side),
+        trade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: trade.m, side: trade.side, onClose: () => setTrade(null), onDone, onOpenMarket: openPMFromTrade }, trade.m.id + "-" + trade.side),
+        pmFromTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", inset: 0, zIndex: 35 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PredMarket, { mk: pmFromTrade, onBack: () => setPmFromTrade(null), onToast: say, onDone }, pmFromTrade.id) }),
         showTabs && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: IS_H5 ? "calc(4px + env(safe-area-inset-bottom))" : 20, left: 16, right: 16, height: 64, borderRadius: 32, background: "rgba(255,255,255,.55)", backdropFilter: "blur(20px)", boxShadow: "0 10px 30px rgba(0,0,0,.15), inset 0 0 0 1px rgba(255,255,255,.5)", display: "flex", alignItems: "stretch", padding: 6, gap: 4, zIndex: 15 }, children: tabs.map(([k, n, I]) => {
           const active = tab === k;
           return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => {
@@ -28829,6 +28995,20 @@ input,button{font-family:inherit}
       BANNER2_CN = mod.BANNER2_CN || BANNER2_CN;
       BANNER3_EN = mod.BANNER3_EN || BANNER3_EN;
       BANNER3_CN = mod.BANNER3_CN || BANNER3_CN;
+      APP_ICON_180 = mod.APP_ICON_180 || APP_ICON_180;
+      APP_ICON_512 = mod.APP_ICON_512 || APP_ICON_512;
+      const setLink = (rel, href, sizes) => {
+        let link = document.querySelector(`link[rel="${rel}"]${sizes ? `[sizes="${sizes}"]` : ""}`);
+        if (!link) {
+          link = document.createElement("link");
+          link.rel = rel;
+          if (sizes) link.sizes = sizes;
+          document.head.appendChild(link);
+        }
+        link.href = href;
+      };
+      setLink("apple-touch-icon", APP_ICON_180);
+      setLink("icon", APP_ICON_512, "512x512");
     } catch (e) {
       console.warn("icons.js failed to load, using placeholders", e);
     }
