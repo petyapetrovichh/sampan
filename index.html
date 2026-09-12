@@ -26778,11 +26778,13 @@ input,button{font-family:inherit}
       setSelIdx(n - 1);
       setDragging(false);
     }, [items]);
+    const [containerW, setContainerW] = (0, import_react4.useState)(0);
     const drawRef = (0, import_react4.useRef)(null);
     const pick = (clientX) => {
       const el = drawRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.width !== containerW) setContainerW(rect.width);
       const frac = rect.width > 0 ? Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) : 1;
       setSelIdx(Math.round(frac * (n - 1)));
     };
@@ -26800,17 +26802,25 @@ input,button{font-family:inherit}
     };
     const effIdx = dragging ? selIdx : n - 1;
     const live = !dragging;
+    const ordered = [...enriched].reverse();
+    const estPillPx = (val, label) => {
+      const CHAR_W = 7.8;
+      let w = 16 + (String(Math.round(val)).length + 1) * CHAR_W;
+      if (label) w += 5 + Math.min(String(label).length, 15) * CHAR_W;
+      return w + KCHART_DOT + KCHART_GAP;
+    };
     const dateLabel = (0, import_react4.useMemo)(() => {
       const d = new Date(Date.now() - (n - 1 - effIdx) * spec.stepSec * 1e3);
       return fmtChartDate(d, spec.stepSec < 60, lang);
     }, [effIdx, n, spec.stepSec, lang]);
     if (!items.length) return null;
-    const ordered = [...enriched].reverse();
     const xPct = effIdx / (n - 1) * 100;
     const xLeft = `calc(${xPct}% + ${(xPct / 100 * KCHART_LINE_EXTEND).toFixed(3)}px)`;
-    const labelShift = xPct < 15 ? "0%" : xPct > 85 ? "-100%" : "-50%";
+    const dateLabelPx = dateLabel.length * 6.6 + 4;
+    const xPx = xPct / 100 * containerW;
+    const labelShift = containerW <= 0 ? "-50%" : xPx - dateLabelPx / 2 < 0 ? "0%" : xPx + dateLabelPx / 2 > containerW + KCHART_GUTTER ? "-100%" : "-50%";
     const yPx = (v) => h - (v - yMin) / (yMax - yMin) * h;
-    const PILL_MIN_GAP = 22;
+    const PILL_MIN_GAP = 30;
     const pillLayout = ordered.map((it, i) => ({ i, val: it.arr[effIdx], y: yPx(it.arr[effIdx]) }));
     const byY = [...pillLayout].sort((a, b) => a.y - b.y);
     for (let k = 1; k < byY.length; k++) {
@@ -26839,17 +26849,24 @@ input,button{font-family:inherit}
           ordered.flatMap((it, i) => {
             const val = it.arr[effIdx];
             const dotTopPx = yPx(val);
+            const availableRightPx = containerW > 0 ? containerW + KCHART_GUTTER - xPct / 100 * containerW : Infinity;
+            const flipped = !live && estPillPx(val, it.label) > availableRightPx;
             return [
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: xLeft, top: `${dotTopPx}px`, transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, zIndex: i, pointerEvents: "none" }, children: [
                 live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } }),
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } })
               ] }, "dot" + i),
               // live/at-rest: pill hugs the app's standard right inset (same edge as the star icon
-              // / timeframe pills). While dragging it just trails right after the dot instead.
+              // / timeframe pills). While dragging it trails right after the dot -- unless it's
+              // grown too wide (label included) to fit before the right edge, in which case it
+              // flips to the left of the crosshair instead (measured in the layout effect above).
               // Vertically it uses the collision-avoided `pillY`, not the dot's own true position.
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: `${pillY[i]}px`, zIndex: i, pointerEvents: "none", whiteSpace: "nowrap", ...live ? { right: -KCHART_GUTTER, transform: "translateY(-50%)" } : { left: xLeft, transform: `translate(${KCHART_DOT / 2 + KCHART_GAP}px,-50%)` } }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, textAlign: "center", whiteSpace: "nowrap" }, children: [
-                Math.round(val),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "100%" }, children: "%" })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: `${pillY[i]}px`, zIndex: i, pointerEvents: "none", whiteSpace: "nowrap", ...live ? { right: -KCHART_GUTTER, transform: "translateY(-50%)" } : flipped ? { left: xLeft, transform: `translate(calc(-100% - ${KCHART_DOT / 2 + KCHART_GAP}px),-50%)` } : { left: xLeft, transform: `translate(${KCHART_DOT / 2 + KCHART_GAP}px,-50%)` } }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, justifyContent: "center", whiteSpace: "nowrap" }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  Math.round(val),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "100%" }, children: "%" })
+                ] }),
+                !live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis" }, children: it.label })
               ] }) }, "pill" + i)
             ];
           })
@@ -26872,7 +26889,7 @@ input,button{font-family:inherit}
     const arrowFor = (0, import_react4.useMemo)(() => contractArrowFn(contracts), [contracts]);
     const labelOf = (c) => (arrowFor(c) ? arrowFor(c) + " " : "") + c.label;
     const top3 = contracts.slice(0, 3);
-    const chartItems = (0, import_react4.useMemo)(() => top3.map((c, i) => ({ pct: c.pct, color: KLINE_COLORS[i], tokenId: c.tokenId })), [contracts]);
+    const chartItems = (0, import_react4.useMemo)(() => top3.map((c, i) => ({ pct: c.pct, color: KLINE_COLORS[i], tokenId: c.tokenId, label: c.label })), [contracts]);
     const predict = (c, side) => setLocalTrade({ m: contractToMarket(mk, c), side });
     const goBack = () => setClosing(true);
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", height: "100%", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }, children: [
