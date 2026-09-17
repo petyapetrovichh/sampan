@@ -24858,7 +24858,7 @@ input,button{font-family:inherit}
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { size: 19, strokeWidth: 2.2, style: { flexShrink: 0 } }),
     children
   ] });
-  function Area({ pts, color = C.brand, h = 140, target, labels, yfmt = (v) => v.toFixed(0) + "%" }) {
+  function Area({ pts, color = C.brand, h = 140, target, labels, yfmt = (v) => v.toFixed(0) + "%", noFill }) {
     const mn = Math.min(...pts, target ?? Infinity), mx = Math.max(...pts, target ?? -Infinity), r = mx - mn || 1, pad = 6;
     const y = (v) => h - pad - (v - mn) / r * (h - pad * 2);
     const d = pts.map((p, i) => `${i / (pts.length - 1) * 100},${y(p)}`).join(" ");
@@ -24872,7 +24872,7 @@ input,button{font-family:inherit}
         ] }) }),
         [0, 0.5, 1].map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: pad + f * (h - pad * 2), y2: pad + f * (h - pad * 2), stroke: C.line, strokeWidth: ".5", strokeDasharray: "1 2", vectorEffect: "non-scaling-stroke" }, f)),
         target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: y(target), y2: y(target), stroke: C.ink, strokeWidth: "1", strokeDasharray: "3 3", vectorEffect: "non-scaling-stroke" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polygon", { points: `0,${h} ${d} 100,${h}`, fill: `url(#${id})` }),
+        !noFill && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polygon", { points: `0,${h} ${d} 100,${h}`, fill: `url(#${id})` }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: d, fill: "none", stroke: color, strokeWidth: "2", vectorEffect: "non-scaling-stroke", strokeLinejoin: "round", strokeLinecap: "round" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${lx}%`, top: ly, width: 12, height: 12, borderRadius: "50%", background: color, border: "2px solid #fff", transform: "translate(-50%,-50%)", animation: "pulse 1.6s infinite", boxShadow: `0 0 0 0 ${color}` } }),
@@ -25725,7 +25725,7 @@ input,button{font-family:inherit}
   var CoinIcon = ({ img, bg, emoji }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 70, height: 70, clipPath: "url(#squircle)", background: bg, display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden" }, children: img ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: img, alt: "", style: { width: "100%", height: "100%", objectFit: "cover" } }) : emoji ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 32, color: "#fff" }, children: emoji }) : null });
   function feedToMarket(mk, i) {
     const rw = mk.rows[i];
-    const pmSource = mk.contracts && mk.contracts.length >= 2 ? mk : null;
+    const pmSource = mk.contracts && mk.contracts.length >= 2 || mk.binaryYesNo || mk.upTokenId !== void 0 ? mk : null;
     if (rw.px !== void 0) {
       const opts2 = [
         { n: "Yes", p: rw.pct, dir: rw.dir, px: rw.px },
@@ -25752,11 +25752,19 @@ input,button{font-family:inherit}
     return { id: mk.id + "-" + i, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts, yesno: false, pmSource };
   }
   function contractToMarket(mk, c) {
+    const [labelYes, labelNo] = c.outLabels || ["Yes", "No"];
     const opts = [
-      { n: "Yes", p: c.pct, sub: c.label },
-      { n: "No", p: 100 - c.pct, sub: c.label }
+      { n: labelYes, p: c.pct, sub: c.label },
+      { n: labelNo, p: 100 - c.pct, sub: c.label }
     ];
     return { id: c.id, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts, yesno: true, resolution: c.label, pmSource: mk };
+  }
+  function binaryToMarket(mk) {
+    const opts = [
+      { n: "Yes", p: mk.yesPct },
+      { n: "No", p: 100 - mk.yesPct }
+    ];
+    return { id: mk.id, cat: "Prediction", league: "", emoji: mk.emoji, icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "24h", vol: 1e6, opts, yesno: true, pmSource: mk };
   }
   function contractArrowFn(contracts) {
     const numeric = contracts.map((c) => parseNumLabel(c.label)).filter((v) => v !== null);
@@ -25769,6 +25777,7 @@ input,button{font-family:inherit}
   }
   function ContractRow({ c, arrowFor, onPredict }) {
     const low = c.pct < 1;
+    const [labelYes, labelNo] = c.outLabels || ["Yes", "No"];
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "14px 0", borderBottom: `1px dashed ${C.line}`, minWidth: 0 }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, minWidth: 0, marginBottom: 10 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { minWidth: 0, flex: 1 }, children: [
@@ -25788,8 +25797,16 @@ input,button{font-family:inherit}
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => onPredict(c, 0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 8, cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predict Yes" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => onPredict(c, 1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 8, cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predict No" }) })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onPredict(c, 0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predict" }),
+          " ",
+          labelYes
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onPredict(c, 1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predict" }),
+          " ",
+          labelNo
+        ] })
       ] })
     ] });
   }
@@ -25817,12 +25834,18 @@ input,button{font-family:inherit}
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: label })
   ] });
   function MarketFeedCard({ mk, onOpen, onOpenMarket, onCopy, showType }) {
-    const openable = mk.contracts && mk.contracts.length >= 2;
+    const openable = mk.contracts && mk.contracts.length >= 2 || mk.binaryYesNo || mk.upTokenId !== void 0;
+    const isUpDown = mk.upTokenId !== void 0;
     const [pressed, setPressed] = (0, import_react4.useState)(false);
     const press = (e) => {
       if (openable && !e.target.closest("button")) setPressed(true);
     };
     const release = () => setPressed(false);
+    const title = isUpDown ? `${mk.assetLabel} Up or Down - ${mk.durationLabel}` : mk.q;
+    const rows = isUpDown ? [
+      { label: "Up", pct: Math.round(mk.upPct), binary: true, side: "Up" },
+      { label: "Down", pct: Math.round(100 - mk.upPct), binary: true, side: "Down" }
+    ] : mk.rows;
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
       {
@@ -25833,19 +25856,23 @@ input,button{font-family:inherit}
         onPointerCancel: release,
         style: { background: C.card, borderRadius: 25, padding: 16, border: `1px solid ${C.line}`, minHeight: 210, overflow: "hidden", cursor: openable ? "pointer" : "default", userSelect: "none", transform: pressed ? "scale(.97)" : "scale(1)", opacity: pressed ? 0.85 : 1, transition: "transform .12s, opacity .12s" },
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0, fontSize: 18, fontWeight: 600, lineHeight: 1.22, letterSpacing: -0.3, paddingTop: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: mk.q })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, alignItems: "center", marginBottom: isUpDown ? 4 : 12 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u20BF" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0, fontSize: 18, fontWeight: 600, lineHeight: 1.22, letterSpacing: -0.3, paddingTop: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: title })
           ] }),
-          mk.rows.map((rw, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 }, children: [
+          isUpDown && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: C.down, fontWeight: 700, marginBottom: 12 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 6, height: 6, borderRadius: 3, background: C.down, animation: "blink 1.2s infinite" } }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live now" })
+          ] }),
+          rows.map((rw, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 16, fontWeight: 600, fontFamily: MONO, display: "flex", alignItems: "center", gap: 6, minWidth: 0, overflow: "hidden", flex: 1 }, children: rw.px !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, flexShrink: 0 }, children: rw.dir === "up" ? "\u2191" : "\u2193" }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: rw.px })
-            ] }) : rw.label ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: rw.label }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1, height: 1, borderBottom: `1.5px solid ${C.line}`, maxWidth: 120 } }) }),
+            ] }) : rw.label ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: rw.label }) : rw.label }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1, height: 1, borderBottom: `1.5px solid ${C.line}`, maxWidth: 120 } }) }),
             rw.binary ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: (e) => {
               e.stopPropagation();
-              onCopy && onCopy(feedToMarket(mk, i), rw.side === "No" ? 1 : 0);
-            }, className: "tap btn-soft", style: { border: "none", background: rw.side === "No" ? C.down : C.up, color: "#fff", borderRadius: 999, padding: "5px 0", width: 70, textAlign: "center", fontWeight: 700, fontSize: 17, flexShrink: 0, boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
+              onCopy && onCopy(isUpDown ? upDownToMarket(mk) : feedToMarket(mk, i), rw.side === "No" || rw.side === "Down" ? 1 : 0);
+            }, className: "tap btn-soft", style: { border: "none", background: rw.side === "No" || rw.side === "Down" ? C.down : C.up, color: "#fff", borderRadius: 999, padding: "5px 0", width: 70, textAlign: "center", fontWeight: 700, fontSize: 17, flexShrink: 0, boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
               rw.pct,
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11, fontWeight: 700 }, children: "%" })
             ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: (e) => {
@@ -25857,12 +25884,15 @@ input,button{font-family:inherit}
             ] })
           ] }, i)),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, marginTop: 6, minWidth: 0, overflow: "hidden" }, children: [
-            showType && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TypePill, { label: "Predictions", emoji: "\u{1F52E}" }),
+            showType && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TypePill, { label: isUpDown ? "Crypto" : "Predictions", emoji: isUpDown ? "\u{1FA99}" : "\u{1F52E}" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
-            mk.token ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
+            isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
+              mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0 } }) : null,
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.assetLabel })
+            ] }) : mk.token ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
               mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, width: 18, textAlign: "center", flexShrink: 0 }, children: mk.emoji }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.token })
             ] }) : null
@@ -26108,12 +26138,13 @@ input,button{font-family:inherit}
     const volStr = fmtVol(vol);
     const GENERIC = /* @__PURE__ */ new Set(["politics", "sports", "crypto", "tech", "pop-culture", "economy", "geopolitics", "elections", "finance", "esports", "weather", "ipo", "world", "2025-predictions", "2026-predictions"]);
     const tagLabel = (ev.tags || []).map((t) => ({ l: t.label, s: (t.slug || "").toLowerCase() })).find((t) => t.l && !GENERIC.has(t.s));
-    const base = { id: "pm" + ev.id, icon: ev.icon || ev.image || "", iconBg: "#EDEBE6", q: ev.title || "", vol: volStr, token: tagLabel ? tagLabel.l : "", desc: ev.description || "" };
+    const base = { id: "pm" + ev.id, icon: ev.icon || ev.image || "", iconBg: "#EDEBE6", q: ev.title || "", vol: volStr, token: tagLabel ? tagLabel.l : "", desc: ev.description || "", allTags: (ev.tags || []).map((t) => ({ label: t.label, emoji: CAT_EMOJI[t.label] || "\u{1F3F7}" })).filter((t) => t.label) };
     if (children.length === 1) {
       const parsed = pmParseOutcome(children[0]);
       if (!parsed) return null;
       if (parsed.isYesNo) {
         const yesIdx = parsed.outs.findIndex((o) => o.toLowerCase() === "yes");
+        const noIdx = parsed.outs.findIndex((o) => o.toLowerCase() === "no");
         const yesPct = parsed.prices[yesIdx < 0 ? 0 : yesIdx];
         const label = children[0].groupItemTitle || "";
         if (!label) {
@@ -26121,7 +26152,8 @@ input,button{font-family:inherit}
             { dir: "up", label: "Yes", pct: yesPct, mkt: children[0], yesNo: true, binary: true, side: "Yes" },
             { dir: "up", label: "No", pct: 100 - yesPct, mkt: children[0], yesNo: true, binary: true, side: "No" }
           ];
-          return { ...base, rows: rows4, binaryYesNo: true };
+          const allTags = (ev.tags || []).map((t) => ({ label: t.label, emoji: CAT_EMOJI[t.label] || "\u{1F3F7}" })).filter((t) => t.label);
+          return { ...base, rows: rows4, binaryYesNo: true, yesPct, conditionId: children[0].conditionId, yesTokenId: parsed.tokenIds[yesIdx < 0 ? 0 : yesIdx], noTokenId: parsed.tokenIds[noIdx < 0 ? 1 : noIdx], allTags };
         }
         const rows3 = [{ dir: "up", label, pct: yesPct, mkt: children[0], yesNo: true }];
         return { ...base, rows: rows3 };
@@ -26143,19 +26175,43 @@ input,button{font-family:inherit}
       const yesIdx = parsed ? parsed.outs.findIndex((o) => o.toLowerCase() === "yes") : 0;
       const yesPct = parsed ? parsed.prices[yesIdx < 0 ? 0 : yesIdx] : 0;
       const tokenId = parsed ? parsed.tokenIds[yesIdx < 0 ? 0 : yesIdx] : null;
-      return { label: mk.groupItemTitle || mk.question || "", pct: yesPct, mkt: mk, tokenId, vol: fmtVol(mk.volume || mk.volumeNum || 0) };
+      return { label: mk.groupItemTitle || mk.question || "", pct: yesPct, mkt: mk, tokenId, vol: fmtVol(mk.volume || mk.volumeNum || 0), icon: mk.icon || mk.image || "" };
     }).sort((a, b) => b.pct - a.pct).map((c, i) => ({ ...c, id: base.id + "-c" + i }));
+    const isSports = (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase()));
+    if (isSports) return { ...base, rows, contracts, isSports: true, slug: ev.slug, gameId: ev.gameId || null, isLiveGame: ev.live === true, gameEnded: !!ev.ended };
     return { ...base, rows, contracts };
   }
   var PM_CACHE = {};
   async function pmFetchSub(sub) {
     if (PM_CACHE[sub] !== void 0) return PM_CACHE[sub];
     try {
+      if (sub === "Live") {
+        const fetchCat = async (tagId) => {
+          try {
+            const r2 = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${tagId}&related_tags=true&active=true&closed=false&order=volume&ascending=false&limit=15`);
+            if (!r2.ok) throw new Error("bad status");
+            const data2 = await r2.json();
+            return (Array.isArray(data2) ? data2 : []).map(pmMapEvent).filter(Boolean).map((mk) => ({ ...mk, catSub: "Live" }));
+          } catch (e) {
+            return [];
+          }
+        };
+        const [sportsEvs, esportsEvs, upDownCards] = await Promise.all([fetchCat(PM_TAGS.Sports), fetchCat(PM_TAGS.Esports), pmFetchUpDownFeedCards().catch(() => [])]);
+        PM_CACHE[sub] = interleave([...sportsEvs, ...esportsEvs], upDownCards, 3);
+        return PM_CACHE[sub];
+      }
       const url = sub === "All" ? "https://gamma-api.polymarket.com/events?active=true&closed=false&order=volume&ascending=false&limit=20" : `https://gamma-api.polymarket.com/events?tag_id=${PM_TAGS[sub]}&related_tags=true&active=true&closed=false&order=volume&ascending=false&limit=20`;
       const r = await fetch(url);
       if (!r.ok) throw new Error("bad status");
       const data = await r.json();
-      PM_CACHE[sub] = (Array.isArray(data) ? data : []).map(pmMapEvent).filter(Boolean).map((mk) => ({ ...mk, catSub: sub }));
+      let mapped = (Array.isArray(data) ? data : []).map(pmMapEvent).filter(Boolean).map((mk) => ({ ...mk, catSub: sub }));
+      if (sub === "Crypto") {
+        try {
+          mapped = interleave(mapped, await pmFetchUpDownFeedCards(), 4);
+        } catch (e) {
+        }
+      }
+      PM_CACHE[sub] = mapped;
     } catch (e) {
       PM_CACHE[sub] = null;
     }
@@ -26269,7 +26325,7 @@ input,button{font-family:inherit}
           ] }, t);
         }) }),
         tab === "Stocks" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 8, padding: "0 16px 12px", overflowX: "auto", scrollbarWidth: "none" }, children: [["All", "\u{1F310}"], ["Pre-IPO", "\u{1F680}"], ["Big Tech", "\u{1F4BB}"], ["Finance", "\u{1F3E6}"], ["Chips", "\u{1F527}"], ["Software", "\u{1F5A5}\uFE0F"], ["AI", "\u{1F916}"], ["Crypto", "\u20BF"], ["EV & Space", "\u{1F697}"], ["Consumer", "\u{1F6CD}"], ["Indices", "\u{1F4CA}"], ["Goods", "\u{1F6E2}\uFE0F"], ["FX", "\u{1F4B1}"]].map(([s, e]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SubTile, { label: s, emoji: s === "All" ? void 0 : e, node: s === "All" ? (() => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllIcon, {})) : void 0, on: stockSub === s, onClick: () => setStockSub(s) }, s)) }),
-        tab === "Predictions" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 8, padding: "0 16px 12px", overflowX: "auto", scrollbarWidth: "none" }, children: [["All", null], ["Sports", "Sports"], ["Esports", "Esports"], ["Crypto", "Crypto"], ["Politics", "Politics"], ["Finance", "Finance"], ["IPOs", "IPO"], ["Geopolitics", "Geopolitics"], ["Tech", "Tech"], ["Culture", "Culture"], ["Elections", "Elections"], ["Economy", "Economy"], ["Weather", "Weather"]].map(([label, key]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SubTile, { label, img: label === "All" ? void 0 : TOPIC_ICON[key], node: label === "All" ? (() => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllIcon, {})) : void 0, on: predSub === label, onClick: () => setPredSub(label) }, label)) }),
+        tab === "Predictions" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 8, padding: "0 16px 12px", overflowX: "auto", scrollbarWidth: "none" }, children: [["All", null], ["Live", "Live"], ["Sports", "Sports"], ["Esports", "Esports"], ["Crypto", "Crypto"], ["Politics", "Politics"], ["Finance", "Finance"], ["IPOs", "IPO"], ["Geopolitics", "Geopolitics"], ["Tech", "Tech"], ["Culture", "Culture"], ["Elections", "Elections"], ["Economy", "Economy"], ["Weather", "Weather"]].map(([label, key]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SubTile, { label, img: label === "All" ? void 0 : TOPIC_ICON[key], node: label === "All" ? (() => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllIcon, {})) : void 0, on: predSub === label, onClick: () => setPredSub(label) }, label)) }),
         tab === "Meme coins" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 8, padding: "0 16px 12px", overflowX: "auto", scrollbarWidth: "none" }, children: [["All", null], ["Movers", "\u2728"], ["New", "\u{1F331}"], ["Charities", "\u{1F497}"], ["Live", "\u{1F3AC}"], ["Market cap", "\u{1F4B0}"], ["Agents", "\u{1F916}"], ["Oldest", "\u{1FA90}"], ["Last trade", "\u{1F4A5}"]].map(([s, e]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SubTile, { label: s, emoji: s === "All" ? void 0 : e, node: s === "All" ? (() => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllIcon, {})) : void 0, on: memeSub === s, onClick: () => setMemeSub(s) }, s)) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fx", style: { padding: "4px 16px 20px", display: "grid", gap: 16, minWidth: 0, overflowX: "hidden" }, children: [
@@ -26712,7 +26768,297 @@ input,button{font-family:inherit}
     }
     return out;
   }
-  function KLineChart({ items, tf, h = 170 }) {
+  var HOLDERS_CACHE = {};
+  async function fetchHolders(conditionId) {
+    if (!conditionId) return null;
+    if (HOLDERS_CACHE[conditionId] !== void 0) return HOLDERS_CACHE[conditionId];
+    try {
+      const r = await fetch(`https://data-api.polymarket.com/holders?market=${conditionId}&limit=5`);
+      if (!r.ok) throw new Error("bad status");
+      const data = await r.json();
+      HOLDERS_CACHE[conditionId] = Array.isArray(data) ? data : null;
+    } catch (e) {
+      HOLDERS_CACHE[conditionId] = null;
+    }
+    return HOLDERS_CACHE[conditionId];
+  }
+  var DOMINANT_COLOR_CACHE = {};
+  function extractDominantColor(url) {
+    if (!url) return Promise.resolve(null);
+    if (DOMINANT_COLOR_CACHE[url] !== void 0) return Promise.resolve(DOMINANT_COLOR_CACHE[url]);
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        try {
+          const size = 24;
+          const canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, size, size);
+          const data = ctx.getImageData(0, 0, size, size).data;
+          let r = 0, g = 0, b = 0, n = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] < 128) continue;
+            const rr = data[i], gg = data[i + 1], bb = data[i + 2];
+            const max = Math.max(rr, gg, bb), min = Math.min(rr, gg, bb);
+            if (max > 235 && min > 235) continue;
+            if (max < 25) continue;
+            r += rr;
+            g += gg;
+            b += bb;
+            n++;
+          }
+          if (!n) {
+            DOMINANT_COLOR_CACHE[url] = null;
+            resolve(null);
+            return;
+          }
+          const hex = "#" + [r, g, b].map((v) => Math.round(v / n).toString(16).padStart(2, "0")).join("");
+          DOMINANT_COLOR_CACHE[url] = hex;
+          resolve(hex);
+        } catch (e) {
+          DOMINANT_COLOR_CACHE[url] = null;
+          resolve(null);
+        }
+      };
+      img.onerror = () => {
+        DOMINANT_COLOR_CACHE[url] = null;
+        resolve(null);
+      };
+      img.src = url;
+    });
+  }
+  function hexToHsl(hex) {
+    const r = parseInt(hex.slice(1, 3), 16) / 255, g = parseInt(hex.slice(3, 5), 16) / 255, b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0;
+    const l = (max + min) / 2;
+    const s = max === min ? 0 : l > 0.5 ? (max - min) / (2 - max - min) : (max - min) / (max + min);
+    if (max !== min) {
+      const d = max - min;
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h, s, l };
+  }
+  function colorBucket(hex) {
+    const { h, s } = hexToHsl(hex);
+    if (s < 0.15) return "gray";
+    if (h < 20 || h >= 340) return "red";
+    if (h < 45) return "orange";
+    if (h < 70) return "yellow";
+    if (h < 170) return "green";
+    if (h < 260) return "blue";
+    return "purple";
+  }
+  var COLOR_CONFLICT_SUBSTITUTE = { red: "#2F80ED", orange: "#2F80ED", yellow: "#2F80ED", green: "#E11D48", blue: "#E11D48", purple: "#2F80ED", gray: "#2F80ED" };
+  function resolveTeamColors(hexes, fallback) {
+    const out = hexes.map((h, i) => h || fallback[i]);
+    if (hexes[0] && hexes[1] && colorBucket(hexes[0]) === colorBucket(hexes[1])) {
+      out[1] = COLOR_CONFLICT_SUBSTITUTE[colorBucket(hexes[0])] || fallback[1];
+    }
+    return out;
+  }
+  var PM_MOREMARKETS_CACHE = {};
+  async function pmFetchMoreMarkets(slug) {
+    if (!slug) return [];
+    if (PM_MOREMARKETS_CACHE[slug] !== void 0) return PM_MOREMARKETS_CACHE[slug];
+    try {
+      const r = await fetch(`https://gamma-api.polymarket.com/events/slug/${slug}-more-markets`);
+      if (!r.ok) throw new Error("bad status");
+      const data = await r.json();
+      const ev = Array.isArray(data) ? data[0] : data;
+      const markets = (ev?.markets || []).filter((mk) => mk.active && !mk.closed);
+      const contracts = markets.map((mk) => {
+        const parsed = pmParseOutcome(mk);
+        if (!parsed || parsed.outs.length !== 2) return null;
+        return {
+          id: "mm" + mk.id,
+          label: mk.groupItemTitle || mk.question || "",
+          pct: parsed.prices[0],
+          mkt: mk,
+          tokenId: parsed.tokenIds[0],
+          vol: fmtVol(mk.volume || mk.volumeNum || 0),
+          outLabels: [parsed.outs[0], parsed.outs[1]]
+        };
+      }).filter(Boolean).sort((a, b) => b.pct - a.pct).map((c, i) => ({ ...c, id: c.id + "-" + i }));
+      PM_MOREMARKETS_CACHE[slug] = contracts;
+    } catch (e) {
+      PM_MOREMARKETS_CACHE[slug] = [];
+    }
+    return PM_MOREMARKETS_CACHE[slug];
+  }
+  function useSportsLiveScore(gameId, enabled) {
+    const [score, setScore] = (0, import_react4.useState)(null);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !enabled || !gameId) {
+        setScore(null);
+        return;
+      }
+      let ws;
+      try {
+        ws = new WebSocket("wss://sports-api.polymarket.com/ws");
+        ws.onmessage = (e) => {
+          if (e.data === "ping") {
+            try {
+              ws.send("pong");
+            } catch (err) {
+            }
+            return;
+          }
+          try {
+            const msg = JSON.parse(e.data);
+            if (String(msg.gameId) !== String(gameId)) return;
+            const home = msg.homeScore ?? msg.home_score ?? msg.score?.home ?? msg.home?.score;
+            const away = msg.awayScore ?? msg.away_score ?? msg.score?.away ?? msg.away?.score;
+            if (home !== void 0 && away !== void 0) setScore({ home, away });
+          } catch (err) {
+          }
+        };
+      } catch (e) {
+      }
+      return () => {
+        try {
+          ws && ws.close();
+        } catch (e) {
+        }
+      };
+    }, [gameId, enabled]);
+    return score;
+  }
+  function fmtHolderAmt(n) {
+    const v = Number(n || 0);
+    return v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : v >= 1e3 ? `$${(v / 1e3).toFixed(2)}k` : `$${v.toFixed(2)}`;
+  }
+  var UPDOWN_SYMBOL = { Bitcoin: "BTCUSDT", Ethereum: "ETHUSDT", Solana: "SOLUSDT", BNB: "BNBUSDT", XRP: "XRPUSDT", Dogecoin: "DOGEUSDT" };
+  var UPDOWN_ICON_BG = { Bitcoin: "#F7931A", Ethereum: "#627EEA", Solana: "#9945FF", BNB: "#F0B90B", XRP: "#23292F", Dogecoin: "#C2A633" };
+  function fmtUpDownDuration(ms) {
+    const mins = Math.round(ms / 6e4);
+    if (mins < 60) return `${mins} Min`;
+    const hrs = Math.round(mins / 60);
+    return `${hrs} Hour${hrs > 1 ? "s" : ""}`;
+  }
+  var BINANCE_CACHE = {};
+  async function fetchBinanceKlines(symbol, startMs, endMs) {
+    const key = `${symbol}|${startMs}|${endMs}`;
+    if (BINANCE_CACHE[key] !== void 0) return BINANCE_CACHE[key];
+    try {
+      const qs = new URLSearchParams({ symbol, interval: "1m", startTime: String(startMs), endTime: String(endMs), limit: "1000" });
+      const r = await fetch(`https://api.binance.com/api/v3/klines?${qs}`);
+      if (!r.ok) throw new Error("bad status");
+      const data = await r.json();
+      const pts = (Array.isArray(data) ? data : []).map((k) => ({ t: Math.floor(k[0] / 1e3), p: parseFloat(k[4]) }));
+      BINANCE_CACHE[key] = pts.length ? pts : null;
+    } catch (e) {
+      BINANCE_CACHE[key] = null;
+    }
+    return BINANCE_CACHE[key];
+  }
+  function pmMapUpDownSlot(ev, assetLabel) {
+    const mkt = (ev.markets || [])[0];
+    if (!mkt) return null;
+    const parsed = pmParseOutcome(mkt);
+    if (!parsed) return null;
+    const upIdx = parsed.outs.findIndex((o) => o.toLowerCase() === "up");
+    const downIdx = parsed.outs.findIndex((o) => o.toLowerCase() === "down");
+    if (upIdx < 0 || downIdx < 0) return null;
+    const startMs = new Date(ev.startDate || mkt.startDate || Date.now()).getTime();
+    const endMs = new Date(ev.endDate || mkt.endDate || Date.now()).getTime();
+    return {
+      id: "pmud" + ev.id,
+      q: ev.title || `${assetLabel} Up or Down`,
+      assetLabel,
+      durationLabel: fmtUpDownDuration(endMs - startMs),
+      icon: ev.icon || ev.image || "",
+      iconBg: UPDOWN_ICON_BG[assetLabel] || "#F7931A",
+      vol: fmtVol(Number(ev.volume || ev.volumeNum || 0)),
+      desc: ev.description || "",
+      conditionId: mkt.conditionId,
+      upTokenId: parsed.tokenIds[upIdx],
+      downTokenId: parsed.tokenIds[downIdx],
+      upPct: parsed.prices[upIdx],
+      startMs,
+      endMs,
+      allTags: (ev.tags || []).map((t) => ({ label: t.label, emoji: CAT_EMOJI[t.label] || "\u{1F3F7}" })).filter((t) => t.label)
+    };
+  }
+  var PM_UPDOWN_CACHE = {};
+  async function pmFetchUpDown(assetLabel) {
+    if (PM_UPDOWN_CACHE[assetLabel] !== void 0) return PM_UPDOWN_CACHE[assetLabel];
+    const titleRe = new RegExp("^" + assetLabel + "\\s+up or down", "i");
+    const fetchList = async (closed) => {
+      const qs = closed ? `tag_id=${PM_TAGS.Crypto}&active=false&closed=true&order=endDate&ascending=false&limit=100` : `tag_id=${PM_TAGS.Crypto}&active=true&closed=false&order=startDate&ascending=true&limit=100`;
+      try {
+        const r = await fetch(`https://gamma-api.polymarket.com/events?${qs}`);
+        if (!r.ok) throw new Error("bad status");
+        const data = await r.json();
+        return (Array.isArray(data) ? data : []).filter((ev) => titleRe.test(ev.title || ""));
+      } catch (e) {
+        return [];
+      }
+    };
+    try {
+      const [upcomingEvs, pastEvs] = await Promise.all([fetchList(false), fetchList(true)]);
+      const result = {
+        upcoming: upcomingEvs.map((ev) => pmMapUpDownSlot(ev, assetLabel)).filter(Boolean),
+        past: pastEvs.slice(0, 3).map((ev) => {
+          const mkt = (ev.markets || [])[0];
+          if (!mkt) return null;
+          let prices;
+          try {
+            prices = JSON.parse(mkt.outcomePrices || "[]");
+          } catch {
+            prices = [];
+          }
+          return { id: ev.id, resolvedUp: prices.length ? parseFloat(prices[0]) > 0.5 : null };
+        }).filter(Boolean)
+      };
+      PM_UPDOWN_CACHE[assetLabel] = result;
+      return result;
+    } catch (e) {
+      PM_UPDOWN_CACHE[assetLabel] = null;
+      return null;
+    }
+  }
+  async function pmFetchUpDownFeedCards() {
+    const assets = Object.keys(UPDOWN_SYMBOL);
+    const lists = await Promise.all(assets.map((a) => pmFetchUpDown(a)));
+    const now = Date.now();
+    return lists.map((res) => {
+      if (!res || !res.upcoming?.length) return null;
+      return res.upcoming.find((s) => s.startMs <= now && now < s.endMs) || res.upcoming[0];
+    }).filter(Boolean);
+  }
+  function interleave(base, extra, every) {
+    if (!extra.length) return base;
+    const out = [];
+    let ei = 0;
+    base.forEach((item, i) => {
+      out.push(item);
+      if ((i + 1) % every === 0 && ei < extra.length) out.push(extra[ei++]);
+    });
+    while (ei < extra.length) out.push(extra[ei++]);
+    return out;
+  }
+  function fmtSlotTime(ms) {
+    const d = new Date(ms);
+    let hh = d.getHours();
+    const ampm = hh >= 12 ? "PM" : "AM";
+    hh = hh % 12 || 12;
+    return `${hh}:${String(d.getMinutes()).padStart(2, "0")} ${ampm}`;
+  }
+  function upDownToMarket(mk) {
+    const opts = [
+      { n: "Up", p: mk.upPct },
+      { n: "Down", p: 100 - mk.upPct }
+    ];
+    return { id: mk.id, cat: "Prediction", league: "", emoji: "\u20BF", icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "", vol: 1e6, opts, yesno: true, pmSource: mk };
+  }
+  function KLineChart({ items, tf, h = 170, showTeamLabels }) {
     const { lang } = useLang();
     const W = 320;
     const [liveArrs, setLiveArrs] = (0, import_react4.useState)(null);
@@ -26861,13 +27207,16 @@ input,button{font-family:inherit}
               // grown too wide (label included) to fit before the right edge, in which case it
               // flips to the left of the crosshair instead (measured in the layout effect above).
               // Vertically it uses the collision-avoided `pillY`, not the dot's own true position.
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: `${pillY[i]}px`, zIndex: i, pointerEvents: "none", whiteSpace: "nowrap", ...live ? { right: -KCHART_GUTTER, transform: "translateY(-50%)" } : flipped ? { left: xLeft, transform: `translate(calc(-100% - ${KCHART_DOT / 2 + KCHART_GAP}px),-50%)` } : { left: xLeft, transform: `translate(${KCHART_DOT / 2 + KCHART_GAP}px,-50%)` } }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, justifyContent: "center", whiteSpace: "nowrap" }, children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-                  Math.round(val),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "100%" }, children: "%" })
-                ] }),
-                !live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis" }, children: it.label })
-              ] }) }, "pill" + i)
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", top: `${pillY[i]}px`, zIndex: i, pointerEvents: "none", whiteSpace: "nowrap", ...live ? { right: -KCHART_GUTTER, transform: "translateY(-50%)" } : flipped ? { left: xLeft, transform: `translate(calc(-100% - ${KCHART_DOT / 2 + KCHART_GAP}px),-50%)` } : { left: xLeft, transform: `translate(${KCHART_DOT / 2 + KCHART_GAP}px,-50%)` } }, children: [
+                live && showTeamLabels && it.label && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { textAlign: "right", fontSize: 11, fontWeight: 700, color: it.color, marginBottom: 2, whiteSpace: "nowrap" }, children: it.label }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, justifyContent: "center", whiteSpace: "nowrap" }, children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                    Math.round(val),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "100%" }, children: "%" })
+                  ] }),
+                  !live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis" }, children: it.label })
+                ] })
+              ] }, "pill" + i)
             ];
           })
         ] })
@@ -26875,6 +27224,441 @@ input,button{font-family:inherit}
     );
   }
   var IconOnlyBtn = ({ children, onClick }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap", style: { border: "none", background: "none", padding: 4, margin: -4, display: "grid", placeItems: "center", cursor: "pointer" }, children });
+  function TopHoldersSection({ conditionId, yesTokenId, noTokenId }) {
+    const [data, setData] = (0, import_react4.useState)(null);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !conditionId) {
+        setData(null);
+        return;
+      }
+      let cancelled = false;
+      fetchHolders(conditionId).then((res) => {
+        if (!cancelled) setData(res);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [conditionId]);
+    if (!data || !data.length) return null;
+    const yesGroup = data.find((g) => g.token === yesTokenId);
+    const noGroup = data.find((g) => g.token === noTokenId);
+    const renderList = (holders) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { border: `1px solid ${C.line}`, borderRadius: 16, padding: "0 14px" }, children: holders.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderBottom: i < holders.length - 1 ? `1px solid ${C.line}` : "none" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 16, fontSize: 13, color: C.mute, flexShrink: 0 }, children: i + 1 }),
+      h.profileImageOptimized || h.profileImage ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: h.profileImageOptimized || h.profileImage, alt: "", style: { width: 32, height: 32, borderRadius: "50%", flexShrink: 0, objectFit: "cover" } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 32, height: 32, borderRadius: "50%", background: C.soft, flexShrink: 0 } }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1, minWidth: 0, fontSize: 15, fontWeight: 700, color: C.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: h.displayUsernamePublic !== false ? h.name || h.pseudonym || "Anon" : "Anon" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, fontWeight: 700, color: C.up, flexShrink: 0 }, children: fmtHolderAmt(h.amount) })
+    ] }, (h.proxyWallet || "") + i)) });
+    if (!yesGroup?.holders?.length && !noGroup?.holders?.length) return null;
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Top Traders" }) }),
+      yesGroup?.holders?.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 700, color: C.mute, marginBottom: 6 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Yes Holders" }) }),
+        renderList(yesGroup.holders)
+      ] }),
+      noGroup?.holders?.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: yesGroup?.holders?.length ? 16 : 0 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 700, color: C.mute, marginBottom: 6 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "No Holders" }) }),
+        renderList(noGroup.holders)
+      ] })
+    ] });
+  }
+  function BinaryMarketPage({ mk, onBack, onToast, onDone }) {
+    const { lang } = useLang();
+    const [fav, setFav] = (0, import_react4.useState)(false);
+    const [tf, setTf] = (0, import_react4.useState)("1m");
+    const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
+    const [closing, setClosing] = (0, import_react4.useState)(false);
+    const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
+    const goBack = () => setClosing(true);
+    const chartItems = (0, import_react4.useMemo)(() => [{ pct: mk.yesPct, color: KLINE_COLORS[0], tokenId: mk.yesTokenId }], [mk]);
+    const predict = (side) => setLocalTrade({ m: binaryToMarket(mk), side });
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", height: "100%", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, zIndex: 20, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px 12px" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontWeight: 800, fontSize: 15, pointerEvents: "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Market" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 18, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconOnlyBtn, { onClick: () => onToast(translate(lang, "Link copied")), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Share, { size: 20, color: C.ink }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconOnlyBtn, { onClick: () => {
+            setFav(!fav);
+            onToast(translate(lang, fav ? "Removed from watchlist" : "Added to watchlist"));
+          }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { size: 20, fill: fav ? C.amber : "none", color: fav ? C.amber : C.ink, strokeWidth: fav ? 1.5 : 2, strokeLinejoin: "round" }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 26, minWidth: 0, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u{1F52E}" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: ["1m", "5m", "15m", "1H", "1D", "All"].map((t) => {
+              const on = tf === t;
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
+            }) })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "About" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }, children: (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.emoji }),
+            t.label
+          ] }, i)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: descOpen ? { fontSize: 14, lineHeight: 1.65, color: C.ink2 } : { fontSize: 14, lineHeight: 1.65, color: C.ink2, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: mk.desc || mk.q }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setDescOpen((x) => !x), className: "tap", style: { border: "none", background: "none", padding: 0, marginTop: 6, color: C.mute, fontWeight: 700, fontSize: 13, textDecoration: "underline", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: descOpen ? "Less" : "More" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onToast(translate(lang, "AI analysis coming soon")), className: "tap", style: { width: "100%", marginTop: 14, border: `1px solid ${C.line}`, background: "transparent", borderRadius: 999, padding: "13px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontWeight: 700, fontSize: 15, color: C.ink, cursor: "pointer" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogoMark, { s: 20 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Use AI analysis" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopHoldersSection, { conditionId: mk.conditionId, yesTokenId: mk.yesTokenId, noTokenId: mk.noTokenId })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", gap: 10, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, borderTop: `1px solid ${C.line}` }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 17, padding: "16px 0", borderRadius: 999, cursor: "pointer" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Yes" }),
+          " ",
+          Math.round(mk.yesPct),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12 }, children: "%" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 17, padding: "16px 0", borderRadius: 999, cursor: "pointer" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "No" }),
+          " ",
+          Math.round(100 - mk.yesPct),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12 }, children: "%" })
+        ] })
+      ] }),
+      localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
+        setLocalTrade(null);
+        onDone && onDone(...a);
+      } }, localTrade.m.id + "-" + localTrade.side)
+    ] });
+  }
+  function UpDownMarketPage({ mk: initialMk, onBack, onToast, onDone }) {
+    const { lang } = useLang();
+    const [fav, setFav] = (0, import_react4.useState)(false);
+    const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
+    const [closing, setClosing] = (0, import_react4.useState)(false);
+    const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
+    const [series2, setSeries] = (0, import_react4.useState)(null);
+    const [selectedId, setSelectedId] = (0, import_react4.useState)(initialMk.id);
+    const [now, setNow] = (0, import_react4.useState)(Date.now());
+    const [priceHist, setPriceHist] = (0, import_react4.useState)(null);
+    const goBack = () => setClosing(true);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5) return;
+      let cancelled = false;
+      pmFetchUpDown(initialMk.assetLabel).then((res) => {
+        if (!cancelled) setSeries(res);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [initialMk.assetLabel]);
+    (0, import_react4.useEffect)(() => {
+      const t = setInterval(() => setNow(Date.now()), 1e3);
+      return () => clearInterval(t);
+    }, []);
+    const allSlots = (0, import_react4.useMemo)(() => {
+      const list = series2?.upcoming?.length ? series2.upcoming : [initialMk];
+      return list.some((s) => s.id === initialMk.id) ? list : [initialMk, ...list];
+    }, [series2, initialMk]);
+    const mk = allSlots.find((s) => s.id === selectedId) || initialMk;
+    const isLive = mk.startMs <= now && now < mk.endMs;
+    const isPastSlot = now >= mk.endMs;
+    const secsLeft = Math.max(0, Math.round((mk.endMs - now) / 1e3));
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5) {
+        setPriceHist(null);
+        return;
+      }
+      const symbol = UPDOWN_SYMBOL[mk.assetLabel];
+      if (!symbol) {
+        setPriceHist(null);
+        return;
+      }
+      let cancelled = false;
+      const load = () => fetchBinanceKlines(symbol, mk.startMs, Math.min(now, mk.endMs)).then((res) => {
+        if (!cancelled) setPriceHist(res);
+      });
+      load();
+      const iv = isLive ? setInterval(load, 8e3) : null;
+      return () => {
+        cancelled = true;
+        if (iv) clearInterval(iv);
+      };
+    }, [mk.id, isLive]);
+    const pts = priceHist && priceHist.length >= 2 ? priceHist.map((p) => p.p) : null;
+    const target = pts ? pts[0] : null;
+    const curPrice = pts ? pts[pts.length - 1] : null;
+    const predict = (side) => setLocalTrade({ m: upDownToMarket(mk), side });
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", height: "100%", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, zIndex: 20, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px 12px" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontWeight: 800, fontSize: 15, pointerEvents: "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Market" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 18, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconOnlyBtn, { onClick: () => onToast(translate(lang, "Link copied")), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Share, { size: 20, color: C.ink }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconOnlyBtn, { onClick: () => {
+            setFav(!fav);
+            onToast(translate(lang, fav ? "Removed from watchlist" : "Added to watchlist"));
+          }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { size: 20, fill: fav ? C.amber : "none", color: fav ? C.amber : C.ink, strokeWidth: fav ? 1.5 : 2, strokeLinejoin: "round" }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 18, minWidth: 0, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: "\u20BF" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }),
+            isLive && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: C.down, fontWeight: 700, marginTop: 6 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 6, height: 6, borderRadius: 3, background: C.down, animation: "blink 1.2s infinite" } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live now" }),
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO }, children: [
+                String(secsLeft / 60 | 0).padStart(2, "0"),
+                ":",
+                String(secsLeft % 60).padStart(2, "0")
+              ] })
+            ] })
+          ] })
+        ] }),
+        curPrice != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 4 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 32, fontWeight: 900, fontFamily: MONO }, children: [
+            "$",
+            curPrice.toLocaleString(void 0, { maximumFractionDigits: 2 })
+          ] }),
+          target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, color: curPrice >= target ? C.up : C.down, fontWeight: 700, marginTop: 2 }, children: [
+            curPrice >= target ? "\u25B2" : "\u25BC",
+            " $",
+            Math.abs(curPrice - target).toLocaleString(void 0, { maximumFractionDigits: 2 })
+          ] }),
+          target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-block", fontSize: 12, background: C.soft, padding: "4px 10px", borderRadius: 8, marginTop: 8 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
+            ": ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO, fontWeight: 700 }, children: [
+              "$",
+              target.toLocaleString(void 0, { maximumFractionDigits: 2 })
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: pts ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Area, { pts, color: KLINE_COLORS[0], target, noFill: true, yfmt: (v) => "$" + v.toLocaleString(void 0, { maximumFractionDigits: 0 }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 140, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: isPastSlot ? "" : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 22, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, border: `1px solid ${C.line}`, borderRadius: 999, padding: "8px 14px", fontSize: 14, fontWeight: 700, color: C.ink }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Past" }),
+            (series2?.past || []).slice(0, 3).reverse().map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 20, height: 20, borderRadius: 10, background: p.resolvedUp ? C.up : C.down, display: "grid", placeItems: "center", color: "#fff" }, children: p.resolvedUp ? "\u2197" : "\u2198" }, p.id))
+          ] }),
+          allSlots.map((s) => {
+            const live = s.startMs <= now && now < s.endMs;
+            const on = s.id === selectedId;
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSelectedId(s.id), className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 6, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.ink : "transparent", color: on ? "#fff" : C.ink, borderRadius: 999, padding: "8px 14px", fontSize: 14, fontWeight: 700, cursor: "pointer" }, children: [
+              live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 6, height: 6, borderRadius: 3, background: on ? "#fff" : C.down, animation: "blink 1.2s infinite" } }),
+              fmtSlotTime(s.startMs)
+            ] }, s.id);
+          })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "About" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
+            ] }),
+            (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.emoji }),
+              t.label
+            ] }, i))
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: descOpen ? { fontSize: 14, lineHeight: 1.65, color: C.ink2 } : { fontSize: 14, lineHeight: 1.65, color: C.ink2, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: mk.desc || mk.q }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setDescOpen((x) => !x), className: "tap", style: { border: "none", background: "none", padding: 0, marginTop: 6, color: C.mute, fontWeight: 700, fontSize: 13, textDecoration: "underline", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: descOpen ? "Less" : "More" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onToast(translate(lang, "AI analysis coming soon")), className: "tap", style: { width: "100%", marginTop: 14, border: `1px solid ${C.line}`, background: "transparent", borderRadius: 999, padding: "13px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontWeight: 700, fontSize: 15, color: C.ink, cursor: "pointer" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogoMark, { s: 20 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Use AI analysis" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopHoldersSection, { conditionId: mk.conditionId, yesTokenId: mk.upTokenId, noTokenId: mk.downTokenId })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", gap: 10, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, borderTop: `1px solid ${C.line}` }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 17, padding: "16px 0", borderRadius: 999, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }, children: [
+          "\u2197 ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Up" }),
+          " ",
+          Math.round(mk.upPct),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12 }, children: "%" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 17, padding: "16px 0", borderRadius: 999, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }, children: [
+          "\u2198 ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Down" }),
+          " ",
+          Math.round(100 - mk.upPct),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12 }, children: "%" })
+        ] })
+      ] }),
+      localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
+        setLocalTrade(null);
+        onDone && onDone(...a);
+      } }, localTrade.m.id + "-" + localTrade.side)
+    ] });
+  }
+  function renderMarketPage(mk, props) {
+    if (mk.upTokenId !== void 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UpDownMarketPage, { mk, ...props }, mk.id);
+    if (mk.binaryYesNo) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BinaryMarketPage, { mk, ...props }, mk.id);
+    if (mk.isSports) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SportsMarketPage, { mk, ...props }, mk.id);
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PredMarket, { mk, ...props }, mk.id);
+  }
+  function SportsMarketPage({ mk, onBack, onToast, onDone }) {
+    const { lang } = useLang();
+    const [fav, setFav] = (0, import_react4.useState)(false);
+    const [tf, setTf] = (0, import_react4.useState)("1m");
+    const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
+    const [closing, setClosing] = (0, import_react4.useState)(false);
+    const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
+    const [showAllSheet, setShowAllSheet] = (0, import_react4.useState)(false);
+    const [subMarkets, setSubMarkets] = (0, import_react4.useState)([]);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !mk.slug) {
+        setSubMarkets([]);
+        return;
+      }
+      let cancelled = false;
+      pmFetchMoreMarkets(mk.slug).then((res) => {
+        if (!cancelled) setSubMarkets(res);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [mk.slug]);
+    const moneyline = mk.contracts || [];
+    const top3 = moneyline.slice(0, 3);
+    const [teamColors, setTeamColors] = (0, import_react4.useState)({});
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5) return;
+      let cancelled = false;
+      Promise.all(top3.map((c) => extractDominantColor(c.icon).then((hex) => [c.id, hex]))).then((pairs) => {
+        if (cancelled) return;
+        const next = {};
+        pairs.forEach(([id, hex]) => {
+          if (hex) next[id] = hex;
+        });
+        if (Object.keys(next).length) setTeamColors(next);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [mk.id]);
+    const finalColors = (0, import_react4.useMemo)(() => resolveTeamColors(top3.map((c) => teamColors[c.id] || null), KLINE_COLORS), [top3, teamColors]);
+    const colorFor = (c, i) => finalColors[i] || KLINE_COLORS[i];
+    const chartItems = (0, import_react4.useMemo)(() => top3.map((c, i) => ({ pct: c.pct, color: colorFor(c, i), tokenId: c.tokenId, label: c.label })), [moneyline, teamColors]);
+    const subArrowFor = (0, import_react4.useMemo)(() => contractArrowFn(subMarkets), [subMarkets]);
+    const visibleSub = subMarkets.slice(0, 5);
+    const predictSub = (c, side) => setLocalTrade({ m: contractToMarket(mk, c), side });
+    const predictMoneyline = (c) => setLocalTrade({ m: contractToMarket(mk, { ...c, outLabels: ["Yes", "No"] }), side: 0 });
+    const goBack = () => setClosing(true);
+    const teams = moneyline.filter((c) => c.label.toLowerCase() !== "draw").slice(0, 2);
+    const liveScore = useSportsLiveScore(mk.gameId, !!mk.isLiveGame && !mk.gameEnded);
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", height: "100%", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, zIndex: 20, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px 12px" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontWeight: 800, fontSize: 15, pointerEvents: "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Market" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 18, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconOnlyBtn, { onClick: () => onToast(translate(lang, "Link copied")), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Share, { size: 20, color: C.ink }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconOnlyBtn, { onClick: () => {
+            setFav(!fav);
+            onToast(translate(lang, fav ? "Removed from watchlist" : "Added to watchlist"));
+          }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { size: 20, fill: fav ? C.amber : "none", color: fav ? C.amber : C.ink, strokeWidth: fav ? 1.5 : 2, strokeLinejoin: "round" }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 12, minWidth: 0, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u{1F3C6}" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }) })
+        ] }),
+        mk.isLiveGame && !mk.gameEnded && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: C.down, fontWeight: 700, marginBottom: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 6, height: 6, borderRadius: 3, background: C.down, animation: "blink 1.2s infinite" } }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live now" })
+        ] }),
+        teams.length === 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 18, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, minWidth: 0, flex: 1 }, children: [
+            teams[0].icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: teams[0].icon, alt: "", style: { width: 44, height: 44, borderRadius: "50%", objectFit: "cover", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Team, { n: teams[0].label, size: 44 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, fontWeight: 700, color: C.ink, textAlign: "center", maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: teams[0].label })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 22, fontWeight: 900, fontFamily: MONO, flexShrink: 0, color: C.ink }, children: liveScore ? `${liveScore.home} - ${liveScore.away}` : "vs" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, minWidth: 0, flex: 1 }, children: [
+            teams[1].icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: teams[1].icon, alt: "", style: { width: 44, height: 44, borderRadius: "50%", objectFit: "cover", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Team, { n: teams[1].label, size: 44 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, fontWeight: 700, color: C.ink, textAlign: "center", maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: teams[1].label })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf, showTeamLabels: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: ["1m", "5m", "15m", "1H", "1D", "All"].map((t) => {
+              const on = tf === t;
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
+            }) })
+          ] })
+        ] }),
+        subMarkets.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Select a contract" }) }),
+          visibleSub.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContractRow, { c, arrowFor: subArrowFor, onPredict: predictSub }, c.id)),
+          subMarkets.length > 5 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { onClick: () => setShowAllSheet(true), className: "tap", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "14px 0", minWidth: 0, cursor: "pointer" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 10, fontWeight: 700, fontSize: 15, minWidth: 0 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { width: 32, height: 32, borderRadius: 11, background: C.soft, display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexShrink: 0 }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 3, height: 3, borderRadius: 2, background: C.ink2 } }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 3, height: 3, borderRadius: 2, background: C.ink2 } }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 3, height: 3, borderRadius: 2, background: C.ink2 } })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "View all" }),
+                " ",
+                subMarkets.length,
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "contracts" })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flexShrink: 0, width: 40, height: 40, borderRadius: 20, background: "#fff", display: "grid", placeItems: "center", boxShadow: "inset 0 2px 3px rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.14), inset 0 0 0 1px rgba(0,0,0,.06)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { size: 17, color: C.ink }) })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "About" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }, children: [
+            mk.token && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+              mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%" } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u{1F3C6}" }),
+              mk.token
+            ] }),
+            (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.emoji }),
+              t.label
+            ] }, i))
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: descOpen ? { fontSize: 14, lineHeight: 1.65, color: C.ink2 } : { fontSize: 14, lineHeight: 1.65, color: C.ink2, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: mk.desc || mk.q }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setDescOpen((x) => !x), className: "tap", style: { border: "none", background: "none", padding: 0, marginTop: 6, color: C.mute, fontWeight: 700, fontSize: 13, textDecoration: "underline", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: descOpen ? "Less" : "More" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onToast(translate(lang, "AI analysis coming soon")), className: "tap", style: { width: "100%", marginTop: 14, border: `1px solid ${C.line}`, background: "transparent", borderRadius: 999, padding: "13px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontWeight: 700, fontSize: 15, color: C.ink, cursor: "pointer" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogoMark, { s: 20 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Use AI analysis" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopHoldersSection, { conditionId: moneyline[0]?.mkt?.conditionId, yesTokenId: moneyline[0]?.tokenId, noTokenId: moneyline[1]?.tokenId })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flexShrink: 0, display: "flex", gap: 8, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, borderTop: `1px solid ${C.line}` }, children: moneyline.slice(0, 3).map((c, i) => {
+        const isDraw = c.label.toLowerCase() === "draw";
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predictMoneyline(c), className: "tap btn-soft", style: { flex: 1, border: isDraw ? `1px solid ${C.line}` : "none", background: isDraw ? "transparent" : colorFor(c, i), color: isDraw ? C.ink : "#fff", fontWeight: 700, fontSize: 15, padding: "16px 4px", borderRadius: 999, cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
+          c.label,
+          " ",
+          c.pct,
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11 }, children: "%" })
+        ] }, c.id);
+      }) }),
+      localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
+        setLocalTrade(null);
+        onDone && onDone(...a);
+      } }, localTrade.m.id + "-" + localTrade.side),
+      showAllSheet && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllContractsSheet, { mk, contracts: subMarkets, onBack: () => setShowAllSheet(false), onDone })
+    ] });
+  }
   function PredMarket({ mk, onBack, onToast, onDone }) {
     const { lang } = useLang();
     const [fav, setFav] = (0, import_react4.useState)(false);
@@ -28607,6 +29391,7 @@ input,button{font-family:inherit}
       // trade / terminal
       "Predict Yes": "\u9884\u6D4B \u662F",
       "Predict No": "\u9884\u6D4B \u5426",
+      "Predict": "\u9884\u6D4B",
       "Long": "\u505A\u591A",
       "Short": "\u505A\u7A7A",
       "Yes": "\u662F",
@@ -28660,6 +29445,16 @@ input,button{font-family:inherit}
       "Vol.": "\u6210\u4EA4\u91CF",
       "Use AI analysis": "\u4F7F\u7528AI\u5206\u6790",
       "Top Traders": "\u9876\u7EA7\u4EA4\u6613\u8005",
+      "Yes Holders": '\u6301\u6709"\u662F"',
+      "No Holders": '\u6301\u6709"\u5426"',
+      "Up": "\u4E0A\u6DA8",
+      "Down": "\u4E0B\u8DCC",
+      "Live now": "\u8FDB\u884C\u4E2D",
+      "Target": "\u76EE\u6807\u4EF7",
+      "Past": "\u5386\u53F2",
+      "Swipe to Predict Up": "\u6ED1\u52A8\u9884\u6D4B \u4E0A\u6DA8",
+      "Swipe to Predict Down": "\u6ED1\u52A8\u9884\u6D4B \u4E0B\u8DCC",
+      "Waiting for price data\u2026": "\u7B49\u5F85\u4EF7\u683C\u6570\u636E\u2026",
       "Less": "\u6536\u8D77",
       "More": "\u5C55\u5F00",
       "Link copied": "\u94FE\u63A5\u5DF2\u590D\u5236",
@@ -28961,7 +29756,7 @@ input,button{font-family:inherit}
       setInvited(true);
     } });
     else if (top?.s === "detail") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Detail, { m: top.p, onBack: pop, onTrade: (m, i) => setTrade({ m, side: i }), onToast: say, onTrader: openT }, top.p.id);
-    else if (top?.s === "predmarket") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PredMarket, { mk: top.p, onBack: pop, onToast: say, onDone }, top.p.id);
+    else if (top?.s === "predmarket") screen = renderMarketPage(top.p, { onBack: pop, onToast: say, onDone });
     else if (top?.s === "trader") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trader, { t: top.p, onBack: pop, onCopy: (m, i) => setTrade({ m, side: i }), onOpen: openM }, top.p.id);
     else if (top?.s === "board") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Board, { onBack: pop, onTrader: openT });
     else if (top?.s === "topics") screen = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Topics, { onBack: pop, onToast: say });
@@ -29002,7 +29797,7 @@ input,button{font-family:inherit}
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", inset: 0, top: !IS_H5 && logged ? 54 : "env(safe-area-inset-top)", bottom: 0, overflowY: "auto", paddingBottom: showTabs ? 96 : 0 }, children: screen }),
         trade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: trade.m, side: trade.side, onClose: () => setTrade(null), onDone, onOpenMarket: openPMFromTrade }, trade.m.id + "-" + trade.side),
-        pmFromTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", inset: 0, zIndex: 35 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PredMarket, { mk: pmFromTrade, onBack: () => setPmFromTrade(null), onToast: say, onDone }, pmFromTrade.id) }),
+        pmFromTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", inset: 0, zIndex: 35 }, children: renderMarketPage(pmFromTrade, { onBack: () => setPmFromTrade(null), onToast: say, onDone }) }),
         showTabs && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: IS_H5 ? "calc(4px + env(safe-area-inset-bottom))" : 20, left: 16, right: 16, height: 64, borderRadius: 32, background: "rgba(255,255,255,.55)", backdropFilter: "blur(20px)", boxShadow: "0 10px 30px rgba(0,0,0,.15), inset 0 0 0 1px rgba(255,255,255,.5)", display: "flex", alignItems: "stretch", padding: 6, gap: 4, zIndex: 15 }, children: tabs.map(([k, n, I]) => {
           const active = tab === k;
           return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => {
