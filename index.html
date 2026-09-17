@@ -24809,6 +24809,22 @@ input,button{font-family:inherit}
     const [bg, fg] = TEAM[n] || [C.soft, C.ink];
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: size, height: size, borderRadius: size * 0.3, background: bg, color: fg, display: "grid", placeItems: "center", fontSize: size * 0.32, fontWeight: 800, flexShrink: 0 }, children: n === "Draw" ? "=" : n === "Up" ? "\u2191" : n === "Down" ? "\u2193" : n.slice(0, 2) });
   };
+  var LiveBadge = ({ time, mono }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, lineHeight: 1.2 }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", width: 6, height: 6, flexShrink: 0 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 3, background: C.down } }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 3, background: C.down } })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: C.down, fontWeight: 700 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live" }) }),
+    time && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: C.ink, fontWeight: 400, fontFamily: mono ? MONO : void 0 }, children: time })
+  ] });
+  var AVATAR_BGS = ["#F6DF51", "#8FD5A6", "#9BB8F0", "#F0A6A6", "#C3A6F0", "#F0C58F"];
+  var AVATAR_FACES = ["\u25D5\u203F\u25D5", "\u2022\u1D17\u2022", "^_^", "\u2022_\u2022", "\u1D54\u1D25\u1D54", "\xB7\u1D17\xB7"];
+  var DefaultAvatar = ({ seed = "", size = 32 }) => {
+    const h = Math.abs(hashStr(String(seed)));
+    const bg = AVATAR_BGS[h % AVATAR_BGS.length];
+    const face = AVATAR_FACES[(h >> 3) % AVATAR_FACES.length];
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: size, height: size, borderRadius: "50%", background: bg, flexShrink: 0, display: "grid", placeItems: "center", fontSize: size * 0.3, color: "rgba(0,0,0,.65)", fontWeight: 700, overflow: "hidden" }, children: face });
+  };
   var Pct = ({ n, p, big }) => {
     const tone = n === "Down" ? C.down : n === "Up" ? C.up : n === "Draw" ? C.mute : p >= 50 ? C.up : C.ink2;
     const bg = n === "Down" ? C.downSoft : n === "Up" ? C.upSoft : n === "Draw" ? C.soft : p >= 50 ? C.upSoft : C.soft;
@@ -25775,34 +25791,41 @@ input,button{font-family:inherit}
       return v >= avg ? "\u2191" : "\u2193";
     };
   }
-  function ContractRow({ c, arrowFor, onPredict }) {
-    const low = c.pct < 1;
-    const [labelYes, labelNo] = c.outLabels || ["Yes", "No"];
+  function ContractRow({ c, arrowFor, onPredict, variants }) {
+    const [selId, setSelId] = (0, import_react4.useState)(c.id);
+    const shown = variants && variants.find((v) => v.id === selId) || c;
+    const low = shown.pct < 1;
+    const [labelYes, labelNo] = shown.outLabels || ["Yes", "No"];
+    const SOFT = "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)";
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "14px 0", borderBottom: `1px dashed ${C.line}`, minWidth: 0 }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, minWidth: 0, marginBottom: 10 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { minWidth: 0, flex: 1 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 16, fontWeight: 700, color: C.ink, display: "flex", alignItems: "center", gap: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
-            arrowFor(c) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flexShrink: 0 }, children: arrowFor(c) }),
-            c.label
+            arrowFor(shown) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flexShrink: 0 }, children: arrowFor(shown) }),
+            shown.label
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, fontWeight: 500, color: C.mute, marginTop: 2 }, children: [
-            c.vol,
+          variants && variants.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 6, marginTop: 8, overflowX: "auto", scrollbarWidth: "none" }, children: variants.map((v) => {
+            const on = v.id === shown.id;
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setSelId(v.id), className: "tap", style: { flexShrink: 0, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.ink : "transparent", color: on ? "#fff" : C.ink, borderRadius: 10, padding: "5px 11px", fontSize: 13, fontWeight: 700, cursor: "pointer" }, children: v.variantLabel }, v.id);
+          }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, fontWeight: 500, color: C.mute, marginTop: variants && variants.length > 1 ? 8 : 2 }, children: [
+            shown.vol,
             " ",
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Vol." })
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 24, fontWeight: 700, fontFamily: MONO, color: low ? C.mute : C.ink, flexShrink: 0 }, children: [
-          low ? "<1" : c.pct,
+          low ? "<1" : shown.pct,
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "%" })
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onPredict(c, 0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onPredict(shown, 0), className: "tap btn-soft", style: { flex: 1, border: "none", background: shown.yesColor || C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", boxShadow: SOFT }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predict" }),
           " ",
           labelYes
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onPredict(c, 1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onPredict(shown, 1), className: "tap btn-soft", style: { flex: 1, border: "none", background: shown.noColor || C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", boxShadow: SOFT }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predict" }),
           " ",
           labelNo
@@ -25810,9 +25833,31 @@ input,button{font-family:inherit}
       ] })
     ] });
   }
-  function AllContractsSheet({ mk, contracts, onBack, onDone }) {
+  function groupContracts(contracts) {
+    const out = [];
+    const byKey = {};
+    for (const c of contracts) {
+      const m = String(c.label).match(/\d+(?:\.\d+)?/);
+      if (!m) {
+        out.push({ head: c, variants: null });
+        continue;
+      }
+      const key = c.label.replace(m[0], "\0");
+      const entry = { ...c, variantLabel: m[0] };
+      if (byKey[key]) {
+        byKey[key].variants.push(entry);
+        continue;
+      }
+      const group = { head: entry, variants: [entry] };
+      byKey[key] = group;
+      out.push(group);
+    }
+    return out.map((g) => g.variants && g.variants.length > 1 ? g : { head: g.head, variants: null });
+  }
+  function AllContractsSheet({ mk, contracts, onBack, onDone, grouped }) {
     const [closing, setClosing] = (0, import_react4.useState)(false);
     const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
+    const rows = (0, import_react4.useMemo)(() => grouped ? groupContracts(contracts) : contracts.map((c) => ({ head: c, variants: null })), [contracts, grouped]);
     const arrowFor = (0, import_react4.useMemo)(() => contractArrowFn(contracts), [contracts]);
     const predict = (c, side) => setLocalTrade({ m: contractToMarket(mk, c), side });
     const goBack = () => setClosing(true);
@@ -25822,7 +25867,7 @@ input,button{font-family:inherit}
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 20, fontWeight: 800 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Select a contract" }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: contracts.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContractRow, { c, arrowFor, onPredict: predict }, c.id)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: rows.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContractRow, { c: g.head, variants: g.variants, arrowFor, onPredict: predict }, g.head.id)) }),
       localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
         setLocalTrade(null);
         onDone && onDone(...a);
@@ -25842,6 +25887,8 @@ input,button{font-family:inherit}
     };
     const release = () => setPressed(false);
     const title = isUpDown ? `${mk.assetLabel} Up or Down - ${mk.durationLabel}` : mk.q;
+    const showLive = isUpDown || mk.isLiveGame && !mk.gameEnded;
+    const liveTime = isUpDown ? mk.startMs ? fmtSlotTime(mk.startMs) : "" : mk.startMs ? fmtSlotTime(mk.startMs) : "";
     const rows = isUpDown ? [
       { label: "Up", pct: Math.round(mk.upPct), binary: true, side: "Up" },
       { label: "Down", pct: Math.round(100 - mk.upPct), binary: true, side: "Down" }
@@ -25856,13 +25903,12 @@ input,button{font-family:inherit}
         onPointerCancel: release,
         style: { background: C.card, borderRadius: 25, padding: 16, border: `1px solid ${C.line}`, minHeight: 210, overflow: "hidden", cursor: openable ? "pointer" : "default", userSelect: "none", transform: pressed ? "scale(.97)" : "scale(1)", opacity: pressed ? 0.85 : 1, transition: "transform .12s, opacity .12s" },
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, alignItems: "center", marginBottom: isUpDown ? 4 : 12 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u20BF" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0, fontSize: 18, fontWeight: 600, lineHeight: 1.22, letterSpacing: -0.3, paddingTop: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: title })
-          ] }),
-          isUpDown && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: C.down, fontWeight: 700, marginBottom: 12 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 6, height: 6, borderRadius: 3, background: C.down, animation: "blink 1.2s infinite" } }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live now" })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 600, lineHeight: 1.22, letterSpacing: -0.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: title }),
+              showLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 5 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: liveTime }) })
+            ] })
           ] }),
           rows.map((rw, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 16, fontWeight: 600, fontFamily: MONO, display: "flex", alignItems: "center", gap: 6, minWidth: 0, overflow: "hidden", flex: 1 }, children: rw.px !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
@@ -26182,28 +26228,50 @@ input,button{font-family:inherit}
       const team = sportsTeams.find((t) => t.name === label);
       return { label, pct: yesPct, mkt: mk, tokenId, noTokenId, conditionId: mk.conditionId, vol: fmtVol(mk.volume || mk.volumeNum || 0), icon: team?.logo || mk.icon || mk.image || "", abbr: team?.abbreviation || "", ordering: team?.ordering || null };
     }).sort((a, b) => b.pct - a.pct).map((c, i) => ({ ...c, id: base.id + "-c" + i }));
-    const looksLikeMoneyline = contracts.length === 2 || contracts.length === 3 && contracts.some((c) => c.label.toLowerCase() === "draw");
-    const isSports = looksLikeMoneyline && (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase()));
-    if (isSports) return { ...base, rows, contracts, isSports: true, slug: ev.slug, gameId: ev.gameId || null, isLiveGame: ev.live === true, gameEnded: !!ev.ended, startMs: ev.startDate ? new Date(ev.startDate).getTime() : null };
+    const isSports = sportsTeams.length === 2 && (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase()));
+    if (isSports) {
+      const teamNames = sportsTeams.map((t) => t.name.toLowerCase());
+      const isMoneyline = (c) => teamNames.includes(c.label.toLowerCase()) || c.label.toLowerCase() === "draw";
+      const moneyline = contracts.filter(isMoneyline);
+      const others = contracts.filter((c) => !isMoneyline(c));
+      if (moneyline.length >= 2) {
+        return { ...base, rows, contracts: moneyline, extraContracts: others, isSports: true, slug: ev.slug, gameId: ev.gameId || null, isLiveGame: ev.live === true, gameEnded: !!ev.ended, startMs: ev.startDate ? new Date(ev.startDate).getTime() : null };
+      }
+    }
     return { ...base, rows, contracts };
   }
   var PM_CACHE = {};
+  var PM_GAMES_CACHE = {};
+  async function pmFetchGames(tagId) {
+    if (PM_GAMES_CACHE[tagId] !== void 0) return PM_GAMES_CACHE[tagId];
+    try {
+      const r = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${tagId}&related_tags=true&active=true&closed=false&order=startDate&ascending=true&limit=100`);
+      if (!r.ok) throw new Error("bad status");
+      const data = await r.json();
+      PM_GAMES_CACHE[tagId] = (Array.isArray(data) ? data : []).map(pmMapEvent).filter(Boolean);
+    } catch (e) {
+      PM_GAMES_CACHE[tagId] = [];
+    }
+    return PM_GAMES_CACHE[tagId];
+  }
   async function pmFetchSub(sub) {
     if (PM_CACHE[sub] !== void 0) return PM_CACHE[sub];
     try {
       if (sub === "Live") {
-        const fetchCat = async (tagId) => {
-          try {
-            const r2 = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${tagId}&related_tags=true&active=true&closed=false&order=volume&ascending=false&limit=15`);
-            if (!r2.ok) throw new Error("bad status");
-            const data2 = await r2.json();
-            return (Array.isArray(data2) ? data2 : []).map(pmMapEvent).filter(Boolean).map((mk) => ({ ...mk, catSub: "Live" }));
-          } catch (e) {
-            return [];
-          }
-        };
-        const [sportsEvs, esportsEvs, upDownCards] = await Promise.all([fetchCat(PM_TAGS.Sports), fetchCat(PM_TAGS.Esports), pmFetchUpDownFeedCards().catch(() => [])]);
-        PM_CACHE[sub] = interleave([...sportsEvs, ...esportsEvs], upDownCards, 3);
+        const [sportsEvs, esportsEvs, upDownCards] = await Promise.all([
+          pmFetchGames(PM_TAGS.Sports),
+          pmFetchGames(PM_TAGS.Esports),
+          pmFetchUpDownFeedCards().catch(() => [])
+        ]);
+        const liveGames = [...sportsEvs, ...esportsEvs].filter((mk) => mk.isLiveGame && !mk.gameEnded).map((mk) => ({ ...mk, catSub: "Live" }));
+        PM_CACHE[sub] = interleave(liveGames, upDownCards, 3);
+        return PM_CACHE[sub];
+      }
+      if (sub === "Sports" || sub === "Esports") {
+        const games = await pmFetchGames(PM_TAGS[sub]);
+        const live = games.filter((m) => m.isLiveGame && !m.gameEnded);
+        const rest = games.filter((m) => !(m.isLiveGame && !m.gameEnded));
+        PM_CACHE[sub] = [...live, ...rest].map((mk) => ({ ...mk, catSub: sub }));
         return PM_CACHE[sub];
       }
       const url = sub === "All" ? "https://gamma-api.polymarket.com/events?active=true&closed=false&order=volume&ascending=false&limit=20" : `https://gamma-api.polymarket.com/events?tag_id=${PM_TAGS[sub]}&related_tags=true&active=true&closed=false&order=volume&ascending=false&limit=20`;
@@ -26779,7 +26847,7 @@ input,button{font-family:inherit}
     if (!conditionId) return null;
     if (HOLDERS_CACHE[conditionId] !== void 0) return HOLDERS_CACHE[conditionId];
     try {
-      const r = await fetch(`https://data-api.polymarket.com/holders?market=${conditionId}&limit=5`);
+      const r = await fetch(`https://data-api.polymarket.com/holders?market=${conditionId}&limit=50`);
       if (!r.ok) throw new Error("bad status");
       const data = await r.json();
       HOLDERS_CACHE[conditionId] = Array.isArray(data) ? data : null;
@@ -27246,11 +27314,18 @@ input,button{font-family:inherit}
     );
   }
   var IconOnlyBtn = ({ children, onClick }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap", style: { border: "none", background: "none", padding: 4, margin: -4, display: "grid", placeItems: "center", cursor: "pointer" }, children });
-  function TopHoldersSection({ conditionId, yesTokenId, noTokenId, hideTitle }) {
-    const [data, setData] = (0, import_react4.useState)(null);
+  var HolderAvatar = ({ h, size = 32 }) => {
+    const src = h.profileImageOptimized || h.profileImage;
+    const [broken, setBroken] = (0, import_react4.useState)(false);
+    if (!src || broken) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DefaultAvatar, { seed: h.proxyWallet || h.name || h.pseudonym || "", size });
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src, alt: "", onError: () => setBroken(true), style: { width: size, height: size, borderRadius: "50%", flexShrink: 0, objectFit: "cover" } });
+  };
+  function TopHoldersSection({ conditionId, yesTokenId, noTokenId, hideTitle, yesLabel = "Yes Holders", noLabel = "No Holders" }) {
+    const [data, setData] = (0, import_react4.useState)(() => HOLDERS_CACHE[conditionId] ?? null);
     (0, import_react4.useEffect)(() => {
-      if (!IS_H5 || !conditionId) {
-        setData(null);
+      if (!IS_H5 || !conditionId) return;
+      if (HOLDERS_CACHE[conditionId] !== void 0) {
+        setData(HOLDERS_CACHE[conditionId]);
         return;
       }
       let cancelled = false;
@@ -27264,21 +27339,37 @@ input,button{font-family:inherit}
     if (!data || !data.length) return null;
     const yesGroup = data.find((g) => g.token === yesTokenId);
     const noGroup = data.find((g) => g.token === noTokenId);
-    const renderList = (holders) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { border: `1px solid ${C.line}`, borderRadius: 24, padding: "4px 14px" }, children: holders.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 0" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 16, fontSize: 13, color: C.mute, flexShrink: 0, textAlign: "center" }, children: i + 1 }),
-      h.profileImageOptimized || h.profileImage ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: h.profileImageOptimized || h.profileImage, alt: "", style: { width: 32, height: 32, borderRadius: "50%", flexShrink: 0, objectFit: "cover" } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 32, height: 32, borderRadius: "50%", background: C.soft, flexShrink: 0 } }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1, minWidth: 0, fontSize: 15, fontWeight: 700, color: C.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: h.displayUsernamePublic !== false ? h.name || h.pseudonym || "Anon" : "Anon" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, fontWeight: 700, color: C.up, flexShrink: 0 }, children: fmtHolderAmt(h.amount) })
-    ] }, (h.proxyWallet || "") + i)) });
+    const TOP_N = 10;
+    const renderList = (holders) => {
+      const top = holders.slice(0, TOP_N);
+      const rest = holders.slice(TOP_N);
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { border: `1px solid ${C.line}`, borderRadius: 24, padding: "4px 14px" }, children: [
+        top.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 0" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 18, fontSize: 13, color: C.mute, flexShrink: 0, textAlign: "center" }, children: i + 1 }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HolderAvatar, { h }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1, minWidth: 0, fontSize: 15, fontWeight: 700, color: C.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: h.displayUsernamePublic !== false ? h.name || h.pseudonym || "Anon" : "Anon" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, fontWeight: 700, color: C.up, flexShrink: 0 }, children: fmtHolderAmt(h.amount) })
+        ] }, (h.proxyWallet || "") + i)),
+        rest.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "12px 0", borderTop: `1px dashed ${C.line}` }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", alignItems: "center" }, children: rest.slice(0, 5).map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginLeft: i === 0 ? 0 : -12, border: "2px solid #fff", borderRadius: "50%", display: "flex" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HolderAvatar, { h, size: 30 }) }, (h.proxyWallet || "") + i)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 15, fontWeight: 700, color: C.ink, flexShrink: 0 }, children: [
+            "+",
+            rest.length,
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Users" })
+          ] })
+        ] })
+      ] });
+    };
     if (!yesGroup?.holders?.length && !noGroup?.holders?.length) return null;
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 26, minWidth: 0 }, children: [
       !hideTitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Top Traders" }) }),
       yesGroup?.holders?.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 700, color: C.mute, marginBottom: 6 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Yes Holders" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 700, color: C.mute, marginBottom: 6 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: yesLabel }) }),
         renderList(yesGroup.holders)
       ] }),
       noGroup?.holders?.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: yesGroup?.holders?.length ? 16 : 0 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 700, color: C.mute, marginBottom: 6 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "No Holders" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 700, color: C.mute, marginBottom: 6 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: noLabel }) }),
         renderList(noGroup.holders)
       ] })
     ] });
@@ -27336,16 +27427,17 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Use AI analysis" })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopHoldersSection, { conditionId: mk.conditionId, yesTokenId: mk.yesTokenId, noTokenId: mk.noTokenId })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopHoldersSection, { conditionId: mk.conditionId, yesTokenId: mk.yesTokenId, noTokenId: mk.noTokenId }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 88, flexShrink: 0 } })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", gap: 10, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, borderTop: `1px solid ${C.line}` }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: 0, bottom: 0, display: "flex", gap: 10, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, background: "transparent", pointerEvents: "none", zIndex: 5 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", pointerEvents: "auto", boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Yes" }),
           " ",
           Math.round(mk.yesPct),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12 }, children: "%" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", pointerEvents: "auto", boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "No" }),
           " ",
           Math.round(100 - mk.yesPct),
@@ -27433,16 +27525,7 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: "\u20BF" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }),
-            isLive && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: C.down, fontWeight: 700, marginTop: 6 }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 6, height: 6, borderRadius: 3, background: C.down, animation: "blink 1.2s infinite" } }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live now" }),
-              " ",
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO }, children: [
-                String(secsLeft / 60 | 0).padStart(2, "0"),
-                ":",
-                String(secsLeft % 60).padStart(2, "0")
-              ] })
-            ] })
+            isLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 6 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { mono: true, time: `${String(secsLeft / 60 | 0).padStart(2, "0")}:${String(secsLeft % 60).padStart(2, "0")}` }) })
           ] })
         ] }),
         curPrice != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 4 }, children: [
@@ -27498,17 +27581,18 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Use AI analysis" })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopHoldersSection, { conditionId: mk.conditionId, yesTokenId: mk.upTokenId, noTokenId: mk.downTokenId })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopHoldersSection, { conditionId: mk.conditionId, yesTokenId: mk.upTokenId, noTokenId: mk.downTokenId, yesLabel: "Up Holders", noLabel: "Down Holders" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 88, flexShrink: 0 } })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", gap: 10, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, borderTop: `1px solid ${C.line}` }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: 0, bottom: 0, display: "flex", gap: 10, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, background: "transparent", pointerEvents: "none", zIndex: 5 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", pointerEvents: "auto", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
           "\u2197 ",
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Up" }),
           " ",
           Math.round(mk.upPct),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12 }, children: "%" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", pointerEvents: "auto", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
           "\u2198 ",
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Down" }),
           " ",
@@ -27571,8 +27655,10 @@ input,button{font-family:inherit}
     const finalColors = (0, import_react4.useMemo)(() => resolveTeamColors(top3.map((c) => teamColors[c.id] || null), KLINE_COLORS), [top3, teamColors]);
     const colorFor = (c, i) => finalColors[i] || KLINE_COLORS[i];
     const chartItems = (0, import_react4.useMemo)(() => top3.map((c, i) => ({ pct: c.pct, color: colorFor(c, i), tokenId: c.tokenId, label: c.abbr || c.label })), [moneyline, teamColors]);
-    const subArrowFor = (0, import_react4.useMemo)(() => contractArrowFn(subMarkets), [subMarkets]);
-    const visibleSub = subMarkets.slice(0, 5);
+    const allSub = (0, import_react4.useMemo)(() => [...mk.extraContracts || [], ...subMarkets], [mk.extraContracts, subMarkets]);
+    const subGroups = (0, import_react4.useMemo)(() => groupContracts(allSub), [allSub]);
+    const subArrowFor = (0, import_react4.useMemo)(() => contractArrowFn(allSub), [allSub]);
+    const visibleSub = subGroups.slice(0, 5);
     const predictSub = (c, side) => setLocalTrade({ m: contractToMarket(mk, c), side });
     const predictMoneyline = (c) => setLocalTrade({ m: contractToMarket(mk, { ...c, outLabels: ["Yes", "No"] }), side: 0 });
     const goBack = () => setClosing(true);
@@ -27601,10 +27687,7 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }) })
         ] }),
         mk.startMs && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { fontSize: 12, fontWeight: 500, color: C.mute, marginBottom: 10 }, children: fmtGameTime(mk.startMs) }),
-        mk.isLiveGame && !gameEnded && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: C.down, fontWeight: 700, marginBottom: 10 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 6, height: 6, borderRadius: 3, background: C.down, animation: "blink 1.2s infinite" } }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live now" })
-        ] }),
+        mk.isLiveGame && !gameEnded && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: mk.startMs ? fmtSlotTime(mk.startMs) : "" }) }),
         teams.length === 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 18, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, minWidth: 0 }, children: [
             teams[0].icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: teams[0].icon, alt: "", style: { width: 44, height: 44, borderRadius: "50%", objectFit: "cover", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Team, { n: teams[0].label, size: 44 }),
@@ -27631,10 +27714,10 @@ input,button{font-family:inherit}
             }) })
           ] })
         ] }),
-        subMarkets.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+        subGroups.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Select a contract" }) }),
-          visibleSub.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContractRow, { c, arrowFor: subArrowFor, onPredict: predictSub }, c.id)),
-          subMarkets.length > 5 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { onClick: () => setShowAllSheet(true), className: "tap", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "14px 0", minWidth: 0, cursor: "pointer" }, children: [
+          visibleSub.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContractRow, { c: g.head, variants: g.variants, arrowFor: subArrowFor, onPredict: predictSub }, g.head.id)),
+          subGroups.length > 5 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { onClick: () => setShowAllSheet(true), className: "tap", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "14px 0", minWidth: 0, cursor: "pointer" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 10, fontWeight: 700, fontSize: 15, minWidth: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { width: 32, height: 32, borderRadius: 11, background: C.soft, display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexShrink: 0 }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 3, height: 3, borderRadius: 2, background: C.ink2 } }),
@@ -27644,7 +27727,7 @@ input,button{font-family:inherit}
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "View all" }),
                 " ",
-                subMarkets.length,
+                subGroups.length,
                 " ",
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "contracts" })
               ] })
@@ -27678,9 +27761,10 @@ input,button{font-family:inherit}
             return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTrFilter(c.id), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.filterOn : C.filterOff, borderRadius: 14, padding: "6px 13px", fontSize: 14, fontWeight: 550, color: on ? "#fff" : C.mute, whiteSpace: "nowrap", cursor: "pointer" }, children: c.abbr || c.label }, c.id);
           }) }),
           selHolder && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopHoldersSection, { conditionId: selHolder.conditionId, yesTokenId: selHolder.tokenId, noTokenId: selHolder.noTokenId, hideTitle: true })
-        ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 88, flexShrink: 0 } })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flexShrink: 0, display: "flex", gap: 8, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, borderTop: `1px solid ${C.line}` }, children: [teams[0], drawContract, teams[1]].filter(Boolean).map((c) => {
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, bottom: 0, display: "flex", gap: 8, padding: "12px 16px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, background: "transparent", pointerEvents: "none", zIndex: 5 }, children: [teams[0], drawContract, teams[1]].filter(Boolean).map((c) => {
         const isDraw = c.label.toLowerCase() === "draw";
         const i = moneyline.findIndex((x) => x.id === c.id);
         return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predictMoneyline(c), className: "tap btn-soft", style: { flex: 1, border: isDraw ? `1px solid ${C.line}` : "none", background: isDraw ? "transparent" : colorFor(c, i), color: isDraw ? C.ink : "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", boxShadow: isDraw ? "none" : "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
@@ -27694,7 +27778,7 @@ input,button{font-family:inherit}
         setLocalTrade(null);
         onDone && onDone(...a);
       } }, localTrade.m.id + "-" + localTrade.side),
-      showAllSheet && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllContractsSheet, { mk, contracts: subMarkets, onBack: () => setShowAllSheet(false), onDone })
+      showAllSheet && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllContractsSheet, { mk, contracts: allSub, grouped: true, onBack: () => setShowAllSheet(false), onDone })
     ] });
   }
   function PredMarket({ mk, onBack, onToast, onDone }) {
@@ -29489,11 +29573,13 @@ input,button{font-family:inherit}
       "Top Traders": "\u9876\u7EA7\u4EA4\u6613\u8005",
       "Yes Holders": '\u6301\u6709"\u662F"',
       "No Holders": '\u6301\u6709"\u5426"',
+      "Up Holders": "\u770B\u6DA8\u6301\u4ED3",
+      "Down Holders": "\u770B\u8DCC\u6301\u4ED3",
       "Up": "\u4E0A\u6DA8",
       "Down": "\u4E0B\u8DCC",
-      "Live now": "\u8FDB\u884C\u4E2D",
       "Target": "\u76EE\u6807\u4EF7",
       "Past": "\u5386\u53F2",
+      "Users": "\u7528\u6237",
       "Swipe to Predict Up": "\u6ED1\u52A8\u9884\u6D4B \u4E0A\u6DA8",
       "Swipe to Predict Down": "\u6ED1\u52A8\u9884\u6D4B \u4E0B\u8DCC",
       "Waiting for price data\u2026": "\u7B49\u5F85\u4EF7\u683C\u6570\u636E\u2026",
