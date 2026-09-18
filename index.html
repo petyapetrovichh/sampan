@@ -27124,14 +27124,24 @@ input,button{font-family:inherit}
   function useThrottledValue(value, ms) {
     const [out, setOut] = (0, import_react4.useState)(value);
     const latest = (0, import_react4.useRef)(value);
+    const lastEmit = (0, import_react4.useRef)(0);
+    const timer = (0, import_react4.useRef)(null);
     (0, import_react4.useEffect)(() => {
       latest.current = value;
-    }, [value]);
-    (0, import_react4.useEffect)(() => {
-      setOut(latest.current);
-      const iv = setInterval(() => setOut(latest.current), ms);
-      return () => clearInterval(iv);
-    }, [ms]);
+      const since = Date.now() - lastEmit.current;
+      if (since >= ms) {
+        lastEmit.current = Date.now();
+        setOut(value);
+        return;
+      }
+      if (timer.current) return;
+      timer.current = setTimeout(() => {
+        timer.current = null;
+        lastEmit.current = Date.now();
+        setOut(latest.current);
+      }, ms - since);
+    }, [value, ms]);
+    (0, import_react4.useEffect)(() => () => clearTimeout(timer.current), []);
     return out;
   }
   function useSmoothedValue(value, factor = 0.12) {
@@ -27197,17 +27207,27 @@ input,button{font-family:inherit}
       incoming != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, lineHeight: "1.3em", transform: `translateY(${newY})`, transition }, children: incoming })
     ] });
   }
-  var OdometerText = ({ text }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex" }, children: [...text].map((ch, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerChar, { ch }, i)) });
+  var OdometerText = ({ text }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex", alignItems: "baseline" }, children: [...text].map((ch, i) => /[0-9]/.test(ch) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerChar, { ch }, i) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", height: "1.3em", lineHeight: "1.3em" }, children: ch }, i)) });
   function UpDownChart({ pts, target, h = 170, onScrub, spanStartMs, spanEndMs }) {
     const [dragMs, setDragMs] = (0, import_react4.useState)(null);
     const drawRef = (0, import_react4.useRef)(null);
-    const n = pts.length;
     const spanMs = Math.max(1, spanEndMs - spanStartMs);
-    const xOf = (t) => Math.max(0, Math.min(100, (t - spanStartMs) / spanMs * 100));
+    const xOf = (t) => (t - spanStartMs) / spanMs * 100;
+    const visPts = (0, import_react4.useMemo)(() => {
+      const inside = pts.filter((p) => p.t >= spanStartMs);
+      const firstInside = pts.findIndex((p) => p.t >= spanStartMs);
+      if (firstInside > 0) {
+        const a = pts[firstInside - 1], b = pts[firstInside];
+        const f = (spanStartMs - a.t) / Math.max(1, b.t - a.t);
+        inside.unshift({ t: spanStartMs, p: a.p + (b.p - a.p) * f });
+      }
+      return inside;
+    }, [pts, spanStartMs]);
+    const n = visPts.length;
     const nearestIdx = (ms) => {
       let bestI = n - 1, bestD = Infinity;
       for (let i = 0; i < n; i++) {
-        const dd = Math.abs(pts[i].t - ms);
+        const dd = Math.abs(visPts[i].t - ms);
         if (dd < bestD) {
           bestD = dd;
           bestI = i;
@@ -27227,8 +27247,8 @@ input,button{font-family:inherit}
       onScrub && onScrub(null);
     };
     const dragIdx = dragMs == null ? null : nearestIdx(dragMs);
-    const last = pts[n - 1]?.p;
-    const rawSpan = n > 1 ? Math.max(...pts.map((p) => p.p)) - Math.min(...pts.map((p) => p.p)) : 0;
+    const last = visPts[n - 1]?.p;
+    const rawSpan = n > 1 ? Math.max(...visPts.map((p) => p.p)) - Math.min(...visPts.map((p) => p.p)) : 0;
     const halfSpan = Math.max(rawSpan * 0.9, (last || 1) * 6e-4, 1);
     const smoothCenter = useSmoothedValue(last, 0.08);
     const center = smoothCenter ?? last ?? 0;
@@ -27238,7 +27258,7 @@ input,button{font-family:inherit}
     const targetAbove = target != null && target > yMax;
     const path = (0, import_react4.useMemo)(() => {
       if (n < 2) return "";
-      const X2 = (i) => xOf(pts[i].t), Y = (i) => yPx(pts[i].p);
+      const X2 = (i) => xOf(visPts[i].t), Y = (i) => yPx(visPts[i].p);
       let d = `M ${X2(0)} ${Y(0)}`;
       for (let i = 0; i < n - 1; i++) {
         const xMid = (X2(i) + X2(i + 1)) / 2, yMid = (Y(i) + Y(i + 1)) / 2;
@@ -27246,21 +27266,33 @@ input,button{font-family:inherit}
       }
       d += ` L ${X2(n - 1)} ${Y(n - 1)}`;
       return d;
-    }, [pts, yMin, yMax, spanStartMs, spanMs]);
+    }, [visPts, yMin, yMax, spanStartMs, spanMs]);
     const effIdx = dragIdx == null ? n - 1 : dragIdx;
-    const effX = n ? xOf(pts[effIdx].t) : 100;
-    const effY = n ? yPx(pts[effIdx].p) : h / 2;
-    const effP = n ? pts[effIdx].p : last;
+    const effX = n ? xOf(visPts[effIdx].t) : 100;
+    const effY = n ? yPx(visPts[effIdx].p) : h / 2;
+    const effP = n ? visPts[effIdx].p : last;
     const fmtP = (v) => "$" + v.toLocaleString(void 0, { maximumFractionDigits: v < 10 ? 4 : 2 });
     const fmtClock = (ms) => {
       const dt = new Date(ms);
       const p = (v) => String(v).padStart(2, "0");
       return `${p(dt.getHours())}:${p(dt.getMinutes())}:${p(dt.getSeconds())}`;
     };
+    const TICK_SEC = 10;
+    const xTicks = [];
+    for (let t = Math.ceil(spanStartMs / (TICK_SEC * 1e3)) * TICK_SEC * 1e3; t <= spanEndMs; t += TICK_SEC * 1e3) xTicks.push(t);
+    const yStep = (() => {
+      const rough = (yMax - yMin) / 3;
+      const mag = Math.pow(10, Math.floor(Math.log10(rough || 1)));
+      return [1, 2, 5, 10].map((m) => m * mag).find((v) => v >= rough) || mag;
+    })();
+    const yTicks = [];
+    for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) yTicks.push(Number(v.toFixed(8)));
+    const yEdges = yTicks.length >= 2 ? [yTicks[0], yTicks[yTicks.length - 1]] : yTicks;
+    const targetY = targetOnScreen ? yPx(target) : targetAbove ? 12 : h - 14;
     (0, import_react4.useEffect)(() => {
-      if (dragIdx != null) onScrub && onScrub(pts[dragIdx]?.p);
+      if (dragIdx != null) onScrub && onScrub(visPts[dragIdx]?.p);
     }, [dragIdx]);
-    const GLIDE = "top .15s linear, left .15s linear";
+    const GLIDE = "top .12s linear";
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
       {
@@ -27276,11 +27308,11 @@ input,button{font-family:inherit}
         style: { position: "relative", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", cursor: "pointer" },
         children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h, overflow: "visible" }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "visible" }, children: [
-              targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(target), y2: yPx(target), stroke: C.ink, strokeWidth: "1", strokeDasharray: "4 4", vectorEffect: "non-scaling-stroke" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "hidden" }, children: [
+              yEdges.map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(v), y2: yPx(v), stroke: C.line, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }, "g" + v)),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: path, fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
               dragIdx != null && n > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: (() => {
-                const X2 = (i) => xOf(pts[i].t), Y = (i) => yPx(pts[i].p);
+                const X2 = (i) => xOf(visPts[i].t), Y = (i) => yPx(visPts[i].p);
                 let d = `M ${X2(0)} ${Y(0)}`;
                 for (let i = 0; i < dragIdx; i++) {
                   const xMid = (X2(i) + X2(i + 1)) / 2, yMid = (Y(i) + Y(i + 1)) / 2;
@@ -27291,26 +27323,24 @@ input,button{font-family:inherit}
               })(), fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
             ] }),
             dragMs != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${effX}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none", transition: "left .15s linear" } }, "crosshair"),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${effX}%`, top: effY, transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible", transition: GLIDE }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: dragMs == null ? "100%" : `${effX}%`, top: effY, transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible", transition: dragMs == null ? GLIDE : "none" }, children: [
               dragIdx == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } })
             ] }, "livedot"),
-            target != null && !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 4, [targetAbove ? "top" : "bottom"]: 4, display: "flex", alignItems: "center", gap: 4, background: C.soft, borderRadius: 999, padding: "3px 9px", fontSize: 11, fontWeight: 700, color: C.ink, pointerEvents: "none" }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191\u2191" : "\u2193\u2193" })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, top: effY, height: 0, borderTop: `1px dashed ${KLINE_COLORS[0]}`, opacity: 0.75, pointerEvents: "none", transition: dragMs == null ? "top .12s linear" : "none" } }),
+            target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: 0, top: targetY, height: 0, pointerEvents: "none", transition: "top .15s linear" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, top: 0, borderTop: `1px dashed ${C.mute}`, opacity: 0.8 } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 4, background: C.soft, borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 700, color: C.ink, whiteSpace: "nowrap" }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
+                !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191" : "\u2193" })
+              ] })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, right: 0, transition: "top .15s linear" }, children: fmtP(yMax) }),
-              targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(target), right: 0, transform: "translateY(-50%)", color: C.ink, transition: GLIDE }, children: fmtP(target) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: effY, right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700, transition: GLIDE }, children: fmtP(effP) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: 0, right: 0, transition: "bottom .15s linear" }, children: fmtP(yMin) })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden" }, children: [
+              yTicks.map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtP(v) }, v)),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: effY, right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700, background: "#fff", transition: dragMs == null ? GLIDE : "none" }, children: fmtP(effP) })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginRight: KCHART_GUTTER, display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: MONO, color: C.mute, marginTop: 6 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: fmtClock(spanStartMs) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: fmtClock(spanStartMs + spanMs / 2) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: fmtClock(spanEndMs) })
-          ] })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden" }, children: xTicks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${xOf(t)}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: fmtClock(t) }, t)) })
         ]
       }
     );
@@ -27838,7 +27868,30 @@ input,button{font-family:inherit}
     const shownPriceRaw = scrubPrice == null ? livePrice : scrubPrice;
     const shownPrice = useThrottledValue(shownPriceRaw, 1e3);
     const delta = shownPrice != null && target != null ? shownPrice - target : null;
-    const predict = (side) => setLocalTrade({ m: upDownToMarket(initialMk), side });
+    const [liveUpPct, setLiveUpPct] = (0, import_react4.useState)(null);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !initialMk.upTokenId) return;
+      let cancelled = false;
+      const load = async () => {
+        try {
+          const r = await fetch(`https://clob.polymarket.com/midpoint?token_id=${initialMk.upTokenId}`);
+          if (!r.ok) throw new Error("bad status");
+          const d = await r.json();
+          const mid = parseFloat(d?.mid);
+          if (!cancelled && !isNaN(mid)) setLiveUpPct(Math.round(mid * 100));
+        } catch (e) {
+        }
+      };
+      load();
+      const iv = setInterval(load, 8e3);
+      return () => {
+        cancelled = true;
+        clearInterval(iv);
+      };
+    }, [initialMk.upTokenId]);
+    const upPct = liveUpPct != null ? liveUpPct : initialMk.upPct;
+    const tradeMarket = (0, import_react4.useMemo)(() => upDownToMarket({ ...initialMk, upPct }), [initialMk, upPct]);
+    const predict = (side) => setLocalTrade({ side });
     const fmtCountdown = (sec) => {
       const hh = Math.floor(sec / 3600), mm = Math.floor(sec % 3600 / 60), ss = sec % 60;
       const p = (v) => String(v).padStart(2, "0");
@@ -27894,8 +27947,8 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Past" }),
             pastOutcomes.slice(0, 3).reverse().map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 20, height: 20, borderRadius: 10, background: p.resolvedUp ? C.up : C.down, display: "grid", placeItems: "center", color: "#fff", fontSize: 12 }, children: p.resolvedUp ? "\u2197" : "\u2198" }, p.id))
           ] }),
-          allSlots.map((sl) => {
-            const live = sl.startMs <= now && now < sl.endMs;
+          allSlots.map((sl, si) => {
+            const live = si === 0 && sl.startMs <= now && now < sl.endMs;
             const on = sl.id === selectedId;
             return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSelectedId(sl.id), className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 6, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.ink : "transparent", color: on ? "#fff" : C.ink, borderRadius: 14, padding: "7px 12px", fontSize: 14, fontWeight: 700, cursor: "pointer" }, children: [
               live && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", width: 6, height: 6, flexShrink: 0 }, children: [
@@ -27933,21 +27986,21 @@ input,button{font-family:inherit}
           "\u2197 ",
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Up" }),
           " ",
-          Math.round(mk.upPct),
+          Math.round(upPct),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12 }, children: "%" })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predict(1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", pointerEvents: "auto", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
           "\u2198 ",
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Down" }),
           " ",
-          Math.round(100 - mk.upPct),
+          Math.round(100 - upPct),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12 }, children: "%" })
         ] })
       ] }),
-      localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
+      localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: tradeMarket, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
         setLocalTrade(null);
         onDone && onDone(...a);
-      } }, localTrade.m.id + "-" + localTrade.side)
+      } }, tradeMarket.id + "-" + localTrade.side)
     ] });
   }
   function renderMarketPage(mk, props) {
