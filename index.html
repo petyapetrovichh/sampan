@@ -27187,10 +27187,17 @@ input,button{font-family:inherit}
   async function pmFetchUpDownPool() {
     if (PM_UPDOWN_POOL) return PM_UPDOWN_POOL;
     try {
-      const r = await fetch(`https://gamma-api.polymarket.com/series?limit=200&closed=false`);
-      if (!r.ok) throw new Error("bad status");
-      const data = await r.json();
-      PM_UPDOWN_POOL = (Array.isArray(data) ? data : []).filter((s) => /\bup or down\b/i.test(s.title || ""));
+      const pages = await Promise.all([0, 200, 400].map(async (offset) => {
+        try {
+          const r = await fetch(`https://gamma-api.polymarket.com/series?limit=200&closed=false&offset=${offset}`);
+          if (!r.ok) throw new Error("bad status");
+          const d = await r.json();
+          return Array.isArray(d) ? d : [];
+        } catch (e) {
+          return [];
+        }
+      }));
+      PM_UPDOWN_POOL = pages.flat().filter((s) => /\bup or down\b/i.test(s.title || ""));
     } catch (e) {
       PM_UPDOWN_POOL = [];
     }
@@ -27208,8 +27215,13 @@ input,button{font-family:inherit}
       return ev;
     }
   }
+  function upDownTitleMatcher(assetLabel) {
+    const ticker = (UPDOWN_SYMBOL[assetLabel] || "").replace(/USDT$/i, "");
+    const alt = ticker && ticker.toLowerCase() !== assetLabel.toLowerCase() ? "|" + ticker : "";
+    return new RegExp("\\b(" + assetLabel + alt + ")\\b.*up or down|up or down.*\\b(" + assetLabel + alt + ")\\b", "i");
+  }
   async function pmFetchUpDownFallback(assetLabel) {
-    const titleRe = new RegExp("^" + assetLabel + "\\s+up or down", "i");
+    const titleRe = upDownTitleMatcher(assetLabel);
     try {
       const r = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${PM_TAGS.Crypto}&related_tags=true&active=true&closed=false&order=volume&ascending=false&limit=500`);
       if (!r.ok) throw new Error("bad status");
@@ -27221,7 +27233,7 @@ input,button{font-family:inherit}
   }
   async function pmFetchUpDown(assetLabel) {
     if (PM_UPDOWN_CACHE[assetLabel] !== void 0) return PM_UPDOWN_CACHE[assetLabel];
-    const titleRe = new RegExp("^" + assetLabel + "\\s+up or down", "i");
+    const titleRe = upDownTitleMatcher(assetLabel);
     try {
       const pool = await pmFetchUpDownPool();
       const matchingSeries = pool.filter((s) => titleRe.test(s.title || ""));
