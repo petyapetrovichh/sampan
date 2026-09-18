@@ -27388,7 +27388,7 @@ input,button{font-family:inherit}
         children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h, overflow: "visible", marginTop: 24 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "hidden" }, children: [
-              yEdges.map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(v), y2: yPx(v), stroke: C.line, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }, "g" + v)),
+              [...yEdges, ...yTicks].map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(v), y2: yPx(v), stroke: C.line, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }, "g" + v)),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: path, fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
               dragIdx != null && n > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: (() => {
                 const X2 = (i) => xOf(visPts[i].t), Y = (i) => yPx(visPts[i].p);
@@ -27494,9 +27494,42 @@ input,button{font-family:inherit}
       };
       load();
       const iv = setInterval(load, everyMs);
+      let ws;
+      try {
+        ws = new WebSocket("wss://ws-subscriptions-clob.polymarket.com/ws/market");
+        ws.onopen = () => {
+          try {
+            ws.send(JSON.stringify({ type: "market", assets_ids: [upTokenId] }));
+          } catch (e) {
+          }
+        };
+        ws.onmessage = (e) => {
+          if (cancelled) return;
+          try {
+            const msgs = JSON.parse(e.data);
+            for (const m of Array.isArray(msgs) ? msgs : [msgs]) {
+              if (String(m?.asset_id ?? m?.assetId ?? "") !== String(upTokenId)) continue;
+              const bids = m.bids || m.buys, asks = m.asks || m.sells;
+              let v = parseFloat(m.midpoint ?? m.mid ?? m.price);
+              if (isNaN(v) && Array.isArray(bids) && Array.isArray(asks) && bids.length && asks.length) {
+                const bb = Math.max(...bids.map((b) => parseFloat(b.price)).filter((n) => !isNaN(n)));
+                const ba = Math.min(...asks.map((a) => parseFloat(a.price)).filter((n) => !isNaN(n)));
+                if (!isNaN(bb) && !isNaN(ba)) v = (bb + ba) / 2;
+              }
+              if (!isNaN(v) && v > 0 && v < 1) setPct(Math.round(v * 100));
+            }
+          } catch (err) {
+          }
+        };
+      } catch (e) {
+      }
       return () => {
         cancelled = true;
         clearInterval(iv);
+        try {
+          ws && ws.close();
+        } catch (e) {
+        }
       };
     }, [upTokenId, conditionId, enabled, everyMs]);
     return pct;
@@ -28217,7 +28250,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap" }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
               ": ",
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO, fontWeight: 700, display: "inline-block", minWidth: `${targetNumChars}ch`, textAlign: "left", fontVariantNumeric: "tabular-nums", fontFeatureSettings: '"tnum"' }, children: target != null ? "$" + fmtPrice(target) : "$--" })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO, fontWeight: 700, display: "inline-block", minWidth: `${targetNumChars}ch`, textAlign: "center", fontVariantNumeric: "tabular-nums", fontFeatureSettings: '"tnum"' }, children: target != null ? "$" + fmtPrice(target) : "$--" })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] })
