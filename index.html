@@ -24809,13 +24809,13 @@ input,button{font-family:inherit}
     const [bg, fg] = TEAM[n] || [C.soft, C.ink];
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: size, height: size, borderRadius: size * 0.3, background: bg, color: fg, display: "grid", placeItems: "center", fontSize: size * 0.32, fontWeight: 800, flexShrink: 0 }, children: n === "Draw" ? "=" : n === "Up" ? "\u2191" : n === "Down" ? "\u2193" : n.slice(0, 2) });
   };
-  var LiveBadge = ({ time, mono }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, lineHeight: 1.2 }, children: [
+  var LiveBadge = ({ time, mono, countdown }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, lineHeight: 1.2 }, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", width: 16, height: 16, flexShrink: 0 }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", top: 5, left: 5, width: 6, height: 6, borderRadius: 3, background: C.down } }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", top: 5, left: 5, width: 6, height: 6, borderRadius: 3, background: C.down } })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: C.down, fontWeight: 700 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live" }) }),
-    time && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: C.ink, fontWeight: 400, fontFamily: mono ? MONO : void 0 }, children: time })
+    time && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: countdown ? C.down : C.ink, fontWeight: 400, fontFamily: mono ? MONO : void 0 }, children: time })
   ] });
   var AVATAR_BGS = ["#F6DF51", "#8FD5A6", "#9BB8F0", "#F0A6A6", "#C3A6F0", "#F0C58F"];
   var AVATAR_FACES = ["\u25D5\u203F\u25D5", "\u2022\u1D17\u2022", "^_^", "\u2022_\u2022", "\u1D54\u1D25\u1D54", "\xB7\u1D17\xB7"];
@@ -25888,7 +25888,7 @@ input,button{font-family:inherit}
     const release = () => setPressed(false);
     const title = isUpDown ? `${mk.assetLabel} Up or Down - ${mk.durationLabel}` : mk.q;
     const showLive = isUpDown || mk.isLiveGame && !mk.gameEnded;
-    const liveTime = isUpDown ? mk.startMs ? fmtSlotTime(mk.startMs) : "" : mk.startMs ? fmtSlotTime(mk.startMs) : "";
+    const liveTime = !isUpDown && mk.startMs ? fmtSlotTime(mk.startMs) : "";
     const rows = isUpDown ? [
       { label: "Up", pct: Math.round(mk.upPct), binary: true, side: "Up" },
       { label: "Down", pct: Math.round(100 - mk.upPct), binary: true, side: "Down" }
@@ -27085,6 +27085,26 @@ input,button{font-family:inherit}
     const [buf, setBuf] = (0, import_react4.useState)([]);
     const tick = useBinanceLivePrice(symbol, enabled);
     (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !symbol) return;
+      let cancelled = false;
+      (async () => {
+        try {
+          const qs = new URLSearchParams({ symbol, interval: "1s", limit: String(Math.ceil(windowMs / 1e3)) });
+          const r = await fetch(`https://api.binance.com/api/v3/klines?${qs}`);
+          if (!r.ok) throw new Error("bad status");
+          const data = await r.json();
+          if (cancelled || !Array.isArray(data)) return;
+          const seed = data.map((k) => ({ t: k[0], p: parseFloat(k[4]) }));
+          if (seed.length) bufRef.current = seed;
+          setBuf(bufRef.current);
+        } catch (e) {
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [symbol, windowMs]);
+    (0, import_react4.useEffect)(() => {
       if (!tick) return;
       bufRef.current = [...bufRef.current, { t: tick.t * 1e3, p: tick.p }];
       const cutoff = Date.now() - windowMs - 3e3;
@@ -27114,6 +27134,36 @@ input,button{font-family:inherit}
     }, [ms]);
     return out;
   }
+  function useSmoothedValue(value, factor = 0.12) {
+    const [smooth, setSmooth] = (0, import_react4.useState)(value);
+    const targetRef = (0, import_react4.useRef)(value);
+    const smoothRef = (0, import_react4.useRef)(value);
+    (0, import_react4.useEffect)(() => {
+      if (value != null) targetRef.current = value;
+    }, [value]);
+    (0, import_react4.useEffect)(() => {
+      if (smoothRef.current == null && value != null) smoothRef.current = value;
+    }, [value]);
+    (0, import_react4.useEffect)(() => {
+      let raf, alive = true;
+      const step = () => {
+        if (!alive) return;
+        const t = targetRef.current;
+        if (t != null) {
+          if (smoothRef.current == null) smoothRef.current = t;
+          else smoothRef.current += (t - smoothRef.current) * factor;
+          setSmooth(smoothRef.current);
+        }
+        raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+      return () => {
+        alive = false;
+        cancelAnimationFrame(raf);
+      };
+    }, [factor]);
+    return smooth;
+  }
   function OdometerChar({ ch }) {
     const [shown, setShown] = (0, import_react4.useState)(ch);
     const [incoming, setIncoming] = (0, import_react4.useState)(null);
@@ -27141,55 +27191,76 @@ input,button{font-family:inherit}
     }, [ch]);
     const oldY = phase === "end" ? dir > 0 ? "-100%" : "100%" : "0%";
     const newY = phase === "end" ? "0%" : dir > 0 ? "100%" : "-100%";
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", display: "inline-block", width: "1ch", height: "1em", overflow: "hidden", verticalAlign: "bottom" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, transform: `translateY(${oldY})`, transition: "transform .28s cubic-bezier(.3,.7,.4,1)" }, children: shown }),
-      incoming != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, transform: `translateY(${newY})`, transition: "transform .28s cubic-bezier(.3,.7,.4,1)" }, children: incoming })
+    const transition = phase === "idle" ? "none" : "transform .28s cubic-bezier(.3,.7,.4,1)";
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", display: "inline-block", width: "1ch", height: "1.3em", overflow: "hidden", verticalAlign: "bottom" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, lineHeight: "1.3em", transform: `translateY(${oldY})`, transition }, children: shown }),
+      incoming != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, lineHeight: "1.3em", transform: `translateY(${newY})`, transition }, children: incoming })
     ] });
   }
   var OdometerText = ({ text }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex" }, children: [...text].map((ch, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerChar, { ch }, i)) });
   function UpDownChart({ pts, target, h = 170, onScrub, spanStartMs, spanEndMs }) {
-    const [dragIdx, setDragIdx] = (0, import_react4.useState)(null);
+    const [dragMs, setDragMs] = (0, import_react4.useState)(null);
     const drawRef = (0, import_react4.useRef)(null);
     const n = pts.length;
     const spanMs = Math.max(1, spanEndMs - spanStartMs);
     const xOf = (t) => Math.max(0, Math.min(100, (t - spanStartMs) / spanMs * 100));
-    const pick = (clientX) => {
-      const el = drawRef.current;
-      if (!el || !n) return;
-      const r = el.getBoundingClientRect();
-      const frac = r.width > 0 ? Math.max(0, Math.min(1, (clientX - r.left) / r.width)) : 1;
-      const targetMs = spanStartMs + frac * spanMs;
+    const nearestIdx = (ms) => {
       let bestI = n - 1, bestD = Infinity;
       for (let i = 0; i < n; i++) {
-        const dd = Math.abs(pts[i].t - targetMs);
+        const dd = Math.abs(pts[i].t - ms);
         if (dd < bestD) {
           bestD = dd;
           bestI = i;
         }
       }
-      setDragIdx(bestI);
-      onScrub && onScrub(bestI);
+      return bestI;
+    };
+    const pick = (clientX) => {
+      const el = drawRef.current;
+      if (!el || !n) return;
+      const r = el.getBoundingClientRect();
+      const frac = r.width > 0 ? Math.max(0, Math.min(1, (clientX - r.left) / r.width)) : 1;
+      setDragMs(spanStartMs + frac * spanMs);
     };
     const release = () => {
-      setDragIdx(null);
+      setDragMs(null);
       onScrub && onScrub(null);
     };
-    const prices = pts.map((p) => p.p);
-    const vals = target != null ? [...prices, target] : prices;
-    const mn = Math.min(...vals), mx = Math.max(...vals);
-    const pad = (mx - mn) * 0.18 || 1;
-    const yMin = mn - pad, yMax = mx + pad;
-    const yPx = (v) => h - (v - yMin) / (yMax - yMin) * h;
-    const d = pts.map((p) => `${xOf(p.t)},${yPx(p.p)}`).join(" ");
+    const dragIdx = dragMs == null ? null : nearestIdx(dragMs);
     const last = pts[n - 1]?.p;
-    const lastX = n ? xOf(pts[n - 1].t) : 100;
+    const rawSpan = n > 1 ? Math.max(...pts.map((p) => p.p)) - Math.min(...pts.map((p) => p.p)) : 0;
+    const halfSpan = Math.max(rawSpan * 0.9, (last || 1) * 6e-4, 1);
+    const smoothCenter = useSmoothedValue(last, 0.08);
+    const center = smoothCenter ?? last ?? 0;
+    const yMin = center - halfSpan, yMax = center + halfSpan;
+    const yPx = (v) => h - (v - yMin) / (yMax - yMin) * h;
+    const targetOnScreen = target != null && target >= yMin && target <= yMax;
+    const targetAbove = target != null && target > yMax;
+    const path = (0, import_react4.useMemo)(() => {
+      if (n < 2) return "";
+      const X2 = (i) => xOf(pts[i].t), Y = (i) => yPx(pts[i].p);
+      let d = `M ${X2(0)} ${Y(0)}`;
+      for (let i = 0; i < n - 1; i++) {
+        const xMid = (X2(i) + X2(i + 1)) / 2, yMid = (Y(i) + Y(i + 1)) / 2;
+        d += ` Q ${X2(i)} ${Y(i)} ${xMid} ${yMid}`;
+      }
+      d += ` L ${X2(n - 1)} ${Y(n - 1)}`;
+      return d;
+    }, [pts, yMin, yMax, spanStartMs, spanMs]);
     const effIdx = dragIdx == null ? n - 1 : dragIdx;
+    const effX = n ? xOf(pts[effIdx].t) : 100;
+    const effY = n ? yPx(pts[effIdx].p) : h / 2;
+    const effP = n ? pts[effIdx].p : last;
     const fmtP = (v) => "$" + v.toLocaleString(void 0, { maximumFractionDigits: v < 10 ? 4 : 2 });
     const fmtClock = (ms) => {
       const dt = new Date(ms);
       const p = (v) => String(v).padStart(2, "0");
       return `${p(dt.getHours())}:${p(dt.getMinutes())}:${p(dt.getSeconds())}`;
     };
+    (0, import_react4.useEffect)(() => {
+      if (dragIdx != null) onScrub && onScrub(pts[dragIdx]?.p);
+    }, [dragIdx]);
+    const GLIDE = "top .15s linear, left .15s linear";
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
       {
@@ -27204,22 +27275,35 @@ input,button{font-family:inherit}
         onPointerCancel: release,
         style: { position: "relative", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", cursor: "pointer" },
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h, overflow: "visible" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "visible" }, children: [
-              target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(target), y2: yPx(target), stroke: C.ink, strokeWidth: "1", strokeDasharray: "4 4", vectorEffect: "non-scaling-stroke" }),
-              last != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(last), y2: yPx(last), stroke: KLINE_COLORS[0], strokeWidth: "1", strokeDasharray: "4 4", strokeOpacity: ".75", vectorEffect: "non-scaling-stroke" }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: d, fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
+              targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(target), y2: yPx(target), stroke: C.ink, strokeWidth: "1", strokeDasharray: "4 4", vectorEffect: "non-scaling-stroke" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: path, fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
+              dragIdx != null && n > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: (() => {
+                const X2 = (i) => xOf(pts[i].t), Y = (i) => yPx(pts[i].p);
+                let d = `M ${X2(0)} ${Y(0)}`;
+                for (let i = 0; i < dragIdx; i++) {
+                  const xMid = (X2(i) + X2(i + 1)) / 2, yMid = (Y(i) + Y(i + 1)) / 2;
+                  d += ` Q ${X2(i)} ${Y(i)} ${xMid} ${yMid}`;
+                }
+                d += ` L ${X2(dragIdx)} ${Y(dragIdx)}`;
+                return d;
+              })(), fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
             ] }),
-            dragIdx != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(pts[effIdx].t)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }, "crosshair"),
-            last != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${lastX}%`, top: yPx(last), transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible" }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } }),
+            dragMs != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${effX}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none", transition: "left .15s linear" } }, "crosshair"),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${effX}%`, top: effY, transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible", transition: GLIDE }, children: [
+              dragIdx == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } })
             ] }, "livedot"),
+            target != null && !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 4, [targetAbove ? "top" : "bottom"]: 4, display: "flex", alignItems: "center", gap: 4, background: C.soft, borderRadius: 999, padding: "3px 9px", fontSize: 11, fontWeight: 700, color: C.ink, pointerEvents: "none" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191\u2191" : "\u2193\u2193" })
+            ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, right: 0 }, children: fmtP(yMax) }),
-              target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(target), right: 0, transform: "translateY(-50%)", color: C.ink }, children: fmtP(target) }),
-              last != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(last), right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700 }, children: fmtP(last) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: 0, right: 0 }, children: fmtP(yMin) })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, right: 0, transition: "top .15s linear" }, children: fmtP(yMax) }),
+              targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(target), right: 0, transform: "translateY(-50%)", color: C.ink, transition: GLIDE }, children: fmtP(target) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: effY, right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700, transition: GLIDE }, children: fmtP(effP) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: 0, right: 0, transition: "bottom .15s linear" }, children: fmtP(yMin) })
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginRight: KCHART_GUTTER, display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: MONO, color: C.mute, marginTop: 6 }, children: [
@@ -27270,6 +27354,17 @@ input,button{font-family:inherit}
   async function pmFetchUpDown(assetLabel) {
     if (PM_UPDOWN_CACHE[assetLabel] !== void 0) return PM_UPDOWN_CACHE[assetLabel];
     const titleRe = upDownTitleMatcher(assetLabel);
+    const searchFetch = async () => {
+      try {
+        const r = await fetch(`https://gamma-api.polymarket.com/public-search?q=${encodeURIComponent(assetLabel + " up or down")}&limit_per_type=50`);
+        if (!r.ok) throw new Error("bad status");
+        const data = await r.json();
+        const events = data?.events || data?.data?.events || (Array.isArray(data) ? data : []) || [];
+        return events.filter((ev) => titleRe.test(ev.title || ""));
+      } catch (e) {
+        return [];
+      }
+    };
     const fetchList = async (closed) => {
       const qs = closed ? `tag_id=${PM_TAGS.Crypto}&related_tags=true&active=false&closed=true&order=endDate&ascending=false&limit=500` : `tag_id=${PM_TAGS.Crypto}&related_tags=true&active=true&closed=false&order=startDate&ascending=false&limit=500`;
       try {
@@ -27282,7 +27377,15 @@ input,button{font-family:inherit}
       }
     };
     try {
-      const [upcomingEvs, pastEvs] = await Promise.all([fetchList(false), fetchList(true)]);
+      const searched = await searchFetch();
+      const searchedOpen = searched.filter((ev) => !ev.closed);
+      const searchedClosed = searched.filter((ev) => ev.closed);
+      const [tagOpen, tagClosed] = await Promise.all([
+        searchedOpen.length ? Promise.resolve([]) : fetchList(false),
+        searchedClosed.length ? Promise.resolve([]) : fetchList(true)
+      ]);
+      const upcomingEvs = searchedOpen.length ? searchedOpen : tagOpen;
+      const pastEvs = searchedClosed.length ? searchedClosed : tagClosed;
       const result = {
         upcoming: upcomingEvs.map((ev) => pmMapUpDownSlot(ev, assetLabel)).filter(Boolean).sort((a, b) => a.endMs - b.endMs),
         past: pastEvs.slice(0, 3).map((ev) => {
@@ -27696,7 +27799,8 @@ input,button{font-family:inherit}
       const t = setInterval(() => setNow(Date.now()), 1e3);
       return () => clearInterval(t);
     }, []);
-    const windowMs = initialMk.endMs - initialMk.startMs;
+    const rawWindowMs = initialMk.endMs - initialMk.startMs;
+    const windowMs = UPDOWN_WINDOW_MS[updownWindowRank(rawWindowMs)];
     const isDaily = windowMs >= 20 * 60 * 6e4;
     const slotCount = isDaily ? 2 : 6;
     const allSlots = (0, import_react4.useMemo)(() => {
@@ -27704,7 +27808,7 @@ input,button{font-family:inherit}
         ...initialMk,
         id: initialMk.id + "-t" + i,
         startMs: initialMk.startMs + i * windowMs,
-        endMs: initialMk.endMs + i * windowMs
+        endMs: initialMk.startMs + windowMs + i * windowMs
       });
     }, [initialMk, windowMs, slotCount]);
     const mk = allSlots.find((s) => s.id === selectedId) || initialMk;
@@ -27730,8 +27834,8 @@ input,button{font-family:inherit}
     const nowMs = Date.now();
     const spanStartMs = nowMs - 3e4;
     const livePrice = buf.length ? buf[buf.length - 1].p : target != null ? target : null;
-    const [scrubIdx, setScrubIdx] = (0, import_react4.useState)(null);
-    const shownPriceRaw = buf.length ? scrubIdx == null ? livePrice : buf[Math.min(scrubIdx, buf.length - 1)].p : livePrice;
+    const [scrubPrice, setScrubPrice] = (0, import_react4.useState)(null);
+    const shownPriceRaw = scrubPrice == null ? livePrice : scrubPrice;
     const shownPrice = useThrottledValue(shownPriceRaw, 1e3);
     const delta = shownPrice != null && target != null ? shownPrice - target : null;
     const predict = (side) => setLocalTrade({ m: upDownToMarket(initialMk), side });
@@ -27757,7 +27861,7 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: "\u20BF" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { mono: true, time: fmtCountdown(secsLeft) }) })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { mono: true, countdown: true, time: fmtCountdown(secsLeft) }) })
           ] })
         ] }),
         shownPrice != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 10 }, children: [
@@ -27784,7 +27888,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: buf.length >= 2 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UpDownChart, { pts: buf, target, onScrub: setScrubIdx, spanStartMs, spanEndMs: nowMs }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 170, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: buf.length >= 2 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UpDownChart, { pts: buf, target, onScrub: setScrubPrice, spanStartMs, spanEndMs: nowMs }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 170, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 22, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, border: `1px solid ${C.line}`, borderRadius: 14, padding: "7px 12px", fontSize: 14, fontWeight: 700, color: C.ink }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Past" }),
@@ -27795,8 +27899,8 @@ input,button{font-family:inherit}
             const on = sl.id === selectedId;
             return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSelectedId(sl.id), className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 6, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.ink : "transparent", color: on ? "#fff" : C.ink, borderRadius: 14, padding: "7px 12px", fontSize: 14, fontWeight: 700, cursor: "pointer" }, children: [
               live && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", width: 6, height: 6, flexShrink: 0 }, children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 3, background: on ? "#fff" : C.down } }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 3, background: on ? "#fff" : C.down } })
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 3, background: C.down } }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 3, background: C.down } })
               ] }),
               fmtSlotLabel(sl.endMs, sl.endMs - sl.startMs)
             ] }, sl.id);
