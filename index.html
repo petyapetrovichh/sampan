@@ -27080,36 +27080,115 @@ input,button{font-family:inherit}
     }, [symbol, enabled]);
     return tick;
   }
+  function useRollingPriceBuffer(symbol, windowMs = 3e4, enabled = true) {
+    const bufRef = (0, import_react4.useRef)([]);
+    const [buf, setBuf] = (0, import_react4.useState)([]);
+    const tick = useBinanceLivePrice(symbol, enabled);
+    (0, import_react4.useEffect)(() => {
+      if (!tick) return;
+      bufRef.current = [...bufRef.current, { t: tick.t * 1e3, p: tick.p }];
+      const cutoff = Date.now() - windowMs - 3e3;
+      while (bufRef.current.length > 1 && bufRef.current[0].t < cutoff) bufRef.current = bufRef.current.slice(1);
+    }, [tick]);
+    (0, import_react4.useEffect)(() => {
+      if (!enabled) return;
+      const iv = setInterval(() => setBuf(bufRef.current), 150);
+      return () => clearInterval(iv);
+    }, [enabled]);
+    (0, import_react4.useEffect)(() => {
+      bufRef.current = [];
+      setBuf([]);
+    }, [symbol]);
+    return buf;
+  }
+  function useThrottledValue(value, ms) {
+    const [out, setOut] = (0, import_react4.useState)(value);
+    const latest = (0, import_react4.useRef)(value);
+    (0, import_react4.useEffect)(() => {
+      latest.current = value;
+    }, [value]);
+    (0, import_react4.useEffect)(() => {
+      setOut(latest.current);
+      const iv = setInterval(() => setOut(latest.current), ms);
+      return () => clearInterval(iv);
+    }, [ms]);
+    return out;
+  }
+  function OdometerChar({ ch }) {
+    const [shown, setShown] = (0, import_react4.useState)(ch);
+    const [incoming, setIncoming] = (0, import_react4.useState)(null);
+    const [phase, setPhase] = (0, import_react4.useState)("idle");
+    const [dir, setDir] = (0, import_react4.useState)(1);
+    const prevRef = (0, import_react4.useRef)(ch);
+    const timerRef = (0, import_react4.useRef)(null);
+    (0, import_react4.useEffect)(() => {
+      if (ch === prevRef.current) return;
+      const a = prevRef.current, b = ch;
+      const bothDigits = /[0-9]/.test(a) && /[0-9]/.test(b);
+      const d = bothDigits ? Number(b) >= Number(a) ? 1 : -1 : 1;
+      setDir(d);
+      setIncoming(b);
+      setPhase("start");
+      prevRef.current = b;
+      requestAnimationFrame(() => requestAnimationFrame(() => setPhase("end")));
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setShown(b);
+        setIncoming(null);
+        setPhase("idle");
+      }, 320);
+      return () => clearTimeout(timerRef.current);
+    }, [ch]);
+    const oldY = phase === "end" ? dir > 0 ? "-100%" : "100%" : "0%";
+    const newY = phase === "end" ? "0%" : dir > 0 ? "100%" : "-100%";
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", display: "inline-block", width: "1ch", height: "1em", overflow: "hidden", verticalAlign: "bottom" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, transform: `translateY(${oldY})`, transition: "transform .28s cubic-bezier(.3,.7,.4,1)" }, children: shown }),
+      incoming != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, transform: `translateY(${newY})`, transition: "transform .28s cubic-bezier(.3,.7,.4,1)" }, children: incoming })
+    ] });
+  }
+  var OdometerText = ({ text }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex" }, children: [...text].map((ch, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerChar, { ch }, i)) });
   function UpDownChart({ pts, target, h = 170, onScrub, spanStartMs, spanEndMs }) {
     const [dragIdx, setDragIdx] = (0, import_react4.useState)(null);
     const drawRef = (0, import_react4.useRef)(null);
     const n = pts.length;
+    const spanMs = Math.max(1, spanEndMs - spanStartMs);
+    const xOf = (t) => Math.max(0, Math.min(100, (t - spanStartMs) / spanMs * 100));
     const pick = (clientX) => {
       const el = drawRef.current;
-      if (!el) return;
+      if (!el || !n) return;
       const r = el.getBoundingClientRect();
       const frac = r.width > 0 ? Math.max(0, Math.min(1, (clientX - r.left) / r.width)) : 1;
-      const i = Math.round(frac * (n - 1));
-      setDragIdx(i);
-      onScrub && onScrub(i);
+      const targetMs = spanStartMs + frac * spanMs;
+      let bestI = n - 1, bestD = Infinity;
+      for (let i = 0; i < n; i++) {
+        const dd = Math.abs(pts[i].t - targetMs);
+        if (dd < bestD) {
+          bestD = dd;
+          bestI = i;
+        }
+      }
+      setDragIdx(bestI);
+      onScrub && onScrub(bestI);
     };
     const release = () => {
       setDragIdx(null);
       onScrub && onScrub(null);
     };
-    const vals = target != null ? [...pts, target] : pts;
+    const prices = pts.map((p) => p.p);
+    const vals = target != null ? [...prices, target] : prices;
     const mn = Math.min(...vals), mx = Math.max(...vals);
     const pad = (mx - mn) * 0.18 || 1;
     const yMin = mn - pad, yMax = mx + pad;
     const yPx = (v) => h - (v - yMin) / (yMax - yMin) * h;
-    const xPct = (i) => i / (n - 1) * 100;
-    const d = pts.map((p, i) => `${xPct(i)},${yPx(p)}`).join(" ");
-    const last = pts[n - 1];
+    const d = pts.map((p) => `${xOf(p.t)},${yPx(p.p)}`).join(" ");
+    const last = pts[n - 1]?.p;
+    const lastX = n ? xOf(pts[n - 1].t) : 100;
     const effIdx = dragIdx == null ? n - 1 : dragIdx;
     const fmtP = (v) => "$" + v.toLocaleString(void 0, { maximumFractionDigits: v < 10 ? 4 : 2 });
-    const tLabel = (frac) => {
-      const ms = spanStartMs + (spanEndMs - spanStartMs) * frac;
-      return fmtSlotTime(ms);
+    const fmtClock = (ms) => {
+      const dt = new Date(ms);
+      const p = (v) => String(v).padStart(2, "0");
+      return `${p(dt.getHours())}:${p(dt.getMinutes())}:${p(dt.getSeconds())}`;
     };
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
@@ -27128,25 +27207,25 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "visible" }, children: [
               target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(target), y2: yPx(target), stroke: C.ink, strokeWidth: "1", strokeDasharray: "4 4", vectorEffect: "non-scaling-stroke" }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(last), y2: yPx(last), stroke: KLINE_COLORS[0], strokeWidth: "1", strokeDasharray: "4 4", strokeOpacity: ".75", vectorEffect: "non-scaling-stroke" }),
+              last != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(last), y2: yPx(last), stroke: KLINE_COLORS[0], strokeWidth: "1", strokeDasharray: "4 4", strokeOpacity: ".75", vectorEffect: "non-scaling-stroke" }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: d, fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
             ] }),
-            dragIdx != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xPct(effIdx)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }, "crosshair"),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: "100%", top: yPx(last), transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible" }, children: [
+            dragIdx != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(pts[effIdx].t)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }, "crosshair"),
+            last != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${lastX}%`, top: yPx(last), transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible" }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } })
             ] }, "livedot"),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, right: 0 }, children: fmtP(yMax) }),
               target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(target), right: 0, transform: "translateY(-50%)", color: C.ink }, children: fmtP(target) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(last), right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700 }, children: fmtP(last) }),
+              last != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(last), right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700 }, children: fmtP(last) }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: 0, right: 0 }, children: fmtP(yMin) })
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginRight: KCHART_GUTTER, display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: MONO, color: C.mute, marginTop: 6 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: tLabel(0) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: tLabel(0.5) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: tLabel(1) })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: fmtClock(spanStartMs) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: fmtClock(spanStartMs + spanMs / 2) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: fmtClock(spanEndMs) })
           ] })
         ]
       }
@@ -27209,13 +27288,21 @@ input,button{font-family:inherit}
         past: pastEvs.slice(0, 3).map((ev) => {
           const mkt = (ev.markets || [])[0];
           if (!mkt) return null;
+          let outs;
+          try {
+            outs = JSON.parse(mkt.outcomes || "[]");
+          } catch {
+            outs = [];
+          }
           let prices;
           try {
             prices = JSON.parse(mkt.outcomePrices || "[]");
           } catch {
             prices = [];
           }
-          return { id: ev.id, resolvedUp: prices.length ? parseFloat(prices[0]) > 0.5 : null };
+          const upIdx = outs.findIndex((o) => String(o).toLowerCase() === "up");
+          if (upIdx < 0 || !prices.length) return null;
+          return { id: ev.id, resolvedUp: parseFloat(prices[upIdx]) > 0.5 };
         }).filter(Boolean)
       };
       PM_UPDOWN_CACHE[assetLabel] = result;
@@ -27591,16 +27678,15 @@ input,button{font-family:inherit}
     const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
     const [closing, setClosing] = (0, import_react4.useState)(false);
     const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
-    const [slotSeries, setSlotSeries] = (0, import_react4.useState)(null);
+    const [pastOutcomes, setPastOutcomes] = (0, import_react4.useState)([]);
     const [selectedId, setSelectedId] = (0, import_react4.useState)(initialMk.id);
     const [now, setNow] = (0, import_react4.useState)(Date.now());
-    const [priceHist, setPriceHist] = (0, import_react4.useState)(null);
     const goBack = () => setClosing(true);
     (0, import_react4.useEffect)(() => {
       if (!IS_H5) return;
       let cancelled = false;
       pmFetchUpDown(initialMk.assetLabel).then((res) => {
-        if (!cancelled) setSlotSeries(res);
+        if (!cancelled) setPastOutcomes(res?.past || []);
       });
       return () => {
         cancelled = true;
@@ -27610,58 +27696,45 @@ input,button{font-family:inherit}
       const t = setInterval(() => setNow(Date.now()), 1e3);
       return () => clearInterval(t);
     }, []);
+    const windowMs = initialMk.endMs - initialMk.startMs;
+    const isDaily = windowMs >= 20 * 60 * 6e4;
+    const slotCount = isDaily ? 2 : 6;
     const allSlots = (0, import_react4.useMemo)(() => {
-      const list = slotSeries?.upcoming?.length ? slotSeries.upcoming : [initialMk];
-      const sameWindow = list.filter((s) => updownWindowRank(s.endMs - s.startMs) === updownWindowRank(initialMk.endMs - initialMk.startMs));
-      const use = sameWindow.length ? sameWindow : list;
-      const withInitial = use.some((s) => s.id === initialMk.id) ? use : [initialMk, ...use];
-      const seen = /* @__PURE__ */ new Set();
-      const out = [];
-      for (const s of withInitial) {
-        if (seen.has(s.id)) continue;
-        seen.add(s.id);
-        out.push(s);
-      }
-      return out;
-    }, [slotSeries, initialMk]);
+      return Array.from({ length: slotCount }, (_, i) => i === 0 ? initialMk : {
+        ...initialMk,
+        id: initialMk.id + "-t" + i,
+        startMs: initialMk.startMs + i * windowMs,
+        endMs: initialMk.endMs + i * windowMs
+      });
+    }, [initialMk, windowMs, slotCount]);
     const mk = allSlots.find((s) => s.id === selectedId) || initialMk;
     const started = mk.startMs <= now;
     const isLive = started && now < mk.endMs;
     const secsLeft = Math.max(0, Math.round((mk.endMs - now) / 1e3));
     const symbol = UPDOWN_SYMBOL[mk.assetLabel];
-    const spanStartMs = started ? mk.startMs : now - 30 * 6e4;
+    const [target, setTarget] = (0, import_react4.useState)(null);
     (0, import_react4.useEffect)(() => {
-      if (!IS_H5 || !symbol) {
-        setPriceHist(null);
+      if (!IS_H5 || !symbol || !started) {
+        setTarget(null);
         return;
       }
       let cancelled = false;
-      const load = () => fetchBinanceKlines(symbol, spanStartMs, Date.now()).then((res) => {
-        if (!cancelled && res) setPriceHist(res);
+      fetchBinanceKlines(symbol, mk.startMs, mk.startMs + 7e4).then((res) => {
+        if (!cancelled && res && res.length) setTarget(res[0].p);
       });
-      load();
-      const iv = setInterval(load, 3e4);
       return () => {
         cancelled = true;
-        clearInterval(iv);
       };
     }, [mk.id, symbol, started]);
-    const tick = useBinanceLivePrice(symbol, true);
-    const series2 = (0, import_react4.useMemo)(() => {
-      const base = priceHist && priceHist.length >= 2 ? priceHist.filter((p) => p.t * 1e3 >= spanStartMs) : null;
-      if (!base || base.length < 2) return null;
-      if (!tick) return base;
-      const out = base.slice();
-      if (tick.t >= out[out.length - 1].t) out[out.length - 1] = { t: tick.t, p: tick.p };
-      return out;
-    }, [priceHist, tick, spanStartMs]);
-    const pts = series2 ? series2.map((p) => p.p) : null;
-    const target = pts && started ? pts[0] : null;
-    const livePrice = pts ? pts[pts.length - 1] : null;
+    const buf = useRollingPriceBuffer(symbol, 3e4, true);
+    const nowMs = Date.now();
+    const spanStartMs = nowMs - 3e4;
+    const livePrice = buf.length ? buf[buf.length - 1].p : target != null ? target : null;
     const [scrubIdx, setScrubIdx] = (0, import_react4.useState)(null);
-    const shownPrice = pts ? scrubIdx == null ? livePrice : pts[Math.min(scrubIdx, pts.length - 1)] : null;
+    const shownPriceRaw = buf.length ? scrubIdx == null ? livePrice : buf[Math.min(scrubIdx, buf.length - 1)].p : livePrice;
+    const shownPrice = useThrottledValue(shownPriceRaw, 1e3);
     const delta = shownPrice != null && target != null ? shownPrice - target : null;
-    const predict = (side) => setLocalTrade({ m: upDownToMarket(mk), side });
+    const predict = (side) => setLocalTrade({ m: upDownToMarket(initialMk), side });
     const fmtCountdown = (sec) => {
       const hh = Math.floor(sec / 3600), mm = Math.floor(sec % 3600 / 60), ss = sec % 60;
       const p = (v) => String(v).padStart(2, "0");
@@ -27691,7 +27764,7 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 32, fontWeight: 900, fontFamily: MONO }, children: [
               "$",
-              shownPrice.toLocaleString(void 0, { maximumFractionDigits: shownPrice < 10 ? 4 : 2 })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerText, { text: shownPrice.toLocaleString(void 0, { maximumFractionDigits: shownPrice < 10 ? 4 : 2 }) })
             ] }),
             delta != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 17, fontWeight: 500, color: delta >= 0 ? C.up : C.down, fontFamily: MONO }, children: [
               delta >= 0 ? "\u25B2" : "\u25BC",
@@ -27711,11 +27784,11 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: pts ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UpDownChart, { pts, target, onScrub: setScrubIdx, spanStartMs, spanEndMs: now }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 170, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: buf.length >= 2 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UpDownChart, { pts: buf, target, onScrub: setScrubIdx, spanStartMs, spanEndMs: nowMs }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 170, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 22, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, border: `1px solid ${C.line}`, borderRadius: 14, padding: "7px 12px", fontSize: 14, fontWeight: 700, color: C.ink }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Past" }),
-            (slotSeries?.past || []).slice(0, 3).reverse().map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 20, height: 20, borderRadius: 10, background: p.resolvedUp ? C.up : C.down, display: "grid", placeItems: "center", color: "#fff", fontSize: 12 }, children: p.resolvedUp ? "\u2197" : "\u2198" }, p.id))
+            pastOutcomes.slice(0, 3).reverse().map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 20, height: 20, borderRadius: 10, background: p.resolvedUp ? C.up : C.down, display: "grid", placeItems: "center", color: "#fff", fontSize: 12 }, children: p.resolvedUp ? "\u2197" : "\u2198" }, p.id))
           ] }),
           allSlots.map((sl) => {
             const live = sl.startMs <= now && now < sl.endMs;
