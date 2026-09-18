@@ -27185,31 +27185,40 @@ input,button{font-family:inherit}
   var PM_UPDOWN_POOL = null;
   async function pmFetchUpDownPool() {
     if (PM_UPDOWN_POOL) return PM_UPDOWN_POOL;
-    const page = async (closed, offset) => {
-      const qs = closed ? `active=false&closed=true&order=endDate&ascending=false&limit=500&offset=${offset}` : `active=true&closed=false&order=endDate&ascending=true&limit=500&offset=${offset}`;
-      try {
-        const r = await fetch(`https://gamma-api.polymarket.com/events?${qs}`);
-        if (!r.ok) throw new Error("bad status");
-        const d = await r.json();
-        return Array.isArray(d) ? d : [];
-      } catch (e) {
-        return [];
-      }
-    };
-    const [openA, openB, closedA] = await Promise.all([page(false, 0), page(false, 500), page(true, 0)]);
-    const isUpDown = (ev) => /\bup or down\b/i.test(ev.title || "");
-    PM_UPDOWN_POOL = { open: [...openA, ...openB].filter(isUpDown), closed: closedA.filter(isUpDown) };
+    try {
+      const r = await fetch(`https://gamma-api.polymarket.com/series?limit=200&closed=false`);
+      if (!r.ok) throw new Error("bad status");
+      const data = await r.json();
+      PM_UPDOWN_POOL = (Array.isArray(data) ? data : []).filter((s) => /\bup or down\b/i.test(s.title || ""));
+    } catch (e) {
+      PM_UPDOWN_POOL = [];
+    }
     return PM_UPDOWN_POOL;
+  }
+  async function pmFillEventMarkets(ev) {
+    if (ev.markets && ev.markets.length) return ev;
+    if (!ev.slug) return ev;
+    try {
+      const r = await fetch(`https://gamma-api.polymarket.com/events/slug/${ev.slug}`);
+      if (!r.ok) return ev;
+      const full = await r.json();
+      return Array.isArray(full) ? full[0] || ev : full || ev;
+    } catch (e) {
+      return ev;
+    }
   }
   async function pmFetchUpDown(assetLabel) {
     if (PM_UPDOWN_CACHE[assetLabel] !== void 0) return PM_UPDOWN_CACHE[assetLabel];
     const titleRe = new RegExp("^" + assetLabel + "\\s+up or down", "i");
     try {
       const pool = await pmFetchUpDownPool();
-      const upcomingEvs = pool.open.filter((ev) => titleRe.test(ev.title || ""));
-      const pastEvs = pool.closed.filter((ev) => titleRe.test(ev.title || ""));
+      const matchingSeries = pool.filter((s) => titleRe.test(s.title || ""));
+      let allEvents = matchingSeries.flatMap((s) => s.events || []);
+      allEvents = await Promise.all(allEvents.map(pmFillEventMarkets));
+      const upcomingEvs = allEvents.filter((ev) => !ev.closed);
+      const pastEvs = allEvents.filter((ev) => ev.closed).sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
       const result = {
-        upcoming: upcomingEvs.map((ev) => pmMapUpDownSlot(ev, assetLabel)).filter(Boolean),
+        upcoming: upcomingEvs.map((ev) => pmMapUpDownSlot(ev, assetLabel)).filter(Boolean).sort((a, b) => a.endMs - b.endMs),
         past: pastEvs.slice(0, 3).map((ev) => {
           const mkt = (ev.markets || [])[0];
           if (!mkt) return null;
