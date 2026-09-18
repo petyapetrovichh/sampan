@@ -28105,7 +28105,8 @@ input,button{font-family:inherit}
       }
       return out.length ? out : [initialMk];
     }, [initialMk, seriesSlots, windowMs, slotCount, rawWindowMs, Math.floor(now / 1e3)]);
-    const mk = allSlots.find((s) => s.id === selectedId) || allSlots[0] || initialMk;
+    const selId = allSlots.some((s) => s.id === selectedId) ? selectedId : allSlots[0]?.id ?? selectedId;
+    const mk = allSlots.find((s) => s.id === selId) || initialMk;
     const rolloverRef = (0, import_react4.useRef)(0);
     const carouselRef = (0, import_react4.useRef)(null);
     (0, import_react4.useEffect)(() => {
@@ -28130,16 +28131,24 @@ input,button{font-family:inherit}
     const symbol = UPDOWN_SYMBOL[mk.assetLabel];
     const [target, setTarget] = (0, import_react4.useState)(null);
     (0, import_react4.useEffect)(() => {
-      if (!IS_H5 || !symbol || !started) {
-        setTarget(null);
-        return;
-      }
-      let cancelled = false;
-      fetchBinanceKlines(symbol, mk.startMs, mk.startMs + 7e4).then((res) => {
-        if (!cancelled && res && res.length) setTarget(res[0].p);
+      setTarget(null);
+      if (!IS_H5 || !symbol || !started) return;
+      let cancelled = false, iv = null;
+      const load = async () => {
+        const res = await fetchBinanceKlines(symbol, mk.startMs, Math.max(mk.startMs + 6e4, Date.now()));
+        if (cancelled || !res || !res.length) return false;
+        setTarget(res[0].p);
+        return true;
+      };
+      load().then((ok) => {
+        if (ok || cancelled) return;
+        iv = setInterval(async () => {
+          if (await load()) clearInterval(iv);
+        }, 5e3);
       });
       return () => {
         cancelled = true;
+        if (iv) clearInterval(iv);
       };
     }, [mk.id, symbol, started]);
     const buf = useRollingPriceBuffer(symbol, 3e4, true);
@@ -28149,7 +28158,12 @@ input,button{font-family:inherit}
     const [scrubPrice, setScrubPrice] = (0, import_react4.useState)(null);
     const shownPriceRaw = scrubPrice == null ? livePrice : scrubPrice;
     const priceDp = livePrice != null && livePrice < 10 ? 4 : 2;
-    const targetNumChars = livePrice != null ? ("$" + livePrice.toLocaleString(void 0, { minimumFractionDigits: priceDp, maximumFractionDigits: priceDp })).length : 6;
+    const targetNumChars = (() => {
+      const sample = livePrice != null ? "$" + livePrice.toLocaleString(void 0, { minimumFractionDigits: priceDp, maximumFractionDigits: priceDp }) : "$0,000.00";
+      let w = 0;
+      for (const ch of sample) w += /[0-9]/.test(ch) ? 1 : 0.55;
+      return w;
+    })();
     const fmtPrice = (v) => v == null ? "" : v.toLocaleString(void 0, { minimumFractionDigits: priceDp, maximumFractionDigits: priceDp });
     const throttledPrice = useThrottledValue(shownPriceRaw, 1e3);
     const shownPrice = scrubPrice != null ? scrubPrice : throttledPrice;
@@ -28209,7 +28223,7 @@ input,button{font-family:inherit}
           ] }),
           allSlots.map((sl, si) => {
             const live = si === 0 && sl.startMs <= now && now < sl.endMs;
-            const on = sl.id === selectedId;
+            const on = sl.id === selId;
             return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSelectedId(sl.id), className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 6, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.ink : "transparent", color: on ? "#fff" : C.ink, borderRadius: 14, padding: "7px 12px", fontSize: 14, fontWeight: 700, cursor: "pointer" }, children: [
               live && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", width: 6, height: 6, flexShrink: 0 }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 3, background: C.down } }),
