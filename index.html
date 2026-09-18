@@ -27251,9 +27251,11 @@ input,button{font-family:inherit}
       if (easedLast == null) return;
       const now = Date.now();
       const arr = trailRef.current;
-      const lastT = arr.length ? arr[arr.length - 1].t : 0;
-      if (now - lastT >= 55) arr.push({ t: now, p: easedLast });
-      else if (arr.length) arr[arr.length - 1] = { t: now, p: easedLast };
+      const SLOT = 60;
+      const slot = Math.floor(now / SLOT) * SLOT;
+      const lastPt = arr[arr.length - 1];
+      if (!lastPt || lastPt.t !== slot) arr.push({ t: slot, p: easedLast });
+      else lastPt.p = easedLast;
       const cutoff = now - (spanEndMs - spanStartMs) - 3e3;
       let drop = 0;
       while (drop < arr.length - 1 && arr[drop].t < cutoff) drop++;
@@ -27325,7 +27327,8 @@ input,button{font-family:inherit}
     const effX = n ? xOf(visPts[effIdx].t) : 100;
     const effY = n ? yPx(visPts[effIdx].p) : h / 2;
     const effP = n ? visPts[effIdx].p : last;
-    const fmtP = (v) => "$" + v.toLocaleString(void 0, { maximumFractionDigits: v < 10 ? 4 : 2 });
+    const dpY = last != null && last < 10 ? 4 : 2;
+    const fmtP = (v) => "$" + v.toLocaleString(void 0, { minimumFractionDigits: dpY, maximumFractionDigits: dpY });
     const fmtClock = (ms) => {
       const dt = new Date(ms);
       const p = (v) => String(v).padStart(2, "0");
@@ -27392,9 +27395,12 @@ input,button{font-family:inherit}
             // cover a price label or the orange live-price readout as it travels
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: -KCHART_GUTTER, top: targetY, height: 0, pointerEvents: "none", zIndex: 3 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: KCHART_GUTTER, top: 0, borderTop: `1px dashed ${C.mute}`, opacity: 0.8 } }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 4, background: "#8A8F98", borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }, children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
-                !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191" : "\u2193" })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", width: KCHART_GUTTER, height: 19, display: "flex", alignItems: "center", justifyContent: "center" }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 1, top: "50%", width: 13, height: 13, marginTop: -6.5, background: "#8A8F98", borderRadius: 3, transform: "rotate(45deg)" } }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 6, right: 0, top: 0, bottom: 0, background: "#8A8F98", borderRadius: "3px 999px 999px 3px", display: "flex", alignItems: "center", justifyContent: "center", gap: 3, fontSize: 10, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }, children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
+                  !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191" : "\u2193" })
+                ] })
               ] })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: [
