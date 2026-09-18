@@ -27246,7 +27246,16 @@ input,button{font-family:inherit}
         return;
       }
       if (!trailRef.current.length) {
-        trailRef.current = pts.slice();
+        const SEED_SLOT = 60;
+        const dense = [];
+        for (let i = 0; i < pts.length - 1; i++) {
+          const a = pts[i], b = pts[i + 1];
+          const span = b.t - a.t;
+          if (span <= 0) continue;
+          for (let t = a.t; t < b.t; t += SEED_SLOT) dense.push({ t, p: a.p + (b.p - a.p) * ((t - a.t) / span) });
+        }
+        dense.push(pts[pts.length - 1]);
+        trailRef.current = dense.length > 1 ? dense : pts.slice();
         return;
       }
       if (easedLast == null) return;
@@ -27396,18 +27405,18 @@ input,button{font-family:inherit}
             // cover a price label or the orange live-price readout as it travels
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: -KCHART_GUTTER, top: targetY, height: 0, pointerEvents: "none", zIndex: 3 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: KCHART_GUTTER, top: 0, borderTop: `1px dashed ${C.mute}`, opacity: 0.8 } }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", width: KCHART_GUTTER, height: 20 }, children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: "0 0 64 20", width: "64", height: "20", style: { position: "absolute", inset: 0, display: "block" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", width: 50, height: 17 }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: "0 0 50 17", width: "50", height: "17", style: { position: "absolute", inset: 0, display: "block" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                   "path",
                   {
-                    d: "M 3 10 L 12 2.5 L 54 2.5 A 7.5 7.5 0 0 1 54 17.5 L 12 17.5 Z",
+                    d: "M 2.5 8.5 L 9 2.5 L 41.5 2.5 A 6 6 0 0 1 41.5 14.5 L 9 14.5 Z",
                     fill: "#8A8F98",
                     stroke: "#8A8F98",
-                    strokeWidth: "4",
+                    strokeWidth: "3.4",
                     strokeLinejoin: "round"
                   }
                 ) }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 10, right: 0, top: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 3, fontSize: 10, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 7, right: 0, top: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 2, fontSize: 8.5, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }, children: [
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
                   !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191" : "\u2193" })
                 ] })
@@ -27423,6 +27432,27 @@ input,button{font-family:inherit}
       }
     );
   }
+  function upDownWindowMsOf(ev, fallbackMs) {
+    const title = ev.title || "";
+    const m = title.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (m) {
+      const to24 = (h, ap) => Number(h) % 12 + (/PM/i.test(ap) ? 12 : 0);
+      let a = to24(m[1], m[3]) * 60 + Number(m[2]);
+      let b = to24(m[4], m[6]) * 60 + Number(m[5]);
+      let diff = b - a;
+      if (diff <= 0) diff += 24 * 60;
+      return diff * 6e4;
+    }
+    for (const t of ev.tags || []) {
+      const lbl = String(t.label || t.slug || "").trim();
+      let mm = lbl.match(/^(\d+)\s*M$/i);
+      if (mm) return Number(mm[1]) * 6e4;
+      let hh = lbl.match(/^(\d+)\s*H$/i);
+      if (hh) return Number(hh[1]) * 36e5;
+      if (/^daily$/i.test(lbl)) return 24 * 36e5;
+    }
+    return fallbackMs;
+  }
   function pmMapUpDownSlot(ev, assetLabel) {
     const mkt = (ev.markets || [])[0];
     if (!mkt) return null;
@@ -27431,15 +27461,17 @@ input,button{font-family:inherit}
     const upIdx = parsed.outs.findIndex((o) => o.toLowerCase() === "up");
     const downIdx = parsed.outs.findIndex((o) => o.toLowerCase() === "down");
     if (upIdx < 0 || downIdx < 0) return null;
-    const startMs = new Date(ev.startDate || mkt.startDate || Date.now()).getTime();
+    const rawStart = new Date(ev.startDate || mkt.startDate || Date.now()).getTime();
     const endMs = new Date(ev.endDate || mkt.endDate || Date.now()).getTime();
+    const windowMs = upDownWindowMsOf(ev, endMs - rawStart);
+    const startMs = endMs - windowMs;
     return {
       // `q` is the same short title the feed card shows, so opening a card never renames it
       id: "pmud" + ev.id,
-      q: `${assetLabel} Up or Down - ${fmtUpDownDuration(endMs - startMs)}`,
+      q: `${assetLabel} Up or Down - ${fmtUpDownDuration(windowMs)}`,
       rawTitle: ev.title || "",
       assetLabel,
-      durationLabel: fmtUpDownDuration(endMs - startMs),
+      durationLabel: fmtUpDownDuration(windowMs),
       icon: ev.icon || ev.image || "",
       iconBg: UPDOWN_ICON_BG[assetLabel] || "#F7931A",
       vol: fmtVol(Number(ev.volume || ev.volumeNum || 0)),
