@@ -26773,7 +26773,7 @@ input,button{font-family:inherit}
     return `${CHART_MONTHS[d.getMonth()]} ${d.getDate()}, ${time}`;
   }
   var X_FADE = "linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%)";
-  var Y_FADE = "linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%)";
+  var Y_FADE = "linear-gradient(to bottom, transparent 0, #000 5%, #000 95%, transparent 100%)";
   var KCHART_DOT = 9;
   var KCHART_GAP = 5;
   var KCHART_PILL_W = 46;
@@ -27354,8 +27354,10 @@ input,button{font-family:inherit}
       const mag = Math.pow(10, Math.floor(Math.log10(rough || 1)));
       return [1, 2, 5, 10].map((m) => m * mag).find((v) => v >= rough) || mag;
     })();
-    const yEdges = [yMax, yMin];
-    const EDGE_GAP = 16;
+    const EDGE_INSET = 16;
+    const valueAtY = (y) => yMin + (h - y) / h * (yMax - yMin);
+    const yEdges = [valueAtY(EDGE_INSET), valueAtY(h - EDGE_INSET)];
+    const EDGE_GAP = 26;
     const yTicks = [];
     for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
       const val = Number(v.toFixed(8));
@@ -27430,9 +27432,7 @@ input,button{font-family:inherit}
               ] })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, right: 0 }, children: fmtP(yMax) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: 0, right: 0 }, children: fmtP(yMin) }),
-              yTicks.map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtP(v) }, v)),
+              [...yEdges, ...yTicks].map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtP(v) }, v)),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: effY, right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700, background: "#fff" }, children: fmtP(effP) })
             ] })
           ] }),
