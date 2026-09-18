@@ -24810,9 +24810,9 @@ input,button{font-family:inherit}
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: size, height: size, borderRadius: size * 0.3, background: bg, color: fg, display: "grid", placeItems: "center", fontSize: size * 0.32, fontWeight: 800, flexShrink: 0 }, children: n === "Draw" ? "=" : n === "Up" ? "\u2191" : n === "Down" ? "\u2193" : n.slice(0, 2) });
   };
   var LiveBadge = ({ time, mono }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, lineHeight: 1.2 }, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", width: 6, height: 6, flexShrink: 0 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 3, background: C.down } }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 3, background: C.down } })
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", width: 16, height: 16, flexShrink: 0 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", top: 5, left: 5, width: 6, height: 6, borderRadius: 3, background: C.down } }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", top: 5, left: 5, width: 6, height: 6, borderRadius: 3, background: C.down } })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: C.down, fontWeight: 700 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Live" }) }),
     time && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: C.ink, fontWeight: 400, fontFamily: mono ? MONO : void 0 }, children: time })
@@ -25907,7 +25907,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u20BF" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 600, lineHeight: 1.22, letterSpacing: -0.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: title }),
-              showLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 5 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: liveTime }) })
+              showLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: liveTime }) })
             ] })
           ] }),
           rows.map((rw, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 }, children: [
@@ -26258,13 +26258,7 @@ input,button{font-family:inherit}
     if (PM_CACHE[sub] !== void 0) return PM_CACHE[sub];
     try {
       if (sub === "Live") {
-        const [sportsEvs, esportsEvs, upDownCards] = await Promise.all([
-          pmFetchGames(PM_TAGS.Sports),
-          pmFetchGames(PM_TAGS.Esports),
-          pmFetchUpDownFeedCards().catch(() => [])
-        ]);
-        const liveGames = [...sportsEvs, ...esportsEvs].filter((mk) => mk.isLiveGame && !mk.gameEnded).map((mk) => ({ ...mk, catSub: "Live" }));
-        PM_CACHE[sub] = interleave(liveGames, upDownCards, 3);
+        PM_CACHE[sub] = (await pmFetchUpDownFeedCards().catch(() => [])).map((mk) => ({ ...mk, catSub: "Live" }));
         return PM_CACHE[sub];
       }
       if (sub === "Sports" || sub === "Esports") {
@@ -27016,13 +27010,28 @@ input,button{font-family:inherit}
     const v = Number(n || 0);
     return v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : v >= 1e3 ? `$${(v / 1e3).toFixed(2)}k` : `$${v.toFixed(2)}`;
   }
-  var UPDOWN_SYMBOL = { Bitcoin: "BTCUSDT", Ethereum: "ETHUSDT", Solana: "SOLUSDT", BNB: "BNBUSDT", XRP: "XRPUSDT", Dogecoin: "DOGEUSDT" };
-  var UPDOWN_ICON_BG = { Bitcoin: "#F7931A", Ethereum: "#627EEA", Solana: "#9945FF", BNB: "#F0B90B", XRP: "#23292F", Dogecoin: "#C2A633" };
+  var UPDOWN_ASSETS = ["Bitcoin", "Ethereum", "XRP", "BNB", "Solana", "Dogecoin", "Hyperliquid"];
+  var UPDOWN_SYMBOL = { Bitcoin: "BTCUSDT", Ethereum: "ETHUSDT", Solana: "SOLUSDT", BNB: "BNBUSDT", XRP: "XRPUSDT", Dogecoin: "DOGEUSDT", Hyperliquid: "HYPEUSDT" };
+  var UPDOWN_ICON_BG = { Bitcoin: "#F7931A", Ethereum: "#627EEA", Solana: "#9945FF", BNB: "#F0B90B", XRP: "#23292F", Dogecoin: "#C2A633", Hyperliquid: "#97FCE4" };
+  var UPDOWN_WINDOW_MS = [5 * 6e4, 15 * 6e4, 60 * 6e4, 4 * 60 * 6e4, 24 * 60 * 6e4];
+  function updownWindowRank(ms) {
+    let best = UPDOWN_WINDOW_MS.length, bestDiff = Infinity;
+    UPDOWN_WINDOW_MS.forEach((w, i) => {
+      const d = Math.abs(w - ms);
+      if (d < bestDiff) {
+        bestDiff = d;
+        best = i;
+      }
+    });
+    return best;
+  }
   function fmtUpDownDuration(ms) {
     const mins = Math.round(ms / 6e4);
     if (mins < 60) return `${mins} Min`;
     const hrs = Math.round(mins / 60);
-    return `${hrs} Hour${hrs > 1 ? "s" : ""}`;
+    if (hrs < 24) return `${hrs} Hour${hrs > 1 ? "s" : ""}`;
+    const days = Math.round(hrs / 24);
+    return `${days} Day${days > 1 ? "s" : ""}`;
   }
   var BINANCE_CACHE = {};
   async function fetchBinanceKlines(symbol, startMs, endMs) {
@@ -27040,6 +27049,109 @@ input,button{font-family:inherit}
     }
     return BINANCE_CACHE[key];
   }
+  function useBinanceLivePrice(symbol, enabled) {
+    const [tick, setTick] = (0, import_react4.useState)(null);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !enabled || !symbol) {
+        setTick(null);
+        return;
+      }
+      let ws, alive = true;
+      try {
+        ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`);
+        ws.onmessage = (e) => {
+          if (!alive) return;
+          try {
+            const m = JSON.parse(e.data);
+            const p = parseFloat(m.p);
+            if (!isNaN(p)) setTick({ t: Math.floor((m.T || Date.now()) / 1e3), p });
+          } catch (err) {
+          }
+        };
+      } catch (e) {
+      }
+      return () => {
+        alive = false;
+        try {
+          ws && ws.close();
+        } catch (e) {
+        }
+      };
+    }, [symbol, enabled]);
+    return tick;
+  }
+  function UpDownChart({ pts, target, h = 170, onScrub, spanStartMs, spanEndMs }) {
+    const [dragIdx, setDragIdx] = (0, import_react4.useState)(null);
+    const drawRef = (0, import_react4.useRef)(null);
+    const n = pts.length;
+    const pick = (clientX) => {
+      const el = drawRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const frac = r.width > 0 ? Math.max(0, Math.min(1, (clientX - r.left) / r.width)) : 1;
+      const i = Math.round(frac * (n - 1));
+      setDragIdx(i);
+      onScrub && onScrub(i);
+    };
+    const release = () => {
+      setDragIdx(null);
+      onScrub && onScrub(null);
+    };
+    const vals = target != null ? [...pts, target] : pts;
+    const mn = Math.min(...vals), mx = Math.max(...vals);
+    const pad = (mx - mn) * 0.18 || 1;
+    const yMin = mn - pad, yMax = mx + pad;
+    const yPx = (v) => h - (v - yMin) / (yMax - yMin) * h;
+    const xPct = (i) => i / (n - 1) * 100;
+    const d = pts.map((p, i) => `${xPct(i)},${yPx(p)}`).join(" ");
+    const last = pts[n - 1];
+    const effIdx = dragIdx == null ? n - 1 : dragIdx;
+    const fmtP = (v) => "$" + v.toLocaleString(void 0, { maximumFractionDigits: v < 10 ? 4 : 2 });
+    const tLabel = (frac) => {
+      const ms = spanStartMs + (spanEndMs - spanStartMs) * frac;
+      return fmtSlotTime(ms);
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "div",
+      {
+        onPointerDown: (e) => {
+          e.currentTarget.setPointerCapture?.(e.pointerId);
+          pick(e.clientX);
+        },
+        onPointerMove: (e) => {
+          if (dragIdx != null) pick(e.clientX);
+        },
+        onPointerUp: release,
+        onPointerCancel: release,
+        style: { position: "relative", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", cursor: "pointer" },
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "visible" }, children: [
+              target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(target), y2: yPx(target), stroke: C.ink, strokeWidth: "1", strokeDasharray: "4 4", vectorEffect: "non-scaling-stroke" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(last), y2: yPx(last), stroke: KLINE_COLORS[0], strokeWidth: "1", strokeDasharray: "4 4", strokeOpacity: ".75", vectorEffect: "non-scaling-stroke" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: d, fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
+            ] }),
+            dragIdx != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xPct(effIdx)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }, "crosshair"),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: "100%", top: yPx(last), transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } })
+            ] }, "livedot"),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, right: 0 }, children: fmtP(yMax) }),
+              target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(target), right: 0, transform: "translateY(-50%)", color: C.ink }, children: fmtP(target) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(last), right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700 }, children: fmtP(last) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: 0, right: 0 }, children: fmtP(yMin) })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginRight: KCHART_GUTTER, display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: MONO, color: C.mute, marginTop: 6 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: tLabel(0) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: tLabel(0.5) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: tLabel(1) })
+          ] })
+        ]
+      }
+    );
+  }
   function pmMapUpDownSlot(ev, assetLabel) {
     const mkt = (ev.markets || [])[0];
     if (!mkt) return null;
@@ -27051,8 +27163,10 @@ input,button{font-family:inherit}
     const startMs = new Date(ev.startDate || mkt.startDate || Date.now()).getTime();
     const endMs = new Date(ev.endDate || mkt.endDate || Date.now()).getTime();
     return {
+      // `q` is the same short title the feed card shows, so opening a card never renames it
       id: "pmud" + ev.id,
-      q: ev.title || `${assetLabel} Up or Down`,
+      q: `${assetLabel} Up or Down - ${fmtUpDownDuration(endMs - startMs)}`,
+      rawTitle: ev.title || "",
       assetLabel,
       durationLabel: fmtUpDownDuration(endMs - startMs),
       icon: ev.icon || ev.image || "",
@@ -27107,13 +27221,23 @@ input,button{font-family:inherit}
     }
   }
   async function pmFetchUpDownFeedCards() {
-    const assets = Object.keys(UPDOWN_SYMBOL);
-    const lists = await Promise.all(assets.map((a) => pmFetchUpDown(a)));
+    const lists = await Promise.all(UPDOWN_ASSETS.map((a) => pmFetchUpDown(a)));
     const now = Date.now();
-    return lists.map((res) => {
-      if (!res || !res.upcoming?.length) return null;
-      return res.upcoming.find((s) => s.startMs <= now && now < s.endMs) || res.upcoming[0];
-    }).filter(Boolean);
+    const out = [];
+    lists.forEach((res) => {
+      if (!res || !res.upcoming?.length) return;
+      const byWindow = /* @__PURE__ */ new Map();
+      for (const slot of res.upcoming) {
+        const rank = updownWindowRank(slot.endMs - slot.startMs);
+        const running = slot.startMs <= now && now < slot.endMs;
+        const prev = byWindow.get(rank);
+        if (!prev || running && !prev.running || !prev.running && slot.startMs < prev.slot.startMs) {
+          byWindow.set(rank, { slot, running });
+        }
+      }
+      [...byWindow.entries()].sort((a, b) => a[0] - b[0]).forEach(([, v]) => out.push(v.slot));
+    });
+    return out;
   }
   function interleave(base, extra, every) {
     if (!extra.length) return base;
@@ -27456,7 +27580,7 @@ input,button{font-family:inherit}
     const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
     const [closing, setClosing] = (0, import_react4.useState)(false);
     const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
-    const [series2, setSeries] = (0, import_react4.useState)(null);
+    const [slotSeries, setSlotSeries] = (0, import_react4.useState)(null);
     const [selectedId, setSelectedId] = (0, import_react4.useState)(initialMk.id);
     const [now, setNow] = (0, import_react4.useState)(Date.now());
     const [priceHist, setPriceHist] = (0, import_react4.useState)(null);
@@ -27465,7 +27589,7 @@ input,button{font-family:inherit}
       if (!IS_H5) return;
       let cancelled = false;
       pmFetchUpDown(initialMk.assetLabel).then((res) => {
-        if (!cancelled) setSeries(res);
+        if (!cancelled) setSlotSeries(res);
       });
       return () => {
         cancelled = true;
@@ -27476,38 +27600,54 @@ input,button{font-family:inherit}
       return () => clearInterval(t);
     }, []);
     const allSlots = (0, import_react4.useMemo)(() => {
-      const list = series2?.upcoming?.length ? series2.upcoming : [initialMk];
-      return list.some((s) => s.id === initialMk.id) ? list : [initialMk, ...list];
-    }, [series2, initialMk]);
+      const list = slotSeries?.upcoming?.length ? slotSeries.upcoming : [initialMk];
+      const sameWindow = list.filter((s) => updownWindowRank(s.endMs - s.startMs) === updownWindowRank(initialMk.endMs - initialMk.startMs));
+      const use = sameWindow.length ? sameWindow : list;
+      return use.some((s) => s.id === initialMk.id) ? use : [initialMk, ...use];
+    }, [slotSeries, initialMk]);
     const mk = allSlots.find((s) => s.id === selectedId) || initialMk;
-    const isLive = mk.startMs <= now && now < mk.endMs;
-    const isPastSlot = now >= mk.endMs;
+    const started = mk.startMs <= now;
+    const isLive = started && now < mk.endMs;
     const secsLeft = Math.max(0, Math.round((mk.endMs - now) / 1e3));
+    const symbol = UPDOWN_SYMBOL[mk.assetLabel];
+    const spanStartMs = started ? mk.startMs : now - 30 * 6e4;
     (0, import_react4.useEffect)(() => {
-      if (!IS_H5) {
-        setPriceHist(null);
-        return;
-      }
-      const symbol = UPDOWN_SYMBOL[mk.assetLabel];
-      if (!symbol) {
+      if (!IS_H5 || !symbol) {
         setPriceHist(null);
         return;
       }
       let cancelled = false;
-      const load = () => fetchBinanceKlines(symbol, mk.startMs, Math.min(now, mk.endMs)).then((res) => {
-        if (!cancelled) setPriceHist(res);
+      const load = () => fetchBinanceKlines(symbol, spanStartMs, Date.now()).then((res) => {
+        if (!cancelled && res) setPriceHist(res);
       });
       load();
-      const iv = isLive ? setInterval(load, 8e3) : null;
+      const iv = setInterval(load, 3e4);
       return () => {
         cancelled = true;
-        if (iv) clearInterval(iv);
+        clearInterval(iv);
       };
-    }, [mk.id, isLive]);
-    const pts = priceHist && priceHist.length >= 2 ? priceHist.map((p) => p.p) : null;
-    const target = pts ? pts[0] : null;
-    const curPrice = pts ? pts[pts.length - 1] : null;
+    }, [mk.id, symbol, started]);
+    const tick = useBinanceLivePrice(symbol, true);
+    const series2 = (0, import_react4.useMemo)(() => {
+      const base = priceHist && priceHist.length >= 2 ? priceHist.filter((p) => p.t * 1e3 >= spanStartMs) : null;
+      if (!base || base.length < 2) return null;
+      if (!tick) return base;
+      const out = base.slice();
+      if (tick.t >= out[out.length - 1].t) out[out.length - 1] = { t: tick.t, p: tick.p };
+      return out;
+    }, [priceHist, tick, spanStartMs]);
+    const pts = series2 ? series2.map((p) => p.p) : null;
+    const target = pts && started ? pts[0] : null;
+    const livePrice = pts ? pts[pts.length - 1] : null;
+    const [scrubIdx, setScrubIdx] = (0, import_react4.useState)(null);
+    const shownPrice = pts ? scrubIdx == null ? livePrice : pts[Math.min(scrubIdx, pts.length - 1)] : null;
+    const delta = shownPrice != null && target != null ? shownPrice - target : null;
     const predict = (side) => setLocalTrade({ m: upDownToMarket(mk), side });
+    const fmtCountdown = (sec) => {
+      const hh = Math.floor(sec / 3600), mm = Math.floor(sec % 3600 / 60), ss = sec % 60;
+      const p = (v) => String(v).padStart(2, "0");
+      return hh > 0 ? `${p(hh)}:${p(mm)}:${p(ss)}` : `${p(mm)}:${p(ss)}`;
+    };
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", height: "100%", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, zIndex: 20, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px 12px" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
@@ -27525,41 +27665,49 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: "\u20BF" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }),
-            isLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 6 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { mono: true, time: `${String(secsLeft / 60 | 0).padStart(2, "0")}:${String(secsLeft % 60).padStart(2, "0")}` }) })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { mono: true, time: fmtCountdown(secsLeft) }) })
           ] })
         ] }),
-        curPrice != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 4 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 32, fontWeight: 900, fontFamily: MONO }, children: [
-            "$",
-            curPrice.toLocaleString(void 0, { maximumFractionDigits: 2 })
+        shownPrice != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 32, fontWeight: 900, fontFamily: MONO }, children: [
+              "$",
+              shownPrice.toLocaleString(void 0, { maximumFractionDigits: shownPrice < 10 ? 4 : 2 })
+            ] }),
+            delta != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 17, fontWeight: 500, color: delta >= 0 ? C.up : C.down, fontFamily: MONO }, children: [
+              delta >= 0 ? "\u25B2" : "\u25BC",
+              " $",
+              Math.abs(delta).toLocaleString(void 0, { maximumFractionDigits: Math.abs(delta) < 10 ? 4 : 2 })
+            ] })
           ] }),
-          target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, color: curPrice >= target ? C.up : C.down, fontWeight: 700, marginTop: 2 }, children: [
-            curPrice >= target ? "\u25B2" : "\u25BC",
-            " $",
-            Math.abs(curPrice - target).toLocaleString(void 0, { maximumFractionDigits: 2 })
-          ] }),
-          target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-block", fontSize: 12, background: C.soft, padding: "4px 10px", borderRadius: 8, marginTop: 8 }, children: [
+          target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-block", fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, marginTop: 8, lineHeight: 1.5 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
             ": ",
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO, fontWeight: 700 }, children: [
               "$",
-              target.toLocaleString(void 0, { maximumFractionDigits: 2 })
+              target.toLocaleString(void 0, { maximumFractionDigits: target < 10 ? 4 : 2 })
             ] })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: pts ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Area, { pts, color: KLINE_COLORS[0], target, noFill: true, yfmt: (v) => "$" + v.toLocaleString(void 0, { maximumFractionDigits: 0 }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 140, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: isPastSlot ? "" : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", justifyContent: "flex-end", marginBottom: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 }) }),
+          pts ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UpDownChart, { pts, target, onScrub: setScrubIdx, spanStartMs, spanEndMs: now }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 170, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) })
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 22, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, border: `1px solid ${C.line}`, borderRadius: 999, padding: "8px 14px", fontSize: 14, fontWeight: 700, color: C.ink }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, border: `1px solid ${C.line}`, borderRadius: 14, padding: "7px 12px", fontSize: 14, fontWeight: 700, color: C.ink }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Past" }),
-            (series2?.past || []).slice(0, 3).reverse().map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 20, height: 20, borderRadius: 10, background: p.resolvedUp ? C.up : C.down, display: "grid", placeItems: "center", color: "#fff" }, children: p.resolvedUp ? "\u2197" : "\u2198" }, p.id))
+            (slotSeries?.past || []).slice(0, 3).reverse().map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 20, height: 20, borderRadius: 10, background: p.resolvedUp ? C.up : C.down, display: "grid", placeItems: "center", color: "#fff", fontSize: 12 }, children: p.resolvedUp ? "\u2197" : "\u2198" }, p.id))
           ] }),
-          allSlots.map((s) => {
-            const live = s.startMs <= now && now < s.endMs;
-            const on = s.id === selectedId;
-            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSelectedId(s.id), className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 6, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.ink : "transparent", color: on ? "#fff" : C.ink, borderRadius: 999, padding: "8px 14px", fontSize: 14, fontWeight: 700, cursor: "pointer" }, children: [
-              live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 6, height: 6, borderRadius: 3, background: on ? "#fff" : C.down, animation: "blink 1.2s infinite" } }),
-              fmtSlotTime(s.startMs)
-            ] }, s.id);
+          allSlots.map((sl) => {
+            const live = sl.startMs <= now && now < sl.endMs;
+            const on = sl.id === selectedId;
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSelectedId(sl.id), className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 6, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.ink : "transparent", color: on ? "#fff" : C.ink, borderRadius: 14, padding: "7px 12px", fontSize: 14, fontWeight: 700, cursor: "pointer" }, children: [
+              live && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { position: "relative", width: 6, height: 6, flexShrink: 0 }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 3, background: on ? "#fff" : C.down } }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 3, background: on ? "#fff" : C.down } })
+              ] }),
+              fmtSlotTime(sl.endMs)
+            ] }, sl.id);
           })
         ] }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
