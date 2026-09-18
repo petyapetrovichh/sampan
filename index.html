@@ -27030,8 +27030,7 @@ input,button{font-family:inherit}
     if (mins < 60) return `${mins} Min`;
     const hrs = Math.round(mins / 60);
     if (hrs < 24) return `${hrs} Hour${hrs > 1 ? "s" : ""}`;
-    const days = Math.round(hrs / 24);
-    return `${days} Day${days > 1 ? "s" : ""}`;
+    return "Daily";
   }
   var BINANCE_CACHE = {};
   async function fetchBinanceKlines(symbol, startMs, endMs) {
@@ -27183,22 +27182,32 @@ input,button{font-family:inherit}
     };
   }
   var PM_UPDOWN_CACHE = {};
-  async function pmFetchUpDown(assetLabel) {
-    if (PM_UPDOWN_CACHE[assetLabel] !== void 0) return PM_UPDOWN_CACHE[assetLabel];
-    const titleRe = new RegExp("^" + assetLabel + "\\s+up or down", "i");
-    const fetchList = async (closed) => {
-      const qs = closed ? `tag_id=${PM_TAGS.Crypto}&active=false&closed=true&order=endDate&ascending=false&limit=100` : `tag_id=${PM_TAGS.Crypto}&active=true&closed=false&order=endDate&ascending=true&limit=100`;
+  var PM_UPDOWN_POOL = null;
+  async function pmFetchUpDownPool() {
+    if (PM_UPDOWN_POOL) return PM_UPDOWN_POOL;
+    const page = async (closed, offset) => {
+      const qs = closed ? `active=false&closed=true&order=endDate&ascending=false&limit=500&offset=${offset}` : `active=true&closed=false&order=endDate&ascending=true&limit=500&offset=${offset}`;
       try {
         const r = await fetch(`https://gamma-api.polymarket.com/events?${qs}`);
         if (!r.ok) throw new Error("bad status");
-        const data = await r.json();
-        return (Array.isArray(data) ? data : []).filter((ev) => titleRe.test(ev.title || ""));
+        const d = await r.json();
+        return Array.isArray(d) ? d : [];
       } catch (e) {
         return [];
       }
     };
+    const [openA, openB, closedA] = await Promise.all([page(false, 0), page(false, 500), page(true, 0)]);
+    const isUpDown = (ev) => /\bup or down\b/i.test(ev.title || "");
+    PM_UPDOWN_POOL = { open: [...openA, ...openB].filter(isUpDown), closed: closedA.filter(isUpDown) };
+    return PM_UPDOWN_POOL;
+  }
+  async function pmFetchUpDown(assetLabel) {
+    if (PM_UPDOWN_CACHE[assetLabel] !== void 0) return PM_UPDOWN_CACHE[assetLabel];
+    const titleRe = new RegExp("^" + assetLabel + "\\s+up or down", "i");
     try {
-      const [upcomingEvs, pastEvs] = await Promise.all([fetchList(false), fetchList(true)]);
+      const pool = await pmFetchUpDownPool();
+      const upcomingEvs = pool.open.filter((ev) => titleRe.test(ev.title || ""));
+      const pastEvs = pool.closed.filter((ev) => titleRe.test(ev.title || ""));
       const result = {
         upcoming: upcomingEvs.map((ev) => pmMapUpDownSlot(ev, assetLabel)).filter(Boolean),
         past: pastEvs.slice(0, 3).map((ev) => {
@@ -27256,6 +27265,12 @@ input,button{font-family:inherit}
     const ampm = hh >= 12 ? "PM" : "AM";
     hh = hh % 12 || 12;
     return `${hh}:${String(d.getMinutes()).padStart(2, "0")} ${ampm}`;
+  }
+  function fmtSlotLabel(ms, windowMs) {
+    const time = fmtSlotTime(ms);
+    if (windowMs < 20 * 60 * 6e4) return time;
+    const d = new Date(ms);
+    return `${CHART_MONTHS[d.getMonth()]} ${d.getDate()}, ${time}`;
   }
   function fmtGameTime(ms) {
     const d = new Date(ms);
@@ -27603,7 +27618,15 @@ input,button{font-family:inherit}
       const list = slotSeries?.upcoming?.length ? slotSeries.upcoming : [initialMk];
       const sameWindow = list.filter((s) => updownWindowRank(s.endMs - s.startMs) === updownWindowRank(initialMk.endMs - initialMk.startMs));
       const use = sameWindow.length ? sameWindow : list;
-      return use.some((s) => s.id === initialMk.id) ? use : [initialMk, ...use];
+      const withInitial = use.some((s) => s.id === initialMk.id) ? use : [initialMk, ...use];
+      const seen = /* @__PURE__ */ new Set();
+      const out = [];
+      for (const s of withInitial) {
+        if (seen.has(s.id)) continue;
+        seen.add(s.id);
+        out.push(s);
+      }
+      return out;
     }, [slotSeries, initialMk]);
     const mk = allSlots.find((s) => s.id === selectedId) || initialMk;
     const started = mk.startMs <= now;
@@ -27680,19 +27703,19 @@ input,button{font-family:inherit}
               Math.abs(delta).toLocaleString(void 0, { maximumFractionDigits: Math.abs(delta) < 10 ? 4 : 2 })
             ] })
           ] }),
-          target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "inline-block", fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, marginTop: 8, lineHeight: 1.5 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
-            ": ",
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO, fontWeight: 700 }, children: [
-              "$",
-              target.toLocaleString(void 0, { maximumFractionDigits: target < 10 ? 4 : 2 })
-            ] })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 8, minWidth: 0 }, children: [
+            target != null ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
+              ": ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO, fontWeight: 700 }, children: [
+                "$",
+                target.toLocaleString(void 0, { maximumFractionDigits: target < 10 ? 4 : 2 })
+              ] })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", justifyContent: "flex-end", marginBottom: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 }) }),
-          pts ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UpDownChart, { pts, target, onScrub: setScrubIdx, spanStartMs, spanEndMs: now }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 170, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) })
-        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: pts ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UpDownChart, { pts, target, onScrub: setScrubIdx, spanStartMs, spanEndMs: now }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 170, display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 13 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Waiting for price data\u2026" }) }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 22, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, border: `1px solid ${C.line}`, borderRadius: 14, padding: "7px 12px", fontSize: 14, fontWeight: 700, color: C.ink }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Past" }),
@@ -27706,7 +27729,7 @@ input,button{font-family:inherit}
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 3, background: on ? "#fff" : C.down } }),
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 3, background: on ? "#fff" : C.down } })
               ] }),
-              fmtSlotTime(sl.endMs)
+              fmtSlotLabel(sl.endMs, sl.endMs - sl.startMs)
             ] }, sl.id);
           })
         ] }) }),
