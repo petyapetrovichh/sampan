@@ -26770,6 +26770,8 @@ input,button{font-family:inherit}
     const time = withSeconds ? `${hh}:${mm}:${ss} ${ampm}` : `${hh}:${mm} ${ampm}`;
     return `${CHART_MONTHS[d.getMonth()]} ${d.getDate()}, ${time}`;
   }
+  var X_FADE = "linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%)";
+  var Y_FADE = "linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%)";
   var KCHART_DOT = 9;
   var KCHART_GAP = 5;
   var KCHART_PILL_W = 46;
@@ -27229,6 +27231,7 @@ input,button{font-family:inherit}
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex", alignItems: "flex-start", fontVariantNumeric: "tabular-nums", fontFeatureSettings: '"tnum"' }, children: [...text].map((ch, i) => /[0-9]/.test(ch) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerChar, { ch }, i) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", height: "1.25em", lineHeight: "1.25em", verticalAlign: "top" }, children: ch }, i)) })
   );
   function UpDownChart({ pts, target, h = 170, onScrub, spanStartMs, spanEndMs }) {
+    const { lang } = useLang();
     const [dragMs, setDragMs] = (0, import_react4.useState)(null);
     const drawRef = (0, import_react4.useRef)(null);
     const spanMs = Math.max(1, spanEndMs - spanStartMs);
@@ -27315,9 +27318,12 @@ input,button{font-family:inherit}
     const yTicks = [];
     for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) yTicks.push(Number(v.toFixed(8)));
     const yEdges = yTicks.length >= 2 ? [yTicks[0], yTicks[yTicks.length - 1]] : yTicks;
-    const lineTopY = n ? Math.min(...visPts.map((p) => yPx(p.p))) : h / 2;
-    const lineBotY = n ? Math.max(...visPts.map((p) => yPx(p.p))) : h / 2;
-    const targetY = targetOnScreen ? yPx(target) : targetAbove ? Math.max(9, lineTopY - 16) : Math.min(h - 9, lineBotY + 16);
+    const targetY = targetOnScreen ? yPx(target) : targetAbove ? 9 : h - 9;
+    const scrubLabel = dragMs != null && n ? fmtChartDate(new Date(visPts[effIdx].t), true, lang) : "";
+    const scrubW = scrubLabel.length * 6.6 + 4;
+    const scrubPx = effX / 100 * (drawRef.current?.getBoundingClientRect().width || 0);
+    const boundW = (drawRef.current?.getBoundingClientRect().width || 0) + KCHART_GUTTER;
+    const scrubLabelShift = !boundW ? "-50%" : scrubPx - scrubW / 2 < 0 ? "0%" : scrubPx + scrubW / 2 > boundW ? "-100%" : "-50%";
     (0, import_react4.useEffect)(() => {
       if (dragIdx != null) onScrub && onScrub(visPts[dragIdx]?.p);
     }, [dragIdx]);
@@ -27336,7 +27342,7 @@ input,button{font-family:inherit}
         onPointerCancel: release,
         style: { position: "relative", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", cursor: "pointer" },
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h, overflow: "visible" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h, overflow: "visible", marginTop: 24 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "hidden" }, children: [
               yEdges.map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(v), y2: yPx(v), stroke: C.line, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }, "g" + v)),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: path, fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
@@ -27352,6 +27358,7 @@ input,button{font-family:inherit}
               })(), fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
             ] }),
             dragMs != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${effX}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }, "crosshair"),
+            dragMs != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${effX}%`, top: -22, transform: `translateX(${scrubLabelShift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: scrubLabel }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: dragMs == null ? "100%" : `${effX}%`, top: effY, transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible", transition: dragMs == null ? GLIDE : "none" }, children: [
               dragIdx == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } })
@@ -27364,12 +27371,12 @@ input,button{font-family:inherit}
                 !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191" : "\u2193" })
               ] })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: [
               yTicks.map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtP(v) }, v)),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: effY, right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700, background: "#fff" }, children: fmtP(effP) })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden" }, children: xTicks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${xOf(t)}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: fmtClock(t) }, t)) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden", maskImage: X_FADE, WebkitMaskImage: X_FADE }, children: xTicks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${xOf(t)}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: fmtClock(t) }, t)) })
         ]
       }
     );
