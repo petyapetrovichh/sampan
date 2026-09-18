@@ -27238,22 +27238,40 @@ input,button{font-family:inherit}
     const xOf = (t) => (t - spanStartMs) / spanMs * 100;
     const rawLast = pts.length ? pts[pts.length - 1].p : null;
     const easedLast = useSmoothedValue(rawLast, 0.16);
+    const trailRef = (0, import_react4.useRef)([]);
+    (0, import_react4.useEffect)(() => {
+      if (!pts.length) {
+        trailRef.current = [];
+        return;
+      }
+      if (!trailRef.current.length) {
+        trailRef.current = pts.slice();
+        return;
+      }
+      if (easedLast == null) return;
+      const now = Date.now();
+      const arr = trailRef.current;
+      const lastT = arr.length ? arr[arr.length - 1].t : 0;
+      if (now - lastT >= 55) arr.push({ t: now, p: easedLast });
+      else if (arr.length) arr[arr.length - 1] = { t: now, p: easedLast };
+      const cutoff = now - (spanEndMs - spanStartMs) - 3e3;
+      let drop = 0;
+      while (drop < arr.length - 1 && arr[drop].t < cutoff) drop++;
+      if (drop) trailRef.current = arr.slice(drop);
+    });
+    const src = trailRef.current.length ? trailRef.current : pts;
     const visPts = (0, import_react4.useMemo)(() => {
-      const inside = pts.filter((p) => p.t >= spanStartMs);
-      const firstInside = pts.findIndex((p) => p.t >= spanStartMs);
+      const inside = src.filter((p) => p.t >= spanStartMs);
+      const firstInside = src.findIndex((p) => p.t >= spanStartMs);
       if (firstInside > 0) {
-        const a = pts[firstInside - 1], b = pts[firstInside];
+        const a = src[firstInside - 1], b = src[firstInside];
         const f = (spanStartMs - a.t) / Math.max(1, b.t - a.t);
         inside.unshift({ t: spanStartMs, p: a.p + (b.p - a.p) * f });
       }
       const lastP = inside[inside.length - 1];
-      const tipP = easedLast != null ? easedLast : lastP?.p;
-      if (lastP && tipP != null) {
-        if (lastP.t < spanEndMs) inside.push({ t: spanEndMs, p: tipP });
-        else inside[inside.length - 1] = { t: lastP.t, p: tipP };
-      }
+      if (lastP && lastP.t < spanEndMs) inside.push({ t: spanEndMs, p: lastP.p });
       return inside;
-    }, [pts, spanStartMs, spanEndMs, easedLast]);
+    }, [src, pts, spanStartMs, spanEndMs, easedLast]);
     const n = visPts.length;
     const nearestIdx = (ms) => {
       let bestI = n - 1, bestD = Infinity;
@@ -27370,9 +27388,11 @@ input,button{font-family:inherit}
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: KLINE_COLORS[0] } })
             ] }, "livedot"),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, top: effY, height: 0, borderTop: `1px dashed ${KLINE_COLORS[0]}`, opacity: 0.75, pointerEvents: "none" } }),
-            target != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: 0, top: targetY, height: 0, pointerEvents: "none" }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, top: 0, borderTop: `1px dashed ${C.mute}`, opacity: 0.8 } }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 4, background: C.soft, borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 700, color: C.ink, whiteSpace: "nowrap" }, children: [
+            target != null && // sits ABOVE the price scale (zIndex) and extends into the gutter, so it's free to
+            // cover a price label or the orange live-price readout as it travels
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: -KCHART_GUTTER, top: targetY, height: 0, pointerEvents: "none", zIndex: 3 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: KCHART_GUTTER, top: 0, borderTop: `1px dashed ${C.mute}`, opacity: 0.8 } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 4, background: "#8A8F98", borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
                 !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191" : "\u2193" })
               ] })
@@ -27917,23 +27937,56 @@ input,button{font-family:inherit}
     (0, import_react4.useEffect)(() => {
       if (!IS_H5 || !initialMk.upTokenId) return;
       let cancelled = false;
+      const tok = initialMk.upTokenId;
+      const readMidpoint = async () => {
+        const r = await fetch(`https://clob.polymarket.com/midpoint?token_id=${tok}`);
+        if (!r.ok) throw new Error("midpoint " + r.status);
+        const d = await r.json();
+        const v = parseFloat(d?.mid ?? d?.midpoint);
+        if (isNaN(v)) throw new Error("no mid");
+        return v;
+      };
+      const readBookPrices = async () => {
+        const [rb, rs] = await Promise.all([
+          fetch(`https://clob.polymarket.com/price?token_id=${tok}&side=buy`),
+          fetch(`https://clob.polymarket.com/price?token_id=${tok}&side=sell`)
+        ]);
+        if (!rb.ok || !rs.ok) throw new Error("price " + rb.status + "/" + rs.status);
+        const [b, a] = await Promise.all([rb.json(), rs.json()]);
+        const bid = parseFloat(b?.price), ask = parseFloat(a?.price);
+        if (isNaN(bid) || isNaN(ask)) throw new Error("no prices");
+        return (bid + ask) / 2;
+      };
+      const readGamma = async () => {
+        const r = await fetch(`https://gamma-api.polymarket.com/markets?condition_ids=${initialMk.conditionId}`);
+        if (!r.ok) throw new Error("gamma " + r.status);
+        const d = await r.json();
+        const mkt = Array.isArray(d) ? d[0] : d;
+        const parsed = mkt && pmParseOutcome(mkt);
+        if (!parsed) throw new Error("unparsable");
+        const i = parsed.outs.findIndex((o) => String(o).toLowerCase() === "up");
+        if (i < 0) throw new Error("no up outcome");
+        return parsed.prices[i] / 100;
+      };
       const load = async () => {
-        try {
-          const r = await fetch(`https://clob.polymarket.com/midpoint?token_id=${initialMk.upTokenId}`);
-          if (!r.ok) throw new Error("bad status");
-          const d = await r.json();
-          const mid = parseFloat(d?.mid);
-          if (!cancelled && !isNaN(mid)) setLiveUpPct(Math.round(mid * 100));
-        } catch (e) {
+        for (const src of [readMidpoint, readBookPrices, readGamma]) {
+          try {
+            const v = await src();
+            if (!cancelled && v > 0 && v < 1) {
+              setLiveUpPct(Math.round(v * 100));
+              return;
+            }
+          } catch (e) {
+          }
         }
       };
       load();
-      const iv = setInterval(load, 8e3);
+      const iv = setInterval(load, 3e3);
       return () => {
         cancelled = true;
         clearInterval(iv);
       };
-    }, [initialMk.upTokenId]);
+    }, [initialMk.upTokenId, initialMk.conditionId]);
     const upPct = liveUpPct != null ? liveUpPct : initialMk.upPct;
     const tradeMarket = (0, import_react4.useMemo)(() => upDownToMarket({ ...initialMk, upPct }), [initialMk, upPct]);
     const predict = (side) => setLocalTrade({ side });
