@@ -27236,6 +27236,8 @@ input,button{font-family:inherit}
     const drawRef = (0, import_react4.useRef)(null);
     const spanMs = Math.max(1, spanEndMs - spanStartMs);
     const xOf = (t) => (t - spanStartMs) / spanMs * 100;
+    const rawLast = pts.length ? pts[pts.length - 1].p : null;
+    const easedLast = useSmoothedValue(rawLast, 0.16);
     const visPts = (0, import_react4.useMemo)(() => {
       const inside = pts.filter((p) => p.t >= spanStartMs);
       const firstInside = pts.findIndex((p) => p.t >= spanStartMs);
@@ -27245,9 +27247,13 @@ input,button{font-family:inherit}
         inside.unshift({ t: spanStartMs, p: a.p + (b.p - a.p) * f });
       }
       const lastP = inside[inside.length - 1];
-      if (lastP && lastP.t < spanEndMs) inside.push({ t: spanEndMs, p: lastP.p });
+      const tipP = easedLast != null ? easedLast : lastP?.p;
+      if (lastP && tipP != null) {
+        if (lastP.t < spanEndMs) inside.push({ t: spanEndMs, p: tipP });
+        else inside[inside.length - 1] = { t: lastP.t, p: tipP };
+      }
       return inside;
-    }, [pts, spanStartMs, spanEndMs]);
+    }, [pts, spanStartMs, spanEndMs, easedLast]);
     const n = visPts.length;
     const nearestIdx = (ms) => {
       let bestI = n - 1, bestD = Infinity;
@@ -27966,14 +27972,11 @@ input,button{font-family:inherit}
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 8, minWidth: 0 }, children: [
-            target != null ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap", minWidth: 132 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
               ": ",
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO, fontWeight: 700 }, children: [
-                "$",
-                target.toLocaleString(void 0, { maximumFractionDigits: target < 10 ? 4 : 2 })
-              ] })
-            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO, fontWeight: 700 }, children: target != null ? "$" + fmtPrice(target) : "$--" })
+            ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] })
         ] }),
