@@ -25887,11 +25887,13 @@ input,button{font-family:inherit}
     };
     const release = () => setPressed(false);
     const title = isUpDown ? `${mk.assetLabel} Up or Down - ${mk.durationLabel}` : mk.q;
+    const cardLivePct = useLiveUpPct(isUpDown ? mk.upTokenId : null, isUpDown ? mk.conditionId : null, isUpDown, 9e3 + Math.abs(hashStr(String(mk.id))) % 4e3);
+    const cardUpPct = isUpDown ? cardLivePct != null ? cardLivePct : mk.upPct : 0;
     const showLive = isUpDown || mk.isLiveGame && !mk.gameEnded;
     const liveTime = !isUpDown && mk.startMs ? fmtSlotTime(mk.startMs) : "";
     const rows = isUpDown ? [
-      { label: "Up", pct: Math.round(mk.upPct), binary: true, side: "Up" },
-      { label: "Down", pct: Math.round(100 - mk.upPct), binary: true, side: "Down" }
+      { label: "Up", pct: Math.round(cardUpPct), binary: true, side: "Up" },
+      { label: "Down", pct: Math.round(100 - cardUpPct), binary: true, side: "Down" }
     ] : mk.rows;
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
@@ -25917,7 +25919,7 @@ input,button{font-family:inherit}
             ] }) : rw.label ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: rw.label }) : rw.label }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1, height: 1, borderBottom: `1.5px solid ${C.line}`, maxWidth: 120 } }) }),
             rw.binary ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: (e) => {
               e.stopPropagation();
-              onCopy && onCopy(isUpDown ? upDownToMarket(mk) : feedToMarket(mk, i), rw.side === "No" || rw.side === "Down" ? 1 : 0);
+              onCopy && onCopy(isUpDown ? upDownToMarket({ ...mk, upPct: cardUpPct }) : feedToMarket(mk, i), rw.side === "No" || rw.side === "Down" ? 1 : 0);
             }, className: "tap btn-soft", style: { border: "none", background: rw.side === "No" || rw.side === "Down" ? C.down : C.up, color: "#fff", borderRadius: 999, padding: "5px 0", width: 70, textAlign: "center", fontWeight: 700, fontSize: 17, flexShrink: 0, boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
               rw.pct,
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11, fontWeight: 700 }, children: "%" })
@@ -27432,6 +27434,66 @@ input,button{font-family:inherit}
       }
     );
   }
+  function useLiveUpPct(upTokenId, conditionId, enabled = true, everyMs = 3e3) {
+    const [pct, setPct] = (0, import_react4.useState)(null);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !enabled || !upTokenId) {
+        setPct(null);
+        return;
+      }
+      let cancelled = false;
+      const readMidpoint = async () => {
+        const r = await fetch(`https://clob.polymarket.com/midpoint?token_id=${upTokenId}`);
+        if (!r.ok) throw new Error("midpoint " + r.status);
+        const d = await r.json();
+        const v = parseFloat(d?.mid ?? d?.midpoint);
+        if (isNaN(v)) throw new Error("no mid");
+        return v;
+      };
+      const readBookPrices = async () => {
+        const [rb, rs] = await Promise.all([
+          fetch(`https://clob.polymarket.com/price?token_id=${upTokenId}&side=buy`),
+          fetch(`https://clob.polymarket.com/price?token_id=${upTokenId}&side=sell`)
+        ]);
+        if (!rb.ok || !rs.ok) throw new Error("price " + rb.status + "/" + rs.status);
+        const [b, a] = await Promise.all([rb.json(), rs.json()]);
+        const bid = parseFloat(b?.price), ask = parseFloat(a?.price);
+        if (isNaN(bid) || isNaN(ask)) throw new Error("no prices");
+        return (bid + ask) / 2;
+      };
+      const readGamma = async () => {
+        if (!conditionId) throw new Error("no condition id");
+        const r = await fetch(`https://gamma-api.polymarket.com/markets?condition_ids=${conditionId}`);
+        if (!r.ok) throw new Error("gamma " + r.status);
+        const d = await r.json();
+        const mkt = Array.isArray(d) ? d[0] : d;
+        const parsed = mkt && pmParseOutcome(mkt);
+        if (!parsed) throw new Error("unparsable");
+        const i = parsed.outs.findIndex((o) => String(o).toLowerCase() === "up");
+        if (i < 0) throw new Error("no up outcome");
+        return parsed.prices[i] / 100;
+      };
+      const load = async () => {
+        for (const src of [readMidpoint, readBookPrices, readGamma]) {
+          try {
+            const v = await src();
+            if (!cancelled && v > 0 && v < 1) {
+              setPct(Math.round(v * 100));
+              return;
+            }
+          } catch (e) {
+          }
+        }
+      };
+      load();
+      const iv = setInterval(load, everyMs);
+      return () => {
+        cancelled = true;
+        clearInterval(iv);
+      };
+    }, [upTokenId, conditionId, enabled, everyMs]);
+    return pct;
+  }
   function upDownWindowMsOf(ev, fallbackMs) {
     const title = ev.title || "";
     const m = title.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
@@ -27550,12 +27612,19 @@ input,button{font-family:inherit}
         searchedOpen.length ? Promise.resolve([]) : fetchList(false),
         searchedClosed.length ? Promise.resolve([]) : fetchList(true)
       ]);
-      let upcomingEvs = searchedOpen.length ? searchedOpen : tagOpen;
+      const seedOpen = searchedOpen.length ? searchedOpen : tagOpen;
       const pastEvs = searchedClosed.length ? searchedClosed : tagClosed;
-      const byTags = await fetchByDiscoveredTags([...upcomingEvs, ...pastEvs]);
-      if (byTags.length > upcomingEvs.length) upcomingEvs = byTags;
+      const byTags = await fetchByDiscoveredTags([...seedOpen, ...pastEvs]);
+      const mergedOpen = [];
+      const seenIds = /* @__PURE__ */ new Set();
+      for (const ev of [...searchedOpen, ...tagOpen, ...byTags]) {
+        if (!ev || seenIds.has(ev.id)) continue;
+        seenIds.add(ev.id);
+        mergedOpen.push(ev);
+      }
+      const upcomingEvs = mergedOpen;
       const result = {
-        upcoming: upcomingEvs.map((ev) => pmMapUpDownSlot(ev, assetLabel)).filter(Boolean).sort((a, b) => a.endMs - b.endMs),
+        upcoming: upcomingEvs.map((ev) => pmMapUpDownSlot(ev, assetLabel)).filter(Boolean).filter((sl) => sl.endMs > Date.now()).sort((a, b) => a.endMs - b.endMs),
         past: pastEvs.slice(0, 3).map((ev) => {
           const mkt = (ev.markets || [])[0];
           if (!mkt) return null;
@@ -27606,14 +27675,12 @@ input,button{font-family:inherit}
       if (!res || !res.upcoming?.length) return;
       const byWindow = /* @__PURE__ */ new Map();
       for (const slot of res.upcoming) {
+        if (slot.endMs <= now) continue;
         const rank = updownWindowRank(slot.endMs - slot.startMs);
-        const running = slot.startMs <= now && now < slot.endMs;
         const prev = byWindow.get(rank);
-        if (!prev || running && !prev.running || !prev.running && slot.startMs < prev.slot.startMs) {
-          byWindow.set(rank, { slot, running });
-        }
+        if (!prev || slot.endMs < prev.endMs) byWindow.set(rank, slot);
       }
-      [...byWindow.entries()].sort((a, b) => a[0] - b[0]).forEach(([, v]) => out.push(v.slot));
+      [...byWindow.entries()].sort((a, b) => a[0] - b[0]).forEach(([, slot]) => out.push(slot));
     });
     return out;
   }
@@ -27971,6 +28038,7 @@ input,button{font-family:inherit}
     const [closing, setClosing] = (0, import_react4.useState)(false);
     const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
     const [pastOutcomes, setPastOutcomes] = (0, import_react4.useState)([]);
+    const [seriesSlots, setSeriesSlots] = (0, import_react4.useState)(null);
     const [selectedId, setSelectedId] = (0, import_react4.useState)(initialMk.id);
     const [now, setNow] = (0, import_react4.useState)(Date.now());
     const goBack = () => setClosing(true);
@@ -27978,7 +28046,9 @@ input,button{font-family:inherit}
       if (!IS_H5) return;
       let cancelled = false;
       pmFetchUpDown(initialMk.assetLabel).then((res) => {
-        if (!cancelled) setPastOutcomes(res?.past || []);
+        if (cancelled) return;
+        setPastOutcomes(res?.past || []);
+        setSeriesSlots(res?.upcoming || []);
       });
       return () => {
         cancelled = true;
@@ -27993,13 +28063,21 @@ input,button{font-family:inherit}
     const isDaily = windowMs >= 20 * 60 * 6e4;
     const slotCount = isDaily ? 2 : 6;
     const allSlots = (0, import_react4.useMemo)(() => {
-      return Array.from({ length: slotCount }, (_, i) => i === 0 ? initialMk : {
-        ...initialMk,
-        id: initialMk.id + "-t" + i,
-        startMs: initialMk.startMs + i * windowMs,
-        endMs: initialMk.startMs + windowMs + i * windowMs
-      });
-    }, [initialMk, windowMs, slotCount]);
+      const real = (seriesSlots || []).filter((sl) => updownWindowRank(sl.endMs - sl.startMs) === updownWindowRank(rawWindowMs) && sl.endMs > now).sort((a, b) => a.endMs - b.endMs);
+      const out = [];
+      const seen = /* @__PURE__ */ new Set();
+      for (const sl of [initialMk, ...real]) {
+        if (seen.has(sl.id) || out.length >= slotCount) continue;
+        seen.add(sl.id);
+        out.push(sl);
+      }
+      out.sort((a, b) => a.endMs - b.endMs);
+      while (out.length < slotCount) {
+        const last = out[out.length - 1];
+        out.push({ ...last, id: last.id + "-t" + out.length, startMs: last.startMs + windowMs, endMs: last.endMs + windowMs, synthetic: true });
+      }
+      return out;
+    }, [initialMk, seriesSlots, windowMs, slotCount, rawWindowMs]);
     const mk = allSlots.find((s) => s.id === selectedId) || initialMk;
     const started = mk.startMs <= now;
     const isLive = started && now < mk.endMs;
@@ -28026,66 +28104,14 @@ input,button{font-family:inherit}
     const [scrubPrice, setScrubPrice] = (0, import_react4.useState)(null);
     const shownPriceRaw = scrubPrice == null ? livePrice : scrubPrice;
     const priceDp = livePrice != null && livePrice < 10 ? 4 : 2;
+    const targetNumW = (livePrice != null ? ("$" + livePrice.toLocaleString(void 0, { minimumFractionDigits: priceDp, maximumFractionDigits: priceDp })).length : 6) * 7.6;
     const fmtPrice = (v) => v == null ? "" : v.toLocaleString(void 0, { minimumFractionDigits: priceDp, maximumFractionDigits: priceDp });
     const throttledPrice = useThrottledValue(shownPriceRaw, 1e3);
     const shownPrice = scrubPrice != null ? scrubPrice : throttledPrice;
     const delta = shownPrice != null && target != null ? shownPrice - target : null;
-    const [liveUpPct, setLiveUpPct] = (0, import_react4.useState)(null);
-    (0, import_react4.useEffect)(() => {
-      if (!IS_H5 || !initialMk.upTokenId) return;
-      let cancelled = false;
-      const tok = initialMk.upTokenId;
-      const readMidpoint = async () => {
-        const r = await fetch(`https://clob.polymarket.com/midpoint?token_id=${tok}`);
-        if (!r.ok) throw new Error("midpoint " + r.status);
-        const d = await r.json();
-        const v = parseFloat(d?.mid ?? d?.midpoint);
-        if (isNaN(v)) throw new Error("no mid");
-        return v;
-      };
-      const readBookPrices = async () => {
-        const [rb, rs] = await Promise.all([
-          fetch(`https://clob.polymarket.com/price?token_id=${tok}&side=buy`),
-          fetch(`https://clob.polymarket.com/price?token_id=${tok}&side=sell`)
-        ]);
-        if (!rb.ok || !rs.ok) throw new Error("price " + rb.status + "/" + rs.status);
-        const [b, a] = await Promise.all([rb.json(), rs.json()]);
-        const bid = parseFloat(b?.price), ask = parseFloat(a?.price);
-        if (isNaN(bid) || isNaN(ask)) throw new Error("no prices");
-        return (bid + ask) / 2;
-      };
-      const readGamma = async () => {
-        const r = await fetch(`https://gamma-api.polymarket.com/markets?condition_ids=${initialMk.conditionId}`);
-        if (!r.ok) throw new Error("gamma " + r.status);
-        const d = await r.json();
-        const mkt = Array.isArray(d) ? d[0] : d;
-        const parsed = mkt && pmParseOutcome(mkt);
-        if (!parsed) throw new Error("unparsable");
-        const i = parsed.outs.findIndex((o) => String(o).toLowerCase() === "up");
-        if (i < 0) throw new Error("no up outcome");
-        return parsed.prices[i] / 100;
-      };
-      const load = async () => {
-        for (const src of [readMidpoint, readBookPrices, readGamma]) {
-          try {
-            const v = await src();
-            if (!cancelled && v > 0 && v < 1) {
-              setLiveUpPct(Math.round(v * 100));
-              return;
-            }
-          } catch (e) {
-          }
-        }
-      };
-      load();
-      const iv = setInterval(load, 3e3);
-      return () => {
-        cancelled = true;
-        clearInterval(iv);
-      };
-    }, [initialMk.upTokenId, initialMk.conditionId]);
-    const upPct = liveUpPct != null ? liveUpPct : initialMk.upPct;
-    const tradeMarket = (0, import_react4.useMemo)(() => upDownToMarket({ ...initialMk, upPct }), [initialMk, upPct]);
+    const liveUpPct = useLiveUpPct(mk.upTokenId, mk.conditionId, !mk.synthetic, 3e3);
+    const upPct = liveUpPct != null ? liveUpPct : mk.upPct;
+    const tradeMarket = (0, import_react4.useMemo)(() => upDownToMarket({ ...mk, upPct }), [mk, upPct]);
     const predict = (side) => setLocalTrade({ side });
     const fmtCountdown = (sec) => {
       const hh = Math.floor(sec / 3600), mm = Math.floor(sec % 3600 / 60), ss = sec % 60;
@@ -28122,10 +28148,10 @@ input,button{font-family:inherit}
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 8, minWidth: 0 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap", minWidth: 132 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap" }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
               ": ",
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO, fontWeight: 700 }, children: target != null ? "$" + fmtPrice(target) : "$--" })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO, fontWeight: 700, display: "inline-block", minWidth: targetNumW, textAlign: "left" }, children: target != null ? "$" + fmtPrice(target) : "$--" })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] })
