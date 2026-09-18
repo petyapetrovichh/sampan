@@ -26347,6 +26347,7 @@ input,button{font-family:inherit}
     }, [tab, predSub]);
     const predsToShow = () => {
       const cached = predCache[predSub];
+      if (predSub === "Live") return Array.isArray(cached) ? cached : [];
       if (cached === void 0) return feed;
       if (cached === null || !cached.length) return feed;
       return cached;
@@ -27207,6 +27208,17 @@ input,button{font-family:inherit}
       return ev;
     }
   }
+  async function pmFetchUpDownFallback(assetLabel) {
+    const titleRe = new RegExp("^" + assetLabel + "\\s+up or down", "i");
+    try {
+      const r = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${PM_TAGS.Crypto}&related_tags=true&active=true&closed=false&order=volume&ascending=false&limit=500`);
+      if (!r.ok) throw new Error("bad status");
+      const data = await r.json();
+      return (Array.isArray(data) ? data : []).filter((ev) => titleRe.test(ev.title || ""));
+    } catch (e) {
+      return [];
+    }
+  }
   async function pmFetchUpDown(assetLabel) {
     if (PM_UPDOWN_CACHE[assetLabel] !== void 0) return PM_UPDOWN_CACHE[assetLabel];
     const titleRe = new RegExp("^" + assetLabel + "\\s+up or down", "i");
@@ -27214,6 +27226,7 @@ input,button{font-family:inherit}
       const pool = await pmFetchUpDownPool();
       const matchingSeries = pool.filter((s) => titleRe.test(s.title || ""));
       let allEvents = matchingSeries.flatMap((s) => s.events || []);
+      if (!allEvents.length) allEvents = await pmFetchUpDownFallback(assetLabel);
       allEvents = await Promise.all(allEvents.map(pmFillEventMarkets));
       const upcomingEvs = allEvents.filter((ev) => !ev.closed);
       const pastEvs = allEvents.filter((ev) => ev.closed).sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
