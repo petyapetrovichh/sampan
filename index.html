@@ -27354,9 +27354,14 @@ input,button{font-family:inherit}
       const mag = Math.pow(10, Math.floor(Math.log10(rough || 1)));
       return [1, 2, 5, 10].map((m) => m * mag).find((v) => v >= rough) || mag;
     })();
+    const yEdges = [yMax, yMin];
+    const EDGE_GAP = 16;
     const yTicks = [];
-    for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) yTicks.push(Number(v.toFixed(8)));
-    const yEdges = yTicks.length >= 2 ? [yTicks[0], yTicks[yTicks.length - 1]] : yTicks;
+    for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
+      const val = Number(v.toFixed(8));
+      const y = yPx(val);
+      if (y > EDGE_GAP && y < h - EDGE_GAP) yTicks.push(val);
+    }
     const targetY = targetOnScreen ? yPx(target) : targetAbove ? 9 : h - 9;
     const scrubLabel = dragMs != null && n ? fmtChartDate(new Date(visPts[effIdx].t), true, lang) : "";
     const scrubW = scrubLabel.length * 6.6 + 4;
@@ -27425,6 +27430,8 @@ input,button{font-family:inherit}
               ] })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, right: 0 }, children: fmtP(yMax) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: 0, right: 0 }, children: fmtP(yMin) }),
               yTicks.map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtP(v) }, v)),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: effY, right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700, background: "#fff" }, children: fmtP(effP) })
             ] })
