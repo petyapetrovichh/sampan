@@ -27016,9 +27016,9 @@ input,button{font-family:inherit}
     const v = Number(n || 0);
     return v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : v >= 1e3 ? `$${(v / 1e3).toFixed(2)}k` : `$${v.toFixed(2)}`;
   }
-  var UPDOWN_ASSETS = ["Bitcoin", "Ethereum", "XRP", "BNB", "Solana", "Dogecoin", "Hyperliquid"];
-  var UPDOWN_SYMBOL = { Bitcoin: "BTCUSDT", Ethereum: "ETHUSDT", Solana: "SOLUSDT", BNB: "BNBUSDT", XRP: "XRPUSDT", Dogecoin: "DOGEUSDT", Hyperliquid: "HYPEUSDT" };
-  var UPDOWN_ICON_BG = { Bitcoin: "#F7931A", Ethereum: "#627EEA", Solana: "#9945FF", BNB: "#F0B90B", XRP: "#23292F", Dogecoin: "#C2A633", Hyperliquid: "#97FCE4" };
+  var UPDOWN_ASSETS = ["Bitcoin", "Ethereum", "XRP", "BNB", "Solana", "Dogecoin"];
+  var UPDOWN_SYMBOL = { Bitcoin: "BTCUSDT", Ethereum: "ETHUSDT", Solana: "SOLUSDT", BNB: "BNBUSDT", XRP: "XRPUSDT", Dogecoin: "DOGEUSDT" };
+  var UPDOWN_ICON_BG = { Bitcoin: "#F7931A", Ethereum: "#627EEA", Solana: "#9945FF", BNB: "#F0B90B", XRP: "#23292F", Dogecoin: "#C2A633" };
   var UPDOWN_WINDOW_MS = [5 * 6e4, 15 * 6e4, 60 * 6e4, 4 * 60 * 6e4, 24 * 60 * 6e4];
   function updownWindowRank(ms) {
     let best = UPDOWN_WINDOW_MS.length, bestDiff = Infinity;
@@ -27548,13 +27548,17 @@ input,button{font-family:inherit}
     };
   }
   var PM_UPDOWN_CACHE = {};
+  var PM_UPDOWN_CACHE_AT = {};
+  var PM_UPDOWN_TTL = 3e4;
   function upDownTitleMatcher(assetLabel) {
     const ticker = (UPDOWN_SYMBOL[assetLabel] || "").replace(/USDT$/i, "");
     const alt = ticker && ticker.toLowerCase() !== assetLabel.toLowerCase() ? "|" + ticker : "";
     return new RegExp("\\b(" + assetLabel + alt + ")\\b.*up or down|up or down.*\\b(" + assetLabel + alt + ")\\b", "i");
   }
   async function pmFetchUpDown(assetLabel) {
-    if (PM_UPDOWN_CACHE[assetLabel] !== void 0) return PM_UPDOWN_CACHE[assetLabel];
+    if (PM_UPDOWN_CACHE[assetLabel] !== void 0 && Date.now() - (PM_UPDOWN_CACHE_AT[assetLabel] || 0) < PM_UPDOWN_TTL) {
+      return PM_UPDOWN_CACHE[assetLabel];
+    }
     const titleRe = upDownTitleMatcher(assetLabel);
     const searchFetch = async () => {
       try {
@@ -27579,10 +27583,12 @@ input,button{font-family:inherit}
       }
     };
     const fetchByDiscoveredTags = async (seedEvents) => {
-      const wanted = /up\s*or\s*down|recurring/i;
+      const family = /up\s*or\s*down|recurring/i;
+      const windowTag = /^(\d+\s*[mh]|daily)$/i;
       const ids = [];
       for (const ev of seedEvents) for (const t of ev.tags || []) {
-        if ((wanted.test(t.label || "") || wanted.test(t.slug || "")) && t.id && !ids.includes(t.id)) ids.push(t.id);
+        const lbl = String(t.label || t.slug || "").trim();
+        if ((family.test(lbl) || windowTag.test(lbl)) && t.id && !ids.includes(t.id)) ids.push(t.id);
       }
       if (!ids.length) return [];
       const pages = await Promise.all(ids.map(async (id) => {
@@ -27646,12 +27652,18 @@ input,button{font-family:inherit}
         }).filter(Boolean)
       };
       try {
+        const byLen = {};
+        for (const u of result.upcoming) byLen[u.durationLabel] = (byLen[u.durationLabel] || 0) + 1;
+        const live = result.upcoming.filter((u) => u.startMs <= Date.now() && Date.now() < u.endMs).map((u) => u.durationLabel);
         console.log(
           "[updown]",
           assetLabel,
-          "windows:",
-          result.upcoming.map((u) => u.durationLabel).join(", ") || "(none)",
-          "| search:",
+          byLen,
+          "live:",
+          live.join(",") || "(none)",
+          "| raw merged:",
+          upcomingEvs.length,
+          "search:",
           searchedOpen.length,
           "tag:",
           tagOpen.length,
@@ -27661,6 +27673,7 @@ input,button{font-family:inherit}
       } catch (e) {
       }
       PM_UPDOWN_CACHE[assetLabel] = result;
+      PM_UPDOWN_CACHE_AT[assetLabel] = Date.now();
       return result;
     } catch (e) {
       PM_UPDOWN_CACHE[assetLabel] = null;
