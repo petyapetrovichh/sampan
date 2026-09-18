@@ -27349,21 +27349,12 @@ input,button{font-family:inherit}
     const TICK_SEC = 10;
     const xTicks = [];
     for (let t = Math.ceil(spanStartMs / (TICK_SEC * 1e3)) * TICK_SEC * 1e3; t <= spanEndMs; t += TICK_SEC * 1e3) xTicks.push(t);
-    const yStep = (() => {
-      const rough = (yMax - yMin) / 3;
-      const mag = Math.pow(10, Math.floor(Math.log10(rough || 1)));
-      return [1, 2, 5, 10].map((m) => m * mag).find((v) => v >= rough) || mag;
-    })();
     const EDGE_INSET = 16;
     const valueAtY = (y) => yMin + (h - y) / h * (yMax - yMin);
-    const yEdges = [valueAtY(EDGE_INSET), valueAtY(h - EDGE_INSET)];
-    const EDGE_GAP = 26;
-    const yTicks = [];
-    for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
-      const val = Number(v.toFixed(8));
-      const y = yPx(val);
-      if (y > EDGE_GAP && y < h - EDGE_GAP) yTicks.push(val);
-    }
+    const usableH = h - EDGE_INSET * 2;
+    const ySlices = Math.max(1, Math.round(usableH / 46));
+    const yLevels = Array.from({ length: ySlices + 1 }, (_, i) => valueAtY(EDGE_INSET + usableH * i / ySlices));
+    const yEdges = yLevels;
     const targetY = targetOnScreen ? yPx(target) : targetAbove ? 9 : h - 9;
     const scrubLabel = dragMs != null && n ? fmtChartDate(new Date(visPts[effIdx].t), true, lang) : "";
     const scrubW = scrubLabel.length * 6.6 + 4;
@@ -27390,7 +27381,7 @@ input,button{font-family:inherit}
         children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h, overflow: "visible", marginTop: 24 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "hidden" }, children: [
-              [...yEdges, ...yTicks].map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(v), y2: yPx(v), stroke: C.line, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }, "g" + v)),
+              yLevels.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(v), y2: yPx(v), stroke: C.line, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }, "g" + i)),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: path, fill: "none", stroke: KLINE_COLORS[0], strokeWidth: "3", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
               dragIdx != null && n > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: (() => {
                 const X2 = (i) => xOf(visPts[i].t), Y = (i) => yPx(visPts[i].p);
@@ -27432,7 +27423,7 @@ input,button{font-family:inherit}
               ] })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: [
-              [...yEdges, ...yTicks].map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtP(v) }, v)),
+              yLevels.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtP(v) }, i)),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: effY, right: 0, transform: "translateY(-50%)", color: KLINE_COLORS[0], fontWeight: 700, background: "#fff" }, children: fmtP(effP) })
             ] })
           ] }),
@@ -28149,6 +28140,8 @@ input,button{font-family:inherit}
     const mk = allSlots.find((s) => s.id === selId) || initialMk;
     const rolloverRef = (0, import_react4.useRef)(0);
     const carouselRef = (0, import_react4.useRef)(null);
+    const livePriceRef = (0, import_react4.useRef)(null);
+    const carriedTargetRef = (0, import_react4.useRef)({});
     (0, import_react4.useEffect)(() => {
       const first = allSlots[0];
       if (!first || now < first.endMs) return;
@@ -28161,7 +28154,10 @@ input,button{font-family:inherit}
         setSeriesSlots(res.upcoming || []);
         const rank = updownWindowRank(rawWindowMs);
         const next = (res.upcoming || []).filter((sl) => updownWindowRank(sl.endMs - sl.startMs) === rank && sl.endMs > Date.now()).sort((a, b) => a.endMs - b.endMs)[0];
-        if (next) setSelectedId(next.id);
+        if (next) {
+          if (livePriceRef.current != null) carriedTargetRef.current[next.id] = livePriceRef.current;
+          setSelectedId(next.id);
+        }
         if (carouselRef.current) carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
       });
     }, [now, allSlots, initialMk.assetLabel, rawWindowMs]);
@@ -28171,7 +28167,7 @@ input,button{font-family:inherit}
     const symbol = UPDOWN_SYMBOL[mk.assetLabel];
     const [target, setTarget] = (0, import_react4.useState)(null);
     (0, import_react4.useEffect)(() => {
-      setTarget(null);
+      setTarget(carriedTargetRef.current[mk.id] ?? null);
       if (!IS_H5 || !symbol || !started) return;
       let cancelled = false, iv = null;
       const load = async () => {
@@ -28195,6 +28191,9 @@ input,button{font-family:inherit}
     const nowMs = Date.now();
     const spanStartMs = nowMs - 3e4;
     const livePrice = buf.length ? buf[buf.length - 1].p : target != null ? target : null;
+    (0, import_react4.useEffect)(() => {
+      if (livePrice != null) livePriceRef.current = livePrice;
+    }, [livePrice]);
     const [scrubPrice, setScrubPrice] = (0, import_react4.useState)(null);
     const shownPriceRaw = scrubPrice == null ? livePrice : scrubPrice;
     const priceDp = livePrice != null && livePrice < 10 ? 4 : 2;
