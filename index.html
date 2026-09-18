@@ -26847,7 +26847,8 @@ input,button{font-family:inherit}
       const r = await fetch(`https://data-api.polymarket.com/holders?market=${conditionId}&limit=50`);
       if (!r.ok) throw new Error("bad status");
       const data = await r.json();
-      HOLDERS_CACHE[conditionId] = Array.isArray(data) ? data : null;
+      const groups = Array.isArray(data) ? data : Array.isArray(data?.holders) ? data.holders : Array.isArray(data?.data) ? data.data : null;
+      HOLDERS_CACHE[conditionId] = groups;
     } catch (e) {
       HOLDERS_CACHE[conditionId] = null;
     }
@@ -27395,9 +27396,18 @@ input,button{font-family:inherit}
             // cover a price label or the orange live-price readout as it travels
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: -KCHART_GUTTER, top: targetY, height: 0, pointerEvents: "none", zIndex: 3 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: KCHART_GUTTER, top: 0, borderTop: `1px dashed ${C.mute}`, opacity: 0.8 } }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", width: KCHART_GUTTER, height: 19, display: "flex", alignItems: "center", justifyContent: "center" }, children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 1, top: "50%", width: 13, height: 13, marginTop: -6.5, background: "#8A8F98", borderRadius: 3, transform: "rotate(45deg)" } }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 6, right: 0, top: 0, bottom: 0, background: "#8A8F98", borderRadius: "3px 999px 999px 3px", display: "flex", alignItems: "center", justifyContent: "center", gap: 3, fontSize: 10, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: 0, top: 0, transform: "translateY(-50%)", width: KCHART_GUTTER, height: 20 }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: "0 0 64 20", width: "64", height: "20", style: { position: "absolute", inset: 0, display: "block" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                  "path",
+                  {
+                    d: "M 3 10 L 12 2.5 L 54 2.5 A 7.5 7.5 0 0 1 54 17.5 L 12 17.5 Z",
+                    fill: "#8A8F98",
+                    stroke: "#8A8F98",
+                    strokeWidth: "4",
+                    strokeLinejoin: "round"
+                  }
+                ) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 10, right: 0, top: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 3, fontSize: 10, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }, children: [
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Target" }),
                   !targetOnScreen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", animation: "blink 1s infinite" }, children: targetAbove ? "\u2191" : "\u2193" })
                 ] })
@@ -27474,6 +27484,32 @@ input,button{font-family:inherit}
         return [];
       }
     };
+    const fetchByDiscoveredTags = async (seedEvents) => {
+      const wanted = /up\s*or\s*down|recurring/i;
+      const ids = [];
+      for (const ev of seedEvents) for (const t of ev.tags || []) {
+        if ((wanted.test(t.label || "") || wanted.test(t.slug || "")) && t.id && !ids.includes(t.id)) ids.push(t.id);
+      }
+      if (!ids.length) return [];
+      const pages = await Promise.all(ids.map(async (id) => {
+        try {
+          const r = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${id}&related_tags=true&active=true&closed=false&limit=500`);
+          if (!r.ok) throw new Error("bad status");
+          const d = await r.json();
+          return Array.isArray(d) ? d : [];
+        } catch (e) {
+          return [];
+        }
+      }));
+      const seen = /* @__PURE__ */ new Set();
+      const out = [];
+      for (const ev of pages.flat()) {
+        if (seen.has(ev.id) || !titleRe.test(ev.title || "")) continue;
+        seen.add(ev.id);
+        out.push(ev);
+      }
+      return out;
+    };
     try {
       const searched = await searchFetch();
       const searchedOpen = searched.filter((ev) => !ev.closed);
@@ -27482,8 +27518,10 @@ input,button{font-family:inherit}
         searchedOpen.length ? Promise.resolve([]) : fetchList(false),
         searchedClosed.length ? Promise.resolve([]) : fetchList(true)
       ]);
-      const upcomingEvs = searchedOpen.length ? searchedOpen : tagOpen;
+      let upcomingEvs = searchedOpen.length ? searchedOpen : tagOpen;
       const pastEvs = searchedClosed.length ? searchedClosed : tagClosed;
+      const byTags = await fetchByDiscoveredTags([...upcomingEvs, ...pastEvs]);
+      if (byTags.length > upcomingEvs.length) upcomingEvs = byTags;
       const result = {
         upcoming: upcomingEvs.map((ev) => pmMapUpDownSlot(ev, assetLabel)).filter(Boolean).sort((a, b) => a.endMs - b.endMs),
         past: pastEvs.slice(0, 3).map((ev) => {
@@ -27506,6 +27544,21 @@ input,button{font-family:inherit}
           return { id: ev.id, resolvedUp: parseFloat(prices[upIdx]) > 0.5 };
         }).filter(Boolean)
       };
+      try {
+        console.log(
+          "[updown]",
+          assetLabel,
+          "windows:",
+          result.upcoming.map((u) => u.durationLabel).join(", ") || "(none)",
+          "| search:",
+          searchedOpen.length,
+          "tag:",
+          tagOpen.length,
+          "byTags:",
+          byTags.length
+        );
+      } catch (e) {
+      }
       PM_UPDOWN_CACHE[assetLabel] = result;
       return result;
     } catch (e) {
@@ -27760,8 +27813,14 @@ input,button{font-family:inherit}
       };
     }, [conditionId]);
     if (!data || !data.length) return null;
-    const yesGroup = data.find((g) => g.token === yesTokenId);
-    const noGroup = data.find((g) => g.token === noTokenId);
+    const groupToken = (g) => String(g?.token ?? g?.asset ?? g?.tokenId ?? g?.token_id ?? "");
+    const pick = (id) => id == null ? void 0 : data.find((g) => groupToken(g) === String(id));
+    let yesGroup = pick(yesTokenId);
+    let noGroup = pick(noTokenId);
+    if (!yesGroup && !noGroup && data.length >= 1) {
+      yesGroup = data[0];
+      noGroup = data[1];
+    }
     const TOP_N = 10;
     const renderList = (holders) => {
       const top = holders.slice(0, TOP_N);
