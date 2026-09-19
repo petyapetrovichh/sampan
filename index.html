@@ -28471,7 +28471,7 @@ input,button{font-family:inherit}
     }
     return out;
   }
-  function useLiveCoinPrice(network, poolAddress, enabled, everyMs = 4e3) {
+  function useLiveCoinPrice(network, poolAddress, enabled, everyMs = 5e3) {
     const [price, setPrice] = (0, import_react4.useState)(null);
     (0, import_react4.useEffect)(() => {
       if (!IS_H5 || !enabled || !poolAddress) {
@@ -28480,9 +28480,14 @@ input,button{font-family:inherit}
       }
       let cancelled = false;
       const load = async () => {
-        const json = await gtFetch(`/networks/${network}/pools/${poolAddress}`);
-        const v = parseFloat(json?.data?.attributes?.base_token_price_usd);
-        if (!cancelled && !isNaN(v) && v > 0) setPrice(v);
+        try {
+          const r = await fetch(`${GT_BASE}/networks/${network}/pools/${poolAddress}`);
+          if (!r.ok) return;
+          const json = await r.json();
+          const v = parseFloat(json?.data?.attributes?.base_token_price_usd);
+          if (!cancelled && !isNaN(v) && v > 0) setPrice(v);
+        } catch (e) {
+        }
       };
       load();
       const iv = setInterval(load, everyMs);
@@ -28497,6 +28502,11 @@ input,button{font-family:inherit}
     const bufRef = (0, import_react4.useRef)([]);
     const seededKeyRef = (0, import_react4.useRef)(null);
     const [buf, setBuf] = (0, import_react4.useState)([]);
+    const eased = useSmoothedValue(livePrice, 0.16);
+    const easedRef = (0, import_react4.useRef)(null);
+    (0, import_react4.useEffect)(() => {
+      easedRef.current = eased ?? livePrice;
+    }, [eased, livePrice]);
     const seedKey = seedCandles.length ? seedCandles[0].t + "|" + seedCandles.length + "|" + stepSec : null;
     (0, import_react4.useEffect)(() => {
       if (!seedCandles.length || seededKeyRef.current === seedKey) return;
@@ -28505,27 +28515,34 @@ input,button{font-family:inherit}
       setBuf(bufRef.current.slice());
     }, [seedKey]);
     (0, import_react4.useEffect)(() => {
-      if (livePrice == null) return;
-      const arr = bufRef.current;
-      if (!arr.length) return;
-      const nowBucket = Math.floor(Date.now() / 1e3 / stepSec) * stepSec;
-      const last = arr[arr.length - 1];
-      if (nowBucket > last.t) {
-        arr.push({ t: nowBucket, o: livePrice, hi: livePrice, lo: livePrice, c: livePrice });
-        if (arr.length > maxLen) arr.shift();
-      } else {
-        last.c = livePrice;
-        last.hi = Math.max(last.hi, livePrice);
-        last.lo = Math.min(last.lo, livePrice);
-      }
-      bufRef.current = arr;
-      setBuf(arr.slice());
-    }, [livePrice, stepSec]);
+      const tickMs = Math.min(Math.max(stepSec * 1e3, 250), 2e3);
+      const tick = () => {
+        const arr = bufRef.current;
+        if (!arr.length) return;
+        const p = easedRef.current;
+        if (p == null) return;
+        const nowBucket = Math.floor(Date.now() / 1e3 / stepSec) * stepSec;
+        const last = arr[arr.length - 1];
+        if (nowBucket > last.t) {
+          arr.push({ t: nowBucket, o: last.c, hi: Math.max(last.c, p), lo: Math.min(last.c, p), c: p });
+          while (arr.length > maxLen) arr.shift();
+        } else {
+          last.c = p;
+          last.hi = Math.max(last.hi, p);
+          last.lo = Math.min(last.lo, p);
+        }
+        bufRef.current = arr;
+        setBuf(arr.slice());
+      };
+      tick();
+      const iv = setInterval(tick, tickMs);
+      return () => clearInterval(iv);
+    }, [stepSec, maxLen]);
     return buf.length ? buf : seedCandles;
   }
-  function CoinChart({ candles, mode, h = 170, onScrub }) {
+  function CoinChart({ candles, mode, h = 170, onScrub, live = false, windowSec = 30 }) {
     const { lang } = useLang();
-    const [dragIdx, setDragIdx] = (0, import_react4.useState)(null);
+    const [dragMs, setDragMs] = (0, import_react4.useState)(null);
     const drawRef = (0, import_react4.useRef)(null);
     const [containerW, setContainerW] = (0, import_react4.useState)(0);
     (0, import_react4.useEffect)(() => {
@@ -28535,47 +28552,97 @@ input,button{font-family:inherit}
       ro.observe(el);
       return () => ro.disconnect();
     }, []);
+    const [, setFrame] = (0, import_react4.useState)(0);
+    (0, import_react4.useEffect)(() => {
+      if (!live) return;
+      let raf, alive = true;
+      const loop = () => {
+        if (!alive) return;
+        setFrame((f) => f + 1);
+        raf = requestAnimationFrame(loop);
+      };
+      raf = requestAnimationFrame(loop);
+      return () => {
+        alive = false;
+        cancelAnimationFrame(raf);
+      };
+    }, [live]);
     const n = candles.length;
-    const all = candles.flatMap((c) => [c.hi, c.lo]);
+    const nowMs = Date.now();
+    const spanStartMs = live ? nowMs - windowSec * 1e3 : n ? candles[0].t * 1e3 : nowMs;
+    const spanEndMs = live ? nowMs : n ? candles[n - 1].t * 1e3 : nowMs;
+    const spanMs = Math.max(1, spanEndMs - spanStartMs);
+    const xOf = (ms) => (ms - spanStartMs) / spanMs * 100;
+    const visible = live ? candles.filter((c) => c.t * 1e3 >= spanStartMs - 2e3) : candles;
+    const vn = visible.length;
+    const all = visible.flatMap((c) => [c.hi, c.lo]);
     const mn = all.length ? Math.min(...all) : 0, mx = all.length ? Math.max(...all) : 1;
     const scale = mx || 1;
     const pad = (mx - mn) * 0.12 || scale * 0.05;
     const yMin = mn - pad, yMax = mx + pad;
     const span = Math.max(yMax - yMin, scale * 1e-6);
     const yPx = (v) => h - (v - yMin) / span * h;
-    const xOf = (i) => n > 1 ? i / (n - 1) * 100 : 50;
+    const nearestIdx = (ms) => {
+      let bi = vn - 1, bd = Infinity;
+      for (let i = 0; i < vn; i++) {
+        const d = Math.abs(visible[i].t * 1e3 - ms);
+        if (d < bd) {
+          bd = d;
+          bi = i;
+        }
+      }
+      return bi;
+    };
     const pick = (clientX) => {
       const el = drawRef.current;
-      if (!el || n === 0) return;
+      if (!el || !vn) return;
       const r = el.getBoundingClientRect();
       const frac = r.width > 0 ? Math.max(0, Math.min(1, (clientX - r.left) / r.width)) : 1;
-      setDragIdx(Math.round(frac * (n - 1)));
+      setDragMs(spanStartMs + frac * spanMs);
     };
     const release = () => {
-      setDragIdx(null);
+      setDragMs(null);
       onScrub && onScrub(null);
     };
+    const dragIdx = dragMs != null && vn ? nearestIdx(dragMs) : null;
     (0, import_react4.useEffect)(() => {
-      if (dragIdx == null || !onScrub) return;
-      onScrub(candles[dragIdx] || null);
-    }, [dragIdx, candles]);
+      if (!onScrub) return;
+      onScrub(dragIdx != null && visible[dragIdx] ? visible[dragIdx] : null);
+    }, [dragIdx]);
+    const lineColor = KLINE_COLORS[0];
     const bezierClose = (upTo) => {
-      const pts = candles.slice(0, upTo == null ? n : upTo + 1);
+      const pts = visible.slice(0, upTo == null ? vn : upTo + 1);
       if (pts.length < 2) return "";
-      let d = `M ${xOf(0)} ${yPx(pts[0].c)}`;
+      let d = `M ${xOf(pts[0].t * 1e3)} ${yPx(pts[0].c)}`;
       for (let i = 0; i < pts.length - 1; i++) {
-        const x1 = xOf(i), y1 = yPx(pts[i].c), x2 = xOf(i + 1), y2 = yPx(pts[i + 1].c);
+        const x1 = xOf(pts[i].t * 1e3), y1 = yPx(pts[i].c), x2 = xOf(pts[i + 1].t * 1e3), y2 = yPx(pts[i + 1].c);
         d += ` Q ${x1} ${y1} ${(x1 + x2) / 2} ${(y1 + y2) / 2}`;
       }
       const last = pts.length - 1;
-      d += ` L ${xOf(last)} ${yPx(pts[last].c)}`;
+      d += ` L ${xOf(pts[last].t * 1e3)} ${yPx(pts[last].c)}`;
       return d;
     };
-    const yTicks = 5;
-    const ticks = Array.from({ length: yTicks }, (_, i) => yMin + (yMax - yMin) * (i / (yTicks - 1)));
-    const fmtY = (v) => "$" + (v < 0.01 ? v.toFixed(6) : v.toFixed(v < 10 ? 4 : 2));
-    const lineColor = KLINE_COLORS[0];
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    const ticks = Array.from({ length: 5 }, (_, i) => yMin + (yMax - yMin) * (i / 4));
+    const fmtY = (v) => "$" + (v < 0.01 ? v.toFixed(6) : v < 10 ? v.toFixed(4) : v.toFixed(2));
+    const shownIdx = dragIdx != null ? dragIdx : vn - 1;
+    const shownCandle = visible[shownIdx];
+    const xTicks = [];
+    if (live) {
+      const TICK_SEC = 10;
+      for (let t = Math.ceil(spanStartMs / (TICK_SEC * 1e3)) * TICK_SEC * 1e3; t <= spanEndMs; t += TICK_SEC * 1e3) xTicks.push(t);
+    } else if (vn > 1) {
+      for (let i = 0; i < 4; i++) xTicks.push(spanStartMs + spanMs * (i + 0.5) / 4);
+    }
+    const fmtClock = (ms) => {
+      const dt = new Date(ms);
+      const p = (v) => String(v).padStart(2, "0");
+      return `${p(dt.getHours())}:${p(dt.getMinutes())}:${p(dt.getSeconds())}`;
+    };
+    const fmtTickDate = (ms) => {
+      const dt = new Date(ms);
+      return spanMs > 3 * 864e5 ? `${dt.getDate()}/${dt.getMonth() + 1}` : `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`;
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
       {
         onPointerDown: (e) => {
@@ -28583,48 +28650,51 @@ input,button{font-family:inherit}
           pick(e.clientX);
         },
         onPointerMove: (e) => {
-          if (dragIdx != null) pick(e.clientX);
+          if (dragMs != null) pick(e.clientX);
         },
         onPointerUp: release,
         onPointerCancel: release,
         style: { position: "relative", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", cursor: "pointer" },
-        children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h, overflow: "visible", marginTop: 24 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "hidden" }, children: [
-            ticks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(v), y2: yPx(v), stroke: C.line, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }, i)),
-            mode === "candle" ? candles.map((c, i) => {
-              const up = c.c >= c.o;
-              const col = up ? C.up : C.down;
-              const cx = xOf(i);
-              const bw = n > 0 ? 100 / n * 0.55 : 1;
-              const dimmed = dragIdx != null && i > dragIdx;
-              return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { opacity: dimmed ? 0.25 : 1, children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: cx, y1: yPx(c.hi), x2: cx, y2: yPx(c.lo), stroke: col, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: cx - bw / 2, y: Math.min(yPx(c.o), yPx(c.c)), width: bw, height: Math.max(0.8, Math.abs(yPx(c.o) - yPx(c.c))), fill: col })
-              ] }, i);
-            }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(), fill: "none", stroke: lineColor, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
-              dragIdx != null && dragIdx > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(dragIdx), fill: "none", stroke: lineColor, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
-            ] })
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h, overflow: "visible", marginTop: 24 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 100 ${h}`, preserveAspectRatio: "none", style: { width: "100%", height: h, display: "block", overflow: "hidden" }, children: [
+              ticks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "0", x2: "100", y1: yPx(v), y2: yPx(v), stroke: C.line, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }, i)),
+              mode === "candle" ? visible.map((c, i) => {
+                const up = c.c >= c.o;
+                const col = up ? C.up : C.down;
+                const cx = xOf(c.t * 1e3);
+                const bw = Math.max(0.8, 100 / Math.max(vn, 1) * 0.55);
+                const dimmed = dragIdx != null && i > dragIdx;
+                return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { opacity: dimmed ? 0.25 : 1, children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: cx, y1: yPx(c.hi), x2: cx, y2: yPx(c.lo), stroke: col, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: cx - bw / 2, y: Math.min(yPx(c.o), yPx(c.c)), width: bw, height: Math.max(0.8, Math.abs(yPx(c.o) - yPx(c.c))), fill: col })
+                ] }, i);
+              }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(), fill: "none", stroke: lineColor, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
+                dragIdx != null && dragIdx > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(dragIdx), fill: "none", stroke: lineColor, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
+              ] })
+            ] }),
+            shownCandle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, top: yPx(shownCandle.c), height: 0, borderTop: `1px dashed ${lineColor}`, opacity: 0.6, pointerEvents: "none" } }),
+            dragMs != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragMs)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
+            shownCandle && (() => {
+              const x = dragIdx != null ? xOf(shownCandle.t * 1e3) : live ? xOf(spanEndMs) : 100;
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${x}%`, top: yPx(shownCandle.c), transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible", zIndex: 2 }, children: [
+                dragIdx == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lineColor } }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lineColor } })
+              ] });
+            })(),
+            dragMs != null && (() => {
+              const label = fmtChartDate(new Date(dragMs), true, lang);
+              const w = label.length * 6.6 + 4;
+              const xPx = xOf(dragMs) / 100 * containerW;
+              const shift = containerW <= 0 ? "-50%" : xPx - w / 2 < 0 ? "0%" : xPx + w / 2 > containerW + KCHART_GUTTER ? "-100%" : "-50%";
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragMs)}%`, top: -22, transform: `translateX(${shift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: label });
+            })(),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: ticks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtY(v) }, i)) }),
+            shownCandle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: yPx(shownCandle.c), transform: "translateY(-50%)", pointerEvents: "none", zIndex: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", background: lineColor, color: "#fff", fontFamily: MONO, fontWeight: 700, fontSize: 11, padding: "2px 6px", borderRadius: 7, whiteSpace: "nowrap" }, children: fmtY(shownCandle.c) }) })
           ] }),
-          dragIdx != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragIdx)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
-          mode === "line" && n > 0 && (() => {
-            const idx = dragIdx ?? n - 1;
-            const c = candles[idx];
-            const x = dragIdx != null ? xOf(idx) : 100;
-            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${x}%`, top: yPx(c.c), transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible" }, children: [
-              dragIdx == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lineColor } }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lineColor } })
-            ] });
-          })(),
-          dragIdx != null && candles[dragIdx] && (() => {
-            const label = fmtChartDate(new Date(candles[dragIdx].t * 1e3), true, lang);
-            const w = label.length * 6.6 + 4;
-            const xPx = xOf(dragIdx) / 100 * containerW;
-            const shift = containerW <= 0 ? "-50%" : xPx - w / 2 < 0 ? "0%" : xPx + w / 2 > containerW + KCHART_GUTTER ? "-100%" : "-50%";
-            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragIdx)}%`, top: -22, transform: `translateX(${shift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: label });
-          })(),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: ticks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtY(v) }, i)) })
-        ] })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden", maskImage: X_FADE, WebkitMaskImage: X_FADE }, children: xTicks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${xOf(t)}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: live ? fmtClock(t) : fmtTickDate(t) }, t)) })
+        ]
       }
     );
   }
@@ -29626,7 +29696,8 @@ input,button{font-family:inherit}
     const px0 = anchorPx || 0;
     const chg0 = mm.chgNum ?? parseFloat(mm.chg) ?? 0;
     const basePrice = (0, import_react4.useMemo)(() => px0 && chg0 > -100 ? px0 / (1 + chg0 / 100) : px0, [mm.name]);
-    const shownPrice = livePrice ?? px0;
+    const [scrubCandle, setScrubCandle] = (0, import_react4.useState)(null);
+    const shownPrice = scrubCandle ? scrubCandle.c : livePrice ?? px0;
     const shownChg = basePrice > 0 ? (shownPrice - basePrice) / basePrice * 100 : chg0;
     const shownUp = shownChg >= 0;
     const fmtPx2 = (v) => "$" + (v < 0.01 ? v.toFixed(6) : v < 10 ? v.toFixed(4) : v.toFixed(2));
@@ -29673,8 +29744,8 @@ input,button{font-family:inherit}
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 18, minWidth: 0, gap: 8 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode, live: isLive, onScrub: setScrubCandle }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0, gap: 8 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mm.vol })
