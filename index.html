@@ -25798,10 +25798,10 @@ input,button{font-family:inherit}
     const [labelYes, labelNo] = shown.outLabels || ["Yes", "No"];
     const SOFT = "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)";
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "14px 0", borderBottom: `1px dashed ${C.line}`, minWidth: 0 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, minWidth: 0, marginBottom: 10 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, minWidth: 0, marginBottom: 10 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { minWidth: 0, flex: 1 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 16, fontWeight: 700, color: C.ink, display: "flex", alignItems: "center", gap: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
-            arrowFor(shown) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flexShrink: 0 }, children: arrowFor(shown) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 16, fontWeight: 700, color: C.ink, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 }, children: [
+            arrowFor(shown) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { marginRight: 6 }, children: arrowFor(shown) }),
             shown.label
           ] }),
           variants && variants.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 6, marginTop: 8, overflowX: "auto", scrollbarWidth: "none" }, children: variants.map((v) => {
@@ -25878,6 +25878,44 @@ input,button{font-family:inherit}
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15 }, children: emoji }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: label })
   ] });
+  var HandshakeIcon = ({ size = 20 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "svg",
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: C.mute,
+      strokeWidth: "1.7",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      style: { flexShrink: 0 },
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M2 11.5 6 8l3.2 2.4a2 2 0 0 0 2.4 0L14 8.6" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M22 11.5 18 8l-2.6 2a2 2 0 0 0-.3 2.8l2.4 2.8" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M6 8v6.5l3.4 3.2a1.8 1.8 0 0 0 2.6-.1l.4-.5" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12.4 17.1l1.8 1.6a1.6 1.6 0 0 0 2.3-.2" })
+      ]
+    }
+  );
+  function useTeamColors(urls) {
+    const key = (urls || []).join("|");
+    const [hexes, setHexes] = (0, import_react4.useState)([]);
+    (0, import_react4.useEffect)(() => {
+      let cancelled = false;
+      if (!urls || !urls.length) {
+        setHexes([]);
+        return;
+      }
+      Promise.all(urls.map((u) => u ? extractDominantColor(u).catch(() => null) : Promise.resolve(null))).then((res) => {
+        if (!cancelled) setHexes(res);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [key]);
+    return resolveTeamColors(hexes, KLINE_COLORS);
+  }
   function MarketFeedCard({ mk, onOpen, onOpenMarket, onCopy, showType }) {
     const openable = mk.contracts && mk.contracts.length >= 2 || mk.binaryYesNo || mk.upTokenId !== void 0;
     const isUpDown = mk.upTokenId !== void 0;
@@ -25893,10 +25931,21 @@ input,button{font-family:inherit}
     const { score: cardScore } = useSportsLiveScore(isLiveGameCard ? mk.gameId : null, isLiveGameCard);
     const showLive = isUpDown || isLiveGameCard;
     const liveTime = !isUpDown && mk.startMs ? fmtSlotTime(mk.startMs) : "";
+    const isGameCard = !!(mk.isSports && (mk.contracts || []).length >= 2);
+    const gameColors = useTeamColors(isGameCard ? (mk.contracts || []).map((c) => c.icon) : []);
     const rows = isUpDown ? [
       { label: "Up", pct: Math.round(cardUpPct), binary: true, side: "Up" },
       { label: "Down", pct: Math.round(100 - cardUpPct), binary: true, side: "Down" }
-    ] : mk.rows;
+    ] : isGameCard ? (mk.contracts || []).map((c, i) => ({
+      label: c.abbr || c.label,
+      icon: c.icon,
+      pct: Math.round(c.pct),
+      game: true,
+      draw: String(c.label).toLowerCase() === "draw",
+      color: gameColors[i],
+      // per-side score, only when the feed actually gives us one
+      score: cardScore ? c.ordering === "away" ? cardScore.away : c.ordering === "home" ? cardScore.home : i === 0 ? cardScore.home : i === 1 ? cardScore.away : null : null
+    })) : mk.rows;
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
       {
@@ -25915,7 +25964,11 @@ input,button{font-family:inherit}
             ] })
           ] }),
           rows.map((rw, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 16, fontWeight: 600, fontFamily: MONO, display: "flex", alignItems: "center", gap: 6, minWidth: 0, overflow: "hidden", flex: 1 }, children: rw.px !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 16, fontWeight: 600, fontFamily: MONO, display: "flex", alignItems: "center", gap: 8, minWidth: 0, overflow: "hidden", flex: 1 }, children: rw.game ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              rw.draw ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HandshakeIcon, { size: 20 }) : rw.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: rw.icon, alt: "", style: { width: 20, height: 20, borderRadius: "50%", flexShrink: 0, objectFit: "cover" } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 20, height: 20, borderRadius: "50%", background: C.soft, flexShrink: 0 } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: rw.draw ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Draw" }) : rw.label }),
+              rw.score != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { marginLeft: "auto", paddingRight: 4, color: C.mute, fontWeight: 700 }, children: rw.score })
+            ] }) : rw.px !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, flexShrink: 0 }, children: rw.dir === "up" ? "\u2191" : "\u2193" }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: rw.px })
             ] }) : rw.label ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: rw.label }) : rw.label }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1, height: 1, borderBottom: `1.5px solid ${C.line}`, maxWidth: 120 } }) }),
@@ -25928,7 +25981,7 @@ input,button{font-family:inherit}
             ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: (e) => {
               e.stopPropagation();
               onCopy && onCopy(feedToMarket(mk, i), 0);
-            }, className: "tap btn-soft", style: { border: "none", background: C.amber, color: C.ink, borderRadius: 999, padding: "5px 0", width: 70, textAlign: "center", fontWeight: 700, fontSize: 17, flexShrink: 0, boxShadow: "inset 0 2px 1px rgba(255,255,255,.55), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
+            }, className: "tap btn-soft", style: { border: "none", background: rw.game ? rw.draw ? "#fff" : rw.color || C.amber : C.amber, color: rw.game && !rw.draw ? "#fff" : C.ink, boxSizing: "border-box", borderWidth: rw.draw ? 1 : 0, borderStyle: "solid", borderColor: C.line, borderRadius: 999, padding: "5px 0", width: 70, textAlign: "center", fontWeight: 700, fontSize: 17, flexShrink: 0, boxShadow: "inset 0 2px 1px rgba(255,255,255,.55), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
               rw.pct,
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11, fontWeight: 700 }, children: "%" })
             ] })
@@ -25939,7 +25992,13 @@ input,button{font-family:inherit}
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
-            isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
+            isGameCard ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catKind || "Sports" }) }),
+              mk.league ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
+                mk.leagueIcon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.leagueIcon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0, objectFit: "cover" } }) : null,
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.league })
+              ] }) : null
+            ] }) : isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
               mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0 } }) : null,
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.assetLabel })
             ] }) : mk.token ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
@@ -26172,6 +26231,35 @@ input,button{font-family:inherit}
     const v = Number(vol || 0);
     return v >= 1e6 ? `$${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v / 1e3).toFixed(1)}k` : `$${v.toFixed(0)}`;
   }
+  function pmDeriveAbbr(label) {
+    const stop = /* @__PURE__ */ new Set(["fc", "cf", "sc", "ac", "club", "team", "esports", "gaming", "rugby", "the"]);
+    const words = String(label || "").replace(/[^A-Za-z0-9 ]/g, " ").split(/\s+/).filter(Boolean).filter((w) => !stop.has(w.toLowerCase()));
+    const pick = words[0] || String(label || "");
+    return pick.toUpperCase().slice(0, 7);
+  }
+  function pmTitleSides(title) {
+    let t = String(title || "");
+    t = t.replace(/^[^:]{0,24}:\s*/, "");
+    t = t.split(/\s+[-\u2013]\s+/)[0];
+    t = t.replace(/\([^)]*\)/g, " ");
+    const parts = t.split(/\s+vs\.?\s+/i);
+    return parts.length >= 2 ? [parts[0].trim(), parts[1].trim()] : [];
+  }
+  function pmNameMatches(label, side) {
+    const norm = (x) => String(x || "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+    const a = norm(label), b = norm(side);
+    if (!a || !b) return false;
+    if (a === b || a.includes(b) || b.includes(a)) return true;
+    const stop = /* @__PURE__ */ new Set(["fc", "cf", "sc", "ac", "club", "team", "esports", "gaming", "rugby", "united", "city", "the"]);
+    const words = (x) => x.split(" ").filter((w) => w.length > 2 && !stop.has(w));
+    return words(a).some((w) => words(b).includes(w));
+  }
+  var PM_SUBMARKET_RE = /\b(inning|innings|corners?|total|totals|handicap|spread|over\/under|first \d|1st |2nd |3rd |quarter|half|period|map \d|game \d|set \d|props?|player|to score|booking|cards?)\b/i;
+  function pmIsSubMarketTitle(title) {
+    const t = String(title || "");
+    const tail = t.split(/\s+[-\u2013]\s+/).slice(1).join(" - ");
+    return PM_SUBMARKET_RE.test(tail) || /more markets/i.test(t);
+  }
   function pmMapEvent(ev) {
     const tradable = (mk) => {
       if (!mk.active || mk.closed || mk.archived) return false;
@@ -26244,9 +26332,12 @@ input,button{font-family:inherit}
         moneyline = contracts.filter(isMoneyline);
         others = contracts.filter((c) => !isMoneyline(c));
       } else {
-        const titleLc = (ev.title || "").toLowerCase();
-        const inTitle = contracts.filter((c) => c.label && titleLc.includes(c.label.toLowerCase()));
-        const picked = inTitle.length >= 2 ? inTitle : contracts.filter((c) => !isDraw(c)).slice(0, 2);
+        const sides = pmTitleSides(ev.title || "");
+        const nonDraw = contracts.filter((c) => !isDraw(c));
+        const pick = (side) => nonDraw.find((c) => pmNameMatches(c.label, side));
+        const a = sides[0] ? pick(sides[0]) : null;
+        const b = sides[1] ? pick(sides[1]) : null;
+        const picked = a && b && a.id !== b.id ? [a, b] : nonDraw.slice(0, 2);
         const drawC = contracts.find(isDraw);
         moneyline = drawC ? [...picked, drawC] : picked;
         const mlIds = new Set(moneyline.map((c) => c.id));
@@ -26257,10 +26348,15 @@ input,button{font-family:inherit}
         const gEnd = ev.endDate ? new Date(ev.endDate).getTime() : null;
         const ended = !!ev.ended || gEnd != null && gEnd <= Date.now();
         const inProgress = gStart != null && gStart <= Date.now() && (gEnd == null || Date.now() < gEnd);
+        const leagueTag = (ev.tags || []).find((t) => {
+          const sl = (t.slug || "").toLowerCase(), lb = (t.label || "").toLowerCase();
+          return sl && !["sports", "esports", "games", "all"].includes(sl) && !["sports", "esports", "games"].includes(lb);
+        });
+        const withAbbr = moneyline.map((c) => ({ ...c, abbr: c.abbr || pmDeriveAbbr(c.label) }));
         return {
           ...base,
           rows,
-          contracts: moneyline,
+          contracts: withAbbr,
           extraContracts: others,
           isSports: true,
           slug: ev.slug,
@@ -26268,7 +26364,11 @@ input,button{font-family:inherit}
           isLiveGame: ev.live === true || ev.live == null && inProgress,
           gameEnded: ended,
           startMs: gStart,
-          endMs: gEnd
+          endMs: gEnd,
+          isSubMarket: pmIsSubMarketTitle(ev.title),
+          league: leagueTag?.label || "",
+          leagueIcon: leagueTag?.image || leagueTag?.icon || "",
+          catKind: (ev.tags || []).some((t) => (t.slug || "").toLowerCase() === "esports") ? "Esports" : "Sports"
         };
       }
     }
@@ -26307,7 +26407,7 @@ input,button{font-family:inherit}
   }
   async function pmFetchLiveGames() {
     const [sp, es] = await Promise.all([pmFetchGames(PM_TAGS.Sports), pmFetchGames(PM_TAGS.Esports)]);
-    const all = [...sp, ...es].filter((mk) => mk.isSports && mk.isLiveGame && !mk.gameEnded);
+    const all = [...sp, ...es].filter((mk) => mk.isSports && mk.isLiveGame && !mk.gameEnded && !mk.isSubMarket);
     const seen = /* @__PURE__ */ new Set();
     const out = [];
     for (const mk of all.sort((a, b) => (b.startMs || 0) - (a.startMs || 0))) {
@@ -26902,8 +27002,42 @@ input,button{font-family:inherit}
     }
     return CLOB_CACHE[key];
   }
+  var TF_WINDOW_SEC = { "1m": 60, "5m": 5 * 60, "15m": 15 * 60, "1H": 60 * 60 };
+  function useAvailableTimeframes(tokenId, live) {
+    const [tfs, setTfs] = (0, import_react4.useState)(null);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !tokenId) {
+        setTfs(null);
+        return;
+      }
+      let cancelled = false;
+      (async () => {
+        const [hour, day, max] = await Promise.all([
+          fetchClobBucket(tokenId, { key: "1h_f1", interval: "1h", fidelity: 1 }),
+          fetchClobBucket(tokenId, { key: "1d_f5", interval: "1d", fidelity: 5 }),
+          fetchClobBucket(tokenId, { key: "max_f60", interval: "max", fidelity: 60 })
+        ]);
+        if (cancelled) return;
+        const out = [];
+        if (live) out.push("Live");
+        if (hour && hour.length >= 2) {
+          const lastT = hour[hour.length - 1].t;
+          for (const t of ["1m", "5m", "15m", "1H"]) {
+            if (hour.filter((p) => p.t >= lastT - TF_WINDOW_SEC[t]).length >= 2) out.push(t);
+          }
+        }
+        if (day && day.length >= 2) out.push("1D");
+        if (max && max.length >= 2) out.push("All");
+        setTfs(out.length ? out : ["All"]);
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [tokenId, live]);
+    return tfs;
+  }
   function trimHistory(history, tf) {
-    const windowSec = { "1m": 60, "5m": 5 * 60, "15m": 15 * 60, "1H": 60 * 60 }[tf];
+    const windowSec = TF_WINDOW_SEC[tf];
     if (!windowSec) return history;
     const lastT = history[history.length - 1].t;
     const trimmed = history.filter((p) => p.t >= lastT - windowSec);
@@ -27058,15 +27192,16 @@ input,button{font-family:inherit}
       const apply = (p) => {
         if (!p || cancelled) return;
         if (p.ended === true || p.status === "ended" || p.state === "final") setEnded(true);
-        const combined = typeof p.score === "string" ? p.score : null;
-        if (combined && /\d\s*-\s*\d/.test(combined)) {
-          const [home2, away2] = combined.split("-").map((x) => x.trim());
-          setScore({ home: home2, away: away2 });
+        const ok = (v) => /^\d{1,3}$/.test(String(v).trim());
+        const combined = typeof p.score === "string" ? p.score.trim() : null;
+        const m = combined && combined.match(/^(\d{1,3})\s*[-:]\s*(\d{1,3})$/);
+        if (m) {
+          setScore({ home: m[1], away: m[2] });
           return;
         }
         const home = p.homeScore ?? p.home_score ?? p.score?.home ?? p.home?.score;
         const away = p.awayScore ?? p.away_score ?? p.score?.away ?? p.away?.score;
-        if (home !== void 0 && away !== void 0) setScore({ home: String(home), away: String(away) });
+        if (ok(home) && ok(away)) setScore({ home: String(home).trim(), away: String(away).trim() });
       };
       try {
         ws = new WebSocket("wss://sports-api.polymarket.com/ws");
@@ -28125,7 +28260,12 @@ input,button{font-family:inherit}
   function BinaryMarketPage({ mk, onBack, onToast, onDone }) {
     const { lang } = useLang();
     const [fav, setFav] = (0, import_react4.useState)(false);
-    const [tf, setTf] = (0, import_react4.useState)("1m");
+    const [tf, setTf] = (0, import_react4.useState)(null);
+    const probedTfs = useAvailableTimeframes(mk.yesTokenId, false);
+    const tfOptions = probedTfs || ["All"];
+    (0, import_react4.useEffect)(() => {
+      setTf((t) => t && tfOptions.includes(t) ? t : tfOptions[0]);
+    }, [probedTfs]);
     const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
     const [closing, setClosing] = (0, import_react4.useState)(false);
     const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
@@ -28156,7 +28296,7 @@ input,button{font-family:inherit}
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: ["1m", "5m", "15m", "1H", "1D", "All"].map((t) => {
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
               const on = tf === t;
               return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
             }) })
@@ -28434,7 +28574,7 @@ input,button{font-family:inherit}
   function SportsMarketPage({ mk, onBack, onToast, onDone }) {
     const { lang } = useLang();
     const [fav, setFav] = (0, import_react4.useState)(false);
-    const [tf, setTf] = (0, import_react4.useState)("1m");
+    const [tf, setTf] = (0, import_react4.useState)(null);
     const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
     const [closing, setClosing] = (0, import_react4.useState)(false);
     const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
@@ -28475,6 +28615,12 @@ input,button{font-family:inherit}
         cancelled = true;
       };
     }, [mk.slug]);
+    const liveNow = !!(mk.isLiveGame && !mk.gameEnded);
+    const probedTfs = useAvailableTimeframes((mk.contracts || [])[0]?.tokenId, liveNow);
+    const tfOptions = probedTfs || (liveNow ? ["Live", "All"] : ["All"]);
+    (0, import_react4.useEffect)(() => {
+      setTf((t) => t && tfOptions.includes(t) ? t : tfOptions[0]);
+    }, [probedTfs]);
     const moneyline = (0, import_react4.useMemo)(() => (mk.contracts || []).map((c) => {
       const t = (teamInfo || []).find((x) => String(x.name || "").toLowerCase() === String(c.label || "").toLowerCase());
       return t ? { ...c, icon: t.logo || c.icon, abbr: t.abbreviation || c.abbr, ordering: t.ordering || c.ordering } : c;
@@ -28530,18 +28676,17 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u{1F3C6}" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }) })
         ] }),
-        mk.startMs && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { fontSize: 12, fontWeight: 500, color: C.mute, marginBottom: 10 }, children: fmtGameTime(mk.startMs) }),
-        mk.isLiveGame && !gameEnded && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: mk.startMs ? fmtSlotTime(mk.startMs) : "" }) }),
+        mk.isLiveGame && !gameEnded ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: mk.startMs ? fmtSlotTime(mk.startMs) : "" }) }) : mk.startMs ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { fontSize: 12, fontWeight: 500, color: C.mute, marginBottom: 10 }, children: fmtGameTime(mk.startMs) }) : null,
         teams.length === 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 18, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, minWidth: 0 }, children: [
             teams[0].icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: teams[0].icon, alt: "", style: { width: 44, height: 44, borderRadius: "50%", objectFit: "cover", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Team, { n: teams[0].label, size: 44 }),
-            teams[0].abbr && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, fontWeight: 800, color: C.ink }, children: teams[0].abbr }),
+            teams[0].abbr && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 17, fontWeight: 900, color: C.ink, letterSpacing: -0.2 }, children: teams[0].abbr }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, fontWeight: 500, color: C.mute, maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: teams[0].label })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 26, fontWeight: 900, fontFamily: MONO, flexShrink: 0, color: C.ink }, children: liveScore ? `${liveScore.home} - ${liveScore.away}` : "0 - 0" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, minWidth: 0 }, children: [
             teams[1].icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: teams[1].icon, alt: "", style: { width: 44, height: 44, borderRadius: "50%", objectFit: "cover", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Team, { n: teams[1].label, size: 44 }),
-            teams[1].abbr && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, fontWeight: 800, color: C.ink }, children: teams[1].abbr }),
+            teams[1].abbr && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 17, fontWeight: 900, color: C.ink, letterSpacing: -0.2 }, children: teams[1].abbr }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, fontWeight: 500, color: C.mute, maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }, children: teams[1].label })
           ] })
         ] }),
@@ -28552,7 +28697,7 @@ input,button{font-family:inherit}
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: ["1m", "5m", "15m", "1H", "1D", "All"].map((t) => {
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
               const on = tf === t;
               return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
             }) })
@@ -28611,11 +28756,12 @@ input,button{font-family:inherit}
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, bottom: 0, display: "flex", gap: 8, padding: "40px 16px 12px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,.75) 38%, #fff 72%)", pointerEvents: "none", zIndex: 5 }, children: [teams[0], drawContract, teams[1]].filter(Boolean).map((c) => {
         const isDraw = c.label.toLowerCase() === "draw";
         const i = moneyline.findIndex((x) => x.id === c.id);
-        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predictMoneyline(c), className: "tap btn-soft", style: { flex: 1, border: isDraw ? `1px solid ${C.line}` : "none", background: isDraw ? "transparent" : colorFor(c, i), color: isDraw ? C.ink : "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", boxShadow: isDraw ? "none" : "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: [
-          c.abbr || c.label,
-          " ",
-          c.pct,
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11 }, children: "%" })
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predictMoneyline(c), className: "tap btn-soft", style: { flex: 1, border: isDraw ? `1px solid ${C.line}` : "none", background: isDraw ? "transparent" : colorFor(c, i), color: isDraw ? C.ink : "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", boxShadow: isDraw ? "none" : "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }, children: [
+          isDraw ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HandshakeIcon, { size: 18 }) : c.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: c.icon, alt: "", style: { width: 20, height: 20, borderRadius: "50%", objectFit: "cover", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontWeight: 900 }, children: c.abbr || c.label }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            c.pct,
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11 }, children: "%" })
+          ] })
         ] }, c.id);
       }) }),
       localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
@@ -28628,7 +28774,12 @@ input,button{font-family:inherit}
   function PredMarket({ mk, onBack, onToast, onDone }) {
     const { lang } = useLang();
     const [fav, setFav] = (0, import_react4.useState)(false);
-    const [tf, setTf] = (0, import_react4.useState)("1m");
+    const [tf, setTf] = (0, import_react4.useState)(null);
+    const probedTfs = useAvailableTimeframes((mk.contracts || [])[0]?.tokenId, false);
+    const tfOptions = probedTfs || ["All"];
+    (0, import_react4.useEffect)(() => {
+      setTf((t) => t && tfOptions.includes(t) ? t : tfOptions[0]);
+    }, [probedTfs]);
     const [showAllSheet, setShowAllSheet] = (0, import_react4.useState)(false);
     const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
     const [closing, setClosing] = (0, import_react4.useState)(false);
@@ -28680,7 +28831,7 @@ input,button{font-family:inherit}
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: ["1m", "5m", "15m", "1H", "1D", "All"].map((t) => {
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
               const on = tf === t;
               return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
             }) })
@@ -30442,6 +30593,7 @@ input,button{font-family:inherit}
       "1W": "1\u5468",
       "1M": "1\u6708",
       // topic / prediction categories
+      "Draw": "\u5E73\u5C40",
       "Sports": "\u4F53\u80B2",
       "Esports": "\u7535\u5B50\u7ADE\u6280",
       "Politics": "\u653F\u6CBB",
