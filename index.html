@@ -28569,7 +28569,6 @@ input,button{font-family:inherit}
       setBuf(bufRef.current.slice());
     }, [seedKey]);
     (0, import_react4.useEffect)(() => {
-      const tickMs = Math.min(Math.max(stepSec * 1e3, 250), 2e3);
       const tick = () => {
         const arr = bufRef.current;
         if (!arr.length) return;
@@ -28589,7 +28588,20 @@ input,button{font-family:inherit}
         setBuf(arr.slice());
       };
       tick();
-      const iv = setInterval(tick, tickMs);
+      if (stepSec <= 2) {
+        let raf, alive = true;
+        const loop = () => {
+          if (!alive) return;
+          tick();
+          raf = requestAnimationFrame(loop);
+        };
+        raf = requestAnimationFrame(loop);
+        return () => {
+          alive = false;
+          cancelAnimationFrame(raf);
+        };
+      }
+      const iv = setInterval(tick, Math.min(Math.max(stepSec * 1e3, 250), 2e3));
       return () => clearInterval(iv);
     }, [stepSec, maxLen]);
     return buf.length ? buf : seedCandles;
@@ -28643,7 +28655,11 @@ input,button{font-family:inherit}
     const mn = all.length ? Math.min(...all) : 0, mx = all.length ? Math.max(...all) : 1;
     const scale = mx || 1;
     const pad = (mx - mn) * 0.12 || scale * 0.05;
-    const yMin = mn - pad, yMax = mx + pad;
+    const wantMin = mn - pad, wantMax = mx + pad;
+    const smoothMin = useSmoothedValue(wantMin, 0.12), smoothMax = useSmoothedValue(wantMax, 0.12);
+    const easedMin = live ? Math.min(smoothMin ?? wantMin, mn - pad * 0.5) : wantMin;
+    const easedMax = live ? Math.max(smoothMax ?? wantMax, mx + pad * 0.5) : wantMax;
+    const yMin = easedMin, yMax = easedMax;
     const span = Math.max(yMax - yMin, scale * 1e-6);
     const yPx = (v) => h - (v - yMin) / span * h;
     const nearestIdx = (ms) => {
