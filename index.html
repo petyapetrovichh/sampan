@@ -25941,7 +25941,7 @@ input,button{font-family:inherit}
       icon: c.icon,
       pct: Math.round(c.pct),
       game: true,
-      draw: String(c.label).toLowerCase() === "draw",
+      draw: /^draw\b/i.test(String(c.label || "").trim()),
       color: gameColors[i],
       // per-side score, only when the feed actually gives us one
       score: cardScore ? c.ordering === "away" ? cardScore.away : c.ordering === "home" ? cardScore.home : i === 0 ? cardScore.home : i === 1 ? cardScore.away : null : null
@@ -26254,7 +26254,7 @@ input,button{font-family:inherit}
     const words = (x) => x.split(" ").filter((w) => w.length > 2 && !stop.has(w));
     return words(a).some((w) => words(b).includes(w));
   }
-  var PM_SUBMARKET_RE = /(inning|corner|total|handicap|spread|over\/under|moneyline|exact score|correct score|halftime|half.time|first half|second half|both teams|btts|clean sheet|to score|to win (a|the)|winning margin|margin of|quarter|period|overtime|penalt|booking|card|\bmap \d|\bgame \d|\bset \d|\bround \d|\b\d(st|nd|rd|th)\b|props?|player|double chance|draw no bet|method of|series )/i;
+  var PM_SUBMARKET_RE = /(inning|corner|total|handicap|spread|over\/under|moneyline|exact score|correct score|halftime|half.time|first half|second half|both teams|btts|clean sheet|to score|to win (a|the)|winning margin|margin of|quarter|period|overtime|penalt|booking|card|\bmap \d|\bgame \d|\bset \d|\bround \d|\b\d(st|nd|rd|th)\b|props?|player|double chance|draw no bet|method of|series |\bodd\b|\beven\b|\bover\b|\bunder\b|first team|last team|race to|clean|shutout|no goal)/i;
   function pmIsSubMarketTitle(title) {
     const t = String(title || "");
     const tail = t.split(/\s+[-\u2013]\s+/).slice(1).join(" - ");
@@ -26370,9 +26370,9 @@ input,button{font-family:inherit}
           const pick = (side) => nonDraw.find((c) => pmNameMatches(c.label, side));
           const a = sides[0] ? pick(sides[0]) : null;
           const b = sides[1] ? pick(sides[1]) : null;
-          const picked = a && b && a.id !== b.id ? [a, b] : nonDraw.slice(0, 2);
+          const picked = a && b && a.id !== b.id ? [a, b] : null;
           const drawC = contracts.find(isDraw);
-          moneyline = drawC ? [...picked, drawC] : picked;
+          moneyline = !picked ? [] : drawC ? [...picked.map((c) => ({ ...c, icon: "" })), { ...drawC, icon: "" }] : picked.map((c) => ({ ...c, icon: "" }));
           const mlIds = new Set(moneyline.map((c) => c.id));
           others = contracts.filter((c) => !mlIds.has(c.id));
         }
@@ -27240,12 +27240,6 @@ input,button{font-family:inherit}
       };
       try {
         ws = new WebSocket("wss://sports-api.polymarket.com/ws");
-        ws.onopen = () => {
-          try {
-            ws.send(JSON.stringify({ type: "subscribe", game_id: String(gameId) }));
-          } catch (e) {
-          }
-        };
         ws.onmessage = (e) => {
           if (e.data === "ping") {
             try {
