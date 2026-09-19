@@ -25874,7 +25874,7 @@ input,button{font-family:inherit}
       } }, localTrade.m.id + "-" + localTrade.side)
     ] });
   }
-  var TypePill = ({ label, emoji }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 5, background: C.cardPill, color: C.ink, borderRadius: 999, padding: "4px 10px", fontSize: 13, fontWeight: 700, lineHeight: 1, flexShrink: 0 }, children: [
+  var TypePill = ({ label, emoji }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 5, background: C.cardPill, color: C.ink, borderRadius: 999, padding: "4px 10px", fontSize: 13, fontWeight: 700, lineHeight: 1.35, flexShrink: 0 }, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15 }, children: emoji }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: label })
   ] });
@@ -25936,16 +25936,12 @@ input,button{font-family:inherit}
     const rows = isUpDown ? [
       { label: "Up", pct: Math.round(cardUpPct), binary: true, side: "Up" },
       { label: "Down", pct: Math.round(100 - cardUpPct), binary: true, side: "Down" }
-    ] : isGameCard ? (mk.contracts || []).map((c, i) => ({
-      label: c.abbr || c.label,
-      icon: c.icon,
-      pct: Math.round(c.pct),
-      game: true,
-      draw: /^draw\b/i.test(String(c.label || "").trim()),
-      color: gameColors[i],
-      // per-side score, only when the feed actually gives us one
-      score: cardScore ? c.ordering === "away" ? cardScore.away : c.ordering === "home" ? cardScore.home : i === 0 ? cardScore.home : i === 1 ? cardScore.away : null : null
-    })) : mk.rows;
+    ] : isGameCard ? (mk.contracts || []).map((c, i) => {
+      const isRowDraw = /^draw\b/i.test(String(c.label || "").trim());
+      const scoreSide = c.ordering === "away" ? "away" : c.ordering === "home" ? "home" : i === 0 ? "home" : i === 1 ? "away" : null;
+      const score = isRowDraw || !scoreSide ? null : cardScore ? cardScore[scoreSide] : isLiveGameCard ? "0" : null;
+      return { label: c.abbr || c.label, icon: c.icon, pct: Math.round(c.pct), game: true, draw: isRowDraw, color: gameColors[i], score };
+    }) : mk.rows;
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
       {
@@ -25988,20 +25984,20 @@ input,button{font-family:inherit}
           ] }, i)),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, marginTop: 6, minWidth: 0, overflow: "hidden" }, children: [
             showType && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TypePill, { label: isUpDown ? "Crypto" : "Predictions", emoji: isUpDown ? "\u{1FA99}" : "\u{1F52E}" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
             isGameCard ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catKind || "Sports" }) }),
-              mk.league ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catKind || "Sports" }) }),
+              mk.league ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, minWidth: 0 }, children: [
                 mk.leagueIcon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.leagueIcon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0, objectFit: "cover" } }) : null,
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.league })
               ] }) : null
-            ] }) : isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
+            ] }) : isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, minWidth: 0 }, children: [
               mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0 } }) : null,
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.assetLabel })
-            ] }) : mk.token ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, minWidth: 0 }, children: [
+            ] }) : mk.token ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, minWidth: 0 }, children: [
               mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, width: 18, textAlign: "center", flexShrink: 0 }, children: mk.emoji }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.token })
             ] }) : null
@@ -28311,7 +28307,7 @@ input,button{font-family:inherit}
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf, labelBeforePct: true }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
@@ -28323,7 +28319,7 @@ input,button{font-family:inherit}
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "About" }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }, children: (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }, children: (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap" }, children: [
             t.emoji && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.emoji }),
             t.label
           ] }, i)) }),
@@ -28543,11 +28539,11 @@ input,button{font-family:inherit}
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "About" }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap" }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
-            (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+            (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap" }, children: [
               t.emoji && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.emoji }),
               t.label
             ] }, i))
@@ -28706,11 +28702,13 @@ input,button{font-family:inherit}
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 4, minWidth: 0, alignItems: "center" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 18, minWidth: 0, alignItems: "center" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u{1F3C6}" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoFitTitle, { text: mk.q, maxFont: 18, lines: 3 }),
+            mk.isLiveGame && !gameEnded ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: mk.startMs ? fmtSlotTime(mk.startMs) : "" }) }) : mk.startMs ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 3, fontSize: 12, fontWeight: 500, color: C.mute }, children: fmtGameTime(mk.startMs) }) : null
+          ] })
         ] }),
-        mk.isLiveGame && !gameEnded ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: mk.startMs ? fmtSlotTime(mk.startMs) : "" }) }) : mk.startMs ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fu", style: { fontSize: 12, fontWeight: 500, color: C.mute, marginBottom: 10 }, children: fmtGameTime(mk.startMs) }) : null,
         teams.length === 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 18, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, minWidth: 0 }, children: [
             teams[0].icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: teams[0].icon, alt: "", style: { width: 44, height: 44, borderRadius: "50%", objectFit: "cover", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Team, { n: teams[0].label, size: 44 }),
@@ -28727,7 +28725,7 @@ input,button{font-family:inherit}
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf, showTeamLabels: true }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
@@ -28761,11 +28759,11 @@ input,button{font-family:inherit}
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "About" }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }, children: [
-            mk.token && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+            mk.token && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap" }, children: [
               mk.icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%" } }),
               mk.token
             ] }),
-            (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap" }, children: [
+            (mk.allTags || []).map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap" }, children: [
               t.emoji && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.emoji }),
               t.label
             ] }, i))
@@ -28861,7 +28859,7 @@ input,button{font-family:inherit}
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, flexShrink: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
@@ -28895,11 +28893,11 @@ input,button{font-family:inherit}
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "About" }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, marginBottom: 12, overflowX: "auto", scrollbarWidth: "none" }, children: [
-            mk.token && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap", flexShrink: 0 }, children: [
+            mk.token && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap", flexShrink: 0 }, children: [
               mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%" } }) : mk.emoji && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: mk.emoji }),
               mk.token
             ] }),
-            mk.catSub && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1, whiteSpace: "nowrap", flexShrink: 0 }, children: [
+            mk.catSub && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap", flexShrink: 0 }, children: [
               CAT_EMOJI[mk.catSub] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: CAT_EMOJI[mk.catSub] }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catSub })
             ] })
@@ -29149,7 +29147,7 @@ input,button{font-family:inherit}
           ] })
         ] }) : isLongShort ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "center", alignItems: "stretch", gap: 10, padding: "0 16px 12px" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LeveragePill, { value: lev, max: maxLev, onChange: setLev }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, background: "#F7F7F7", padding: "3px 10px", borderRadius: 999, fontSize: 13, fontWeight: 550, lineHeight: 1, flexShrink: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, background: "#F7F7F7", padding: "3px 10px", borderRadius: 999, fontSize: 13, fontWeight: 550, lineHeight: 1.35, flexShrink: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO }, children: [
               "$",
