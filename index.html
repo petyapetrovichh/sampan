@@ -26483,7 +26483,7 @@ input,button{font-family:inherit}
       const r = await fetch(url);
       if (!r.ok) throw new Error("bad status");
       const data = await r.json();
-      let mapped = (Array.isArray(data) ? data : []).map(pmMapEvent).filter(Boolean).map((mk) => ({ ...mk, catSub: sub }));
+      let mapped = (Array.isArray(data) ? data : []).map(pmMapEvent).filter(Boolean).filter((mk) => (mk.rows?.length ?? 2) >= 2).map((mk) => ({ ...mk, catSub: sub }));
       if (sub === "Crypto") {
         try {
           mapped = interleave(mapped, await pmFetchUpDownFeedCards(), 4);
