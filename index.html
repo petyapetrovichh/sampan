@@ -28686,7 +28686,10 @@ input,button{font-family:inherit}
                 dragIdx != null && dragIdx > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(dragIdx), fill: "none", stroke: lineColor, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
               ] })
             ] }),
-            shownCandle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, top: yPx(shownCandle.c), height: 0, borderTop: `1px dashed ${lineColor}`, opacity: 0.6, pointerEvents: "none" } }),
+            shownCandle && (() => {
+              const endPct = mode === "line" ? dragIdx != null ? xOf(shownCandle.t * 1e3) : live ? xOf(spanEndMs) : xOf(candles[candles.length - 1].t * 1e3) : 100;
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, width: `${endPct}%`, top: yPx(shownCandle.c), height: 0, borderTop: `1px dashed ${lineColor}`, opacity: 0.6, pointerEvents: "none" } });
+            })(),
             dragMs != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragMs)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
             mode === "line" && shownCandle && (() => {
               const x = dragIdx != null ? xOf(shownCandle.t * 1e3) : live ? xOf(spanEndMs) : 100;
@@ -28850,7 +28853,7 @@ input,button{font-family:inherit}
         onPointerMove: onMove,
         onPointerUp: release,
         onPointerCancel: release,
-        style: { position: "relative", height: h + 24, minWidth: 0, paddingTop: 24, touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none", cursor: "pointer" },
+        style: { position: "relative", height: h + 24 + 20, minWidth: 0, paddingTop: 24, touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none", cursor: "pointer" },
         children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: `0 0 ${W} ${h}`, style: { width: `calc(100% + ${KCHART_LINE_EXTEND}px)`, height: h, display: "block" }, preserveAspectRatio: "none", children: ordered.map((it, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
@@ -29691,7 +29694,7 @@ input,button{font-family:inherit}
     const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
     const [tf, setTf] = (0, import_react4.useState)("Live");
     const [chartMode, setChartMode] = (0, import_react4.useState)("candle");
-    const tfOptions = ["Live", "1m", "5m", "15m", "1H", "1D", "All"];
+    const tfOptions = ["Live", "5m", "15m", "1H", "1D", "All"];
     const isLive = tf === "Live";
     const candleCount = { Live: 30, "1m": 45, "5m": 45, "15m": 45, "1H": 45, "1D": 45, All: 60 }[tf] || 45;
     const stepSecFor = { Live: 1, "1m": 60, "5m": 300, "15m": 900, "1H": 3600, "1D": 86400, All: 86400 }[tf] || 3600;
@@ -29868,6 +29871,7 @@ input,button{font-family:inherit}
     const [orderBookOpen, setOrderBookOpen] = (0, import_react4.useState)(false);
     const [obPrice, setObPrice] = (0, import_react4.useState)(null);
     const goOrderBook = () => setOrderBookOpen(true);
+    const isMemeCoin = m.cat === "Meme";
     const pickFromOrderBook = (price) => {
       setObPrice(price);
       setOrderBookOpen(false);
@@ -29951,7 +29955,7 @@ input,button{font-family:inherit}
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sd" : "su", onAnimationEnd: () => closing && onClose(), style: { position: "absolute", inset: 0, background: "#fff", zIndex: 30, paddingTop: IS_H5 ? "env(safe-area-inset-top)" : 54, display: "flex", flexDirection: "column" }, children: [
       stage > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Signing, { stage, m, o, amt, col }) : orderMode === "limit" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LimitOrder, { m, side, setSide, isYesNo, o, onOpenModes: () => setSheet(true), onOrderBook: goOrderBook, onClose: close, presetPrice: obPrice, onPresetPriceUsed: () => setObPrice(null), onOpenMarket }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 6px" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: () => setSheet(true), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: [
+          !isMemeCoin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: () => setSheet(true), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "3", y1: "6.5", x2: "17", y2: "6.5", stroke: C.ink, strokeWidth: "1.4", strokeLinecap: "round" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "3", y1: "13.5", x2: "17", y2: "13.5", stroke: C.ink, strokeWidth: "1.4", strokeLinecap: "round" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "13", cy: "6.5", r: "3", fill: "#fff", stroke: C.ink, strokeWidth: "1.4" }),
