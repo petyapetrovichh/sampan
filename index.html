@@ -29795,6 +29795,7 @@ input,button{font-family:inherit}
     const shownUp = shownChg >= 0;
     const fmtPx2 = (v) => "$" + (v < 0.01 ? v.toFixed(6) : v < 10 ? v.toFixed(4) : v.toFixed(2));
     const lg = STOCK_LOGOS[st.sym];
+    const maxLev = 3 + st.sym.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % 48;
     const goBack = () => setClosing(true);
     const trade = (i) => setLocalTrade({ m: stockToMarket(st), side: i });
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", height: "100%", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }, children: [
@@ -29812,10 +29813,7 @@ input,button{font-family:inherit}
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: scrollRef, style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 18, minWidth: 0, alignItems: "center" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 56, height: 56, clipPath: "url(#squircle)", background: lg ? "#fff" : st.bg, display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden", color: "#fff", fontSize: st.sym.length > 5 ? 12 : 16, fontWeight: 800, letterSpacing: -0.3, textAlign: "center", padding: 2 }, children: lg ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: lg, alt: "", style: { width: "100%", height: "100%", objectFit: "cover" } }) : st.sym }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 20, fontWeight: 800, letterSpacing: -0.3 }, children: st.sym }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, color: C.mute, fontWeight: 600 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: st.sec }) })
-          ] })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 20, fontWeight: 800, letterSpacing: -0.3 }, children: st.sym }) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 28, fontWeight: 900, fontFamily: MONO }, children: fmtPx2(shownPrice) }),
@@ -29829,7 +29827,14 @@ input,button{font-family:inherit}
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 4, minWidth: 0 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: st.sec }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Leverage up to" }),
+              ": ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontFamily: MONO, fontWeight: 700 }, children: [
+                maxLev,
+                "x"
+              ] })
+            ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode, live: isLive, onScrub: setScrubCandle }),
@@ -31730,6 +31735,7 @@ input,button{font-family:inherit}
       "Total": "\u5408\u8BA1",
       "Amount": "\u91D1\u989D",
       "Margin": "\u4FDD\u8BC1\u91D1",
+      "Leverage up to": "\u6700\u9AD8\u6760\u6746",
       "Order Book": "\u8BA2\u5355\u7C3F",
       "Order book": "\u8BA2\u5355\u7C3F",
       "Price": "\u4EF7\u683C",
