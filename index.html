@@ -26250,7 +26250,7 @@ input,button{font-family:inherit}
     const json = await gtFetch(`/networks/${network}/pools/${poolAddress}/ohlcv/${unit}?aggregate=${aggregate}&limit=${limit}&currency=usd`);
     const list = json?.data?.attributes?.ohlcv_list;
     if (!Array.isArray(list) || list.length < 2) return null;
-    return list.map((row) => ({ t: row[0], o: row[1], hi: row[2], lo: row[3], c: row[4] })).reverse();
+    return list.map((row) => ({ t: row[0], o: row[1], hi: row[2], lo: row[3], c: row[4] })).sort((a, b) => a.t - b.t);
   }
   var MEMES = [
     { name: "Elon Meme Cycle", tk: "$EMC", cover: "linear-gradient(135deg,#F0F0F0,#D8D8D8)", emoji: "\u{1F501}", px: "$0.0031", chg: "+$0.0004 (14.2%)", up: true, mc: "$3.08K", vol: "$41.2K", sub: "Movers" },
@@ -27851,45 +27851,15 @@ input,button{font-family:inherit}
     }, [key]);
     return ref;
   }
-  function useCoinLiveTrail(anchorPrice, rawValue, windowMs = 3e4) {
-    const eased = useSmoothedValue(rawValue, 0.16);
-    const trailRef = (0, import_react4.useRef)([]);
-    const seededRef = (0, import_react4.useRef)(false);
-    const [buf, setBuf] = (0, import_react4.useState)([]);
-    (0, import_react4.useEffect)(() => {
-      if (seededRef.current || !anchorPrice) return;
-      const now = Date.now();
-      trailRef.current = [{ t: now - windowMs, p: anchorPrice }, { t: now, p: anchorPrice }];
-      seededRef.current = true;
-      setBuf(trailRef.current.slice());
-    }, [anchorPrice, windowMs]);
-    (0, import_react4.useEffect)(() => {
-      if (eased == null || !seededRef.current) return;
-      const now = Date.now();
-      const arr = trailRef.current;
-      const SLOT = 250;
-      const slot = Math.floor(now / SLOT) * SLOT;
-      const last = arr[arr.length - 1];
-      if (!last || last.t !== slot) arr.push({ t: slot, p: eased });
-      else last.p = eased;
-      const cutoff = now - windowMs - 3e3;
-      let drop = 0;
-      while (drop < arr.length - 1 && arr[drop].t < cutoff) drop++;
-      if (drop) trailRef.current = arr.slice(drop);
-      setBuf(trailRef.current.slice());
-    }, [eased, windowMs]);
-    (0, import_react4.useEffect)(() => {
-      trailRef.current = [];
-      seededRef.current = false;
-      setBuf([]);
-    }, [windowMs]);
-    return buf;
-  }
   function useLiveTrail(rawValue, windowMs = 3e4, seedTokenId = null) {
     const eased = useSmoothedValue(rawValue, 0.16);
     const trailRef = (0, import_react4.useRef)([]);
     const seededRef = (0, import_react4.useRef)(false);
     const [buf, setBuf] = (0, import_react4.useState)([]);
+    const rawValueRef = (0, import_react4.useRef)(rawValue);
+    (0, import_react4.useEffect)(() => {
+      rawValueRef.current = rawValue;
+    }, [rawValue]);
     (0, import_react4.useEffect)(() => {
       if (!IS_H5 || !seedTokenId) {
         seededRef.current = false;
@@ -27921,8 +27891,14 @@ input,button{font-family:inherit}
           if (seed.length >= 2) {
             trailRef.current = seed;
             seededRef.current = true;
+            return;
           }
         } catch (e) {
+        }
+        if (!cancelled && rawValueRef.current != null) {
+          const now = Date.now();
+          trailRef.current = [{ t: now - windowMs, p: rawValueRef.current }, { t: now, p: rawValueRef.current }];
+          seededRef.current = true;
         }
       })();
       return () => {
@@ -27970,7 +27946,7 @@ input,button{font-family:inherit}
     }, [windowMs]);
     return buf;
   }
-  function LiveOddsChart({ series: series2, h = 170, onScrub, fmtY = (v) => `${Math.round(v)}%`, clampPercent = true }) {
+  function LiveOddsChart({ series: series2, h = 170, onScrub, fmtY = (v) => `${Math.round(v)}%`, clampPercent = true, showTeamLabels = false }) {
     const { lang } = useLang();
     const [dragMs, setDragMs] = (0, import_react4.useState)(null);
     const drawRef = (0, import_react4.useRef)(null);
@@ -28104,14 +28080,15 @@ input,button{font-family:inherit}
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: s.color } })
               ] }, "dot" + si);
             }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: [
-              yTicks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtY(v) }, i)),
-              trimmed.map((s, si) => {
-                const p = s.pts[s.pts.length - 1];
-                if (!p) return null;
-                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(p.p), right: 0, transform: "translateY(-50%)", color: s.color, fontWeight: 700, background: "#fff", paddingLeft: 2 }, children: fmtY(p.p) }, "lbl" + si);
-              })
-            ] })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: yTicks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtY(v) }, i)) }),
+            trimmed.map((s, si) => {
+              const p = s.pts[s.pts.length - 1];
+              if (!p) return null;
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", top: yPx(p.p), right: -KCHART_GUTTER, transform: "translateY(-50%)", zIndex: si, pointerEvents: "none", whiteSpace: "nowrap" }, children: [
+                showTeamLabels && s.label && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { textAlign: "right", fontSize: 11, fontWeight: 700, color: s.color, marginBottom: 2, whiteSpace: "nowrap" }, children: s.label }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: s.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, justifyContent: "center", whiteSpace: "nowrap" }, children: fmtY(p.p) })
+              ] }, "pill" + si);
+            })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden", maskImage: X_FADE, WebkitMaskImage: X_FADE }, children: xTicks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${xOf(t)}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: fmtClock(t) }, t)) })
         ]
@@ -28595,7 +28572,7 @@ input,button{font-family:inherit}
     const yTicks = 5;
     const ticks = Array.from({ length: yTicks }, (_, i) => yMin + (yMax - yMin) * (i / (yTicks - 1)));
     const fmtY = (v) => "$" + (v < 0.01 ? v.toFixed(6) : v.toFixed(v < 10 ? 4 : 2));
-    const lastUp = n > 1 ? candles[n - 1].c >= candles[0].c : true;
+    const lineColor = KLINE_COLORS[0];
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
       "div",
       {
@@ -28623,8 +28600,8 @@ input,button{font-family:inherit}
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: cx - bw / 2, y: Math.min(yPx(c.o), yPx(c.c)), width: bw, height: Math.max(0.8, Math.abs(yPx(c.o) - yPx(c.c))), fill: col })
               ] }, i);
             }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(), fill: "none", stroke: lastUp ? C.up : C.down, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
-              dragIdx != null && dragIdx > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(dragIdx), fill: "none", stroke: lastUp ? C.up : C.down, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(), fill: "none", stroke: lineColor, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke", strokeOpacity: dragIdx != null ? 0.25 : 1 }),
+              dragIdx != null && dragIdx > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: bezierClose(dragIdx), fill: "none", stroke: lineColor, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" })
             ] })
           ] }),
           dragIdx != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragIdx)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
@@ -28633,8 +28610,8 @@ input,button{font-family:inherit}
             const c = candles[idx];
             const x = dragIdx != null ? xOf(idx) : 100;
             return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${x}%`, top: yPx(c.c), transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible" }, children: [
-              dragIdx == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lastUp ? C.up : C.down } }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lastUp ? C.up : C.down } })
+              dragIdx == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lineColor } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lineColor } })
             ] });
           })(),
           dragIdx != null && candles[dragIdx] && (() => {
@@ -29401,7 +29378,7 @@ input,button{font-family:inherit}
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", justifyContent: "flex-end", marginBottom: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 }) }),
-          isLiveTf ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveOddsChart, { series: liveSeries, onScrub: setLiveScrub }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf, showTeamLabels: true }),
+          isLiveTf ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveOddsChart, { series: liveSeries, onScrub: setLiveScrub, h: 150, showTeamLabels: true }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf, showTeamLabels: true }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
@@ -29617,14 +29594,22 @@ input,button{font-family:inherit}
     const [tf, setTf] = (0, import_react4.useState)("Live");
     const [chartMode, setChartMode] = (0, import_react4.useState)("candle");
     const tfOptions = ["Live", "1H", "1D", "1W", "All"];
-    const candleCount = { Live: 20, "1H": 24, "1D": 30, "1W": 35, All: 48 }[tf] || 30;
-    const stepSecFor = { Live: 60, "1H": 300, "1D": 3600, "1W": 14400, All: 86400 }[tf] || 3600;
+    const isLive = tf === "Live";
+    const candleCount = { Live: 30, "1H": 24, "1D": 30, "1W": 35, All: 48 }[tf] || 30;
+    const stepSecFor = { Live: 1, "1H": 300, "1D": 3600, "1W": 14400, All: 86400 }[tf] || 3600;
     const anchorPx = parseFloat(String(mm.px).replace(/[$,]/g, "")) || null;
-    const demoCandles = (0, import_react4.useMemo)(() => genCandles(mm.name + "|" + tf, candleCount, stepSecFor, anchorPx), [mm.name, tf, candleCount, stepSecFor, anchorPx]);
+    const demoCandles = (0, import_react4.useMemo)(() => {
+      if (isLive) {
+        const nowSec = Math.floor(Date.now() / 1e3);
+        const p = anchorPx || 1;
+        return Array.from({ length: candleCount }, (_, i) => ({ t: nowSec - (candleCount - 1 - i), o: p, hi: p, lo: p, c: p }));
+      }
+      return genCandles(mm.name + "|" + tf, candleCount, stepSecFor, anchorPx);
+    }, [mm.name, tf, candleCount, stepSecFor, anchorPx, isLive]);
     const [realCandles, setRealCandles] = (0, import_react4.useState)(null);
     (0, import_react4.useEffect)(() => {
       setRealCandles(null);
-      if (!IS_H5 || !mm.poolAddress) return;
+      if (!IS_H5 || !mm.poolAddress || isLive) return;
       let cancelled = false;
       gtFetchOHLCV(mm.poolNetwork || "solana", mm.poolAddress, tf).then((res) => {
         if (!cancelled && res) setRealCandles(res);
@@ -29632,22 +29617,16 @@ input,button{font-family:inherit}
       return () => {
         cancelled = true;
       };
-    }, [mm.poolAddress, mm.poolNetwork, tf]);
+    }, [mm.poolAddress, mm.poolNetwork, tf, isLive]);
     const seedCandles = realCandles || demoCandles;
-    const livePrice = useLiveCoinPrice(mm.poolNetwork || "solana", mm.poolAddress, true, 4e3);
+    const livePrice = useLiveCoinPrice(mm.poolNetwork || "solana", mm.poolAddress, true, isLive ? 1e3 : 4e3);
     const candles = useLiveCandles(seedCandles, stepSecFor, livePrice, candleCount);
-    const isLive = tf === "Live";
-    (0, import_react4.useEffect)(() => {
-      if (isLive && chartMode === "candle") setChartMode("line");
-    }, [isLive]);
-    const liveTrailBuf = useCoinLiveTrail(anchorPx, livePrice, 3e4);
     const px0 = anchorPx || 0;
     const chg0 = mm.chgNum ?? parseFloat(mm.chg) ?? 0;
     const basePrice = (0, import_react4.useMemo)(() => px0 && chg0 > -100 ? px0 / (1 + chg0 / 100) : px0, [mm.name]);
     const shownPrice = livePrice ?? px0;
     const shownChg = basePrice > 0 ? (shownPrice - basePrice) / basePrice * 100 : chg0;
     const shownUp = shownChg >= 0;
-    const liveSeries = (0, import_react4.useMemo)(() => [{ label: mm.tk, color: shownUp ? C.up : C.down, buf: liveTrailBuf }], [liveTrailBuf, mm.tk, shownUp]);
     const fmtPx2 = (v) => "$" + (v < 0.01 ? v.toFixed(6) : v < 10 ? v.toFixed(4) : v.toFixed(2));
     const lg = mm.icon || MEME_LOGOS[mm.name];
     const desc = mm.desc || `${mm.name} (${mm.tk}) meme token. Buy or sell on the live price feed.`;
@@ -29692,7 +29671,7 @@ input,button{font-family:inherit}
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] }),
-          isLive ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveOddsChart, { series: liveSeries, fmtY: fmtPx2, clampPercent: false }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0, gap: 8 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
@@ -29703,7 +29682,7 @@ input,button{font-family:inherit}
                 const on = tf === t;
                 return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
               }) }),
-              !isLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartTypeToggle, { mode: chartMode, onToggle: () => setChartMode((m) => m === "candle" ? "line" : "candle") })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartTypeToggle, { mode: chartMode, onToggle: () => setChartMode((m) => m === "candle" ? "line" : "candle") })
             ] })
           ] })
         ] }),
