@@ -25889,7 +25889,9 @@ input,button{font-family:inherit}
     const title = isUpDown ? `${mk.assetLabel} Up or Down - ${mk.durationLabel}` : mk.q;
     const cardLivePct = useLiveUpPct(isUpDown ? mk.upTokenId : null, isUpDown ? mk.conditionId : null, isUpDown, 9e3 + Math.abs(hashStr(String(mk.id))) % 4e3);
     const cardUpPct = isUpDown ? cardLivePct != null ? cardLivePct : mk.upPct : 0;
-    const showLive = isUpDown || mk.isLiveGame && !mk.gameEnded;
+    const isLiveGameCard = !!(mk.isSports && mk.isLiveGame && !mk.gameEnded);
+    const { score: cardScore } = useSportsLiveScore(isLiveGameCard ? mk.gameId : null, isLiveGameCard);
+    const showLive = isUpDown || isLiveGameCard;
     const liveTime = !isUpDown && mk.startMs ? fmtSlotTime(mk.startMs) : "";
     const rows = isUpDown ? [
       { label: "Up", pct: Math.round(cardUpPct), binary: true, side: "Up" },
@@ -25909,7 +25911,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinIcon, { img: mk.icon, bg: mk.iconBg, emoji: mk.emoji || "\u20BF" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 600, lineHeight: 1.22, letterSpacing: -0.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: title }),
-              showLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { time: liveTime }) })
+              showLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveBadge, { mono: !!cardScore, time: cardScore ? `${cardScore.home} : ${cardScore.away}` : liveTime }) })
             ] })
           ] }),
           rows.map((rw, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 }, children: [
@@ -26237,30 +26239,92 @@ input,button{font-family:inherit}
       const moneyline = contracts.filter(isMoneyline);
       const others = contracts.filter((c) => !isMoneyline(c));
       if (moneyline.length >= 2) {
-        return { ...base, rows, contracts: moneyline, extraContracts: others, isSports: true, slug: ev.slug, gameId: ev.gameId || null, isLiveGame: ev.live === true, gameEnded: !!ev.ended, startMs: ev.startDate ? new Date(ev.startDate).getTime() : null };
+        const gStart = ev.startDate ? new Date(ev.startDate).getTime() : null;
+        const gEnd = ev.endDate ? new Date(ev.endDate).getTime() : null;
+        const ended = !!ev.ended || gEnd != null && gEnd <= Date.now();
+        const inProgress = gStart != null && gStart <= Date.now() && (gEnd == null || Date.now() < gEnd);
+        return {
+          ...base,
+          rows,
+          contracts: moneyline,
+          extraContracts: others,
+          isSports: true,
+          slug: ev.slug,
+          gameId: ev.gameId || null,
+          isLiveGame: ev.live === true || ev.live == null && inProgress,
+          gameEnded: ended,
+          startMs: gStart,
+          endMs: gEnd
+        };
       }
     }
     return { ...base, rows, contracts };
   }
   var PM_CACHE = {};
   var PM_GAMES_CACHE = {};
+  var PM_GAMES_CACHE_AT = {};
+  var PM_GAMES_TTL = 3e4;
   async function pmFetchGames(tagId) {
-    if (PM_GAMES_CACHE[tagId] !== void 0) return PM_GAMES_CACHE[tagId];
-    try {
-      const r = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${tagId}&related_tags=true&active=true&closed=false&order=startDate&ascending=true&limit=100`);
-      if (!r.ok) throw new Error("bad status");
-      const data = await r.json();
-      PM_GAMES_CACHE[tagId] = (Array.isArray(data) ? data : []).map(pmMapEvent).filter(Boolean);
-    } catch (e) {
-      PM_GAMES_CACHE[tagId] = [];
+    if (PM_GAMES_CACHE[tagId] !== void 0 && Date.now() - (PM_GAMES_CACHE_AT[tagId] || 0) < PM_GAMES_TTL) {
+      return PM_GAMES_CACHE[tagId];
     }
+    const page = async (qs) => {
+      try {
+        const r = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${tagId}&related_tags=true&active=true&closed=false&${qs}&limit=500`);
+        if (!r.ok) throw new Error("bad status");
+        const d = await r.json();
+        return Array.isArray(d) ? d : [];
+      } catch (e) {
+        return [];
+      }
+    };
+    const [asc, desc] = await Promise.all([page("order=startDate&ascending=true"), page("order=startDate&ascending=false")]);
+    const seen = /* @__PURE__ */ new Set();
+    const evs = [];
+    for (const ev of [...asc, ...desc]) {
+      if (ev && !seen.has(ev.id)) {
+        seen.add(ev.id);
+        evs.push(ev);
+      }
+    }
+    PM_GAMES_CACHE[tagId] = evs.map(pmMapEvent).filter(Boolean);
+    PM_GAMES_CACHE_AT[tagId] = Date.now();
     return PM_GAMES_CACHE[tagId];
+  }
+  async function pmFetchLiveGames() {
+    const [sp, es] = await Promise.all([pmFetchGames(PM_TAGS.Sports), pmFetchGames(PM_TAGS.Esports)]);
+    const all = [...sp, ...es].filter((mk) => mk.isSports && mk.isLiveGame && !mk.gameEnded);
+    const seen = /* @__PURE__ */ new Set();
+    const out = [];
+    for (const mk of all.sort((a, b) => (b.startMs || 0) - (a.startMs || 0))) {
+      if (seen.has(mk.id)) continue;
+      seen.add(mk.id);
+      out.push(mk);
+    }
+    try {
+      console.log(
+        "[live-games] sports:",
+        sp.length,
+        "esports:",
+        es.length,
+        "| games:",
+        [...sp, ...es].filter((m) => m.isSports).length,
+        "live:",
+        out.length
+      );
+    } catch (e) {
+    }
+    return out;
   }
   async function pmFetchSub(sub) {
     if (PM_CACHE[sub] !== void 0) return PM_CACHE[sub];
     try {
       if (sub === "Live") {
-        PM_CACHE[sub] = (await pmFetchUpDownFeedCards().catch(() => [])).map((mk) => ({ ...mk, catSub: "Live" }));
+        const [games, upDown] = await Promise.all([
+          pmFetchLiveGames().catch(() => []),
+          pmFetchUpDownFeedCards().catch(() => [])
+        ]);
+        PM_CACHE[sub] = interleave(games, upDown, 3).map((mk) => ({ ...mk, catSub: "Live" }));
         return PM_CACHE[sub];
       }
       if (sub === "Sports" || sub === "Esports") {
@@ -26970,13 +27034,31 @@ input,button{font-family:inherit}
     const [score, setScore] = (0, import_react4.useState)(null);
     const [ended, setEnded] = (0, import_react4.useState)(false);
     (0, import_react4.useEffect)(() => {
-      if (!IS_H5 || !enabled || !gameId) {
-        setScore(null);
-        return;
-      }
-      let ws;
+      setScore(null);
+      setEnded(false);
+      if (!IS_H5 || !enabled || !gameId) return;
+      let cancelled = false, ws, iv;
+      const apply = (p) => {
+        if (!p || cancelled) return;
+        if (p.ended === true || p.status === "ended" || p.state === "final") setEnded(true);
+        const combined = typeof p.score === "string" ? p.score : null;
+        if (combined && /\d\s*-\s*\d/.test(combined)) {
+          const [home2, away2] = combined.split("-").map((x) => x.trim());
+          setScore({ home: home2, away: away2 });
+          return;
+        }
+        const home = p.homeScore ?? p.home_score ?? p.score?.home ?? p.home?.score;
+        const away = p.awayScore ?? p.away_score ?? p.score?.away ?? p.away?.score;
+        if (home !== void 0 && away !== void 0) setScore({ home: String(home), away: String(away) });
+      };
       try {
         ws = new WebSocket("wss://sports-api.polymarket.com/ws");
+        ws.onopen = () => {
+          try {
+            ws.send(JSON.stringify({ type: "subscribe", game_id: String(gameId) }));
+          } catch (e) {
+          }
+        };
         ws.onmessage = (e) => {
           if (e.data === "ping") {
             try {
@@ -26987,23 +27069,33 @@ input,button{font-family:inherit}
           }
           try {
             const msg = JSON.parse(e.data);
-            if (msg.type !== "sport_result" || !msg.payload) return;
-            const p = msg.payload;
-            if (String(p.game_id) !== String(gameId)) return;
-            if (p.ended) {
-              setEnded(true);
-              return;
-            }
-            if (typeof p.score === "string" && p.score.includes("-")) {
-              const [home, away] = p.score.split("-").map((s) => s.trim());
-              setScore({ home, away });
+            const list = Array.isArray(msg) ? msg : [msg];
+            for (const m of list) {
+              const p = m?.payload ?? m;
+              if (!p) continue;
+              const id = p.game_id ?? p.gameId ?? p.id;
+              if (id != null && String(id) !== String(gameId)) continue;
+              apply(p);
             }
           } catch (err) {
           }
         };
       } catch (e) {
       }
+      const poll = async () => {
+        try {
+          const r = await fetch(`https://gamma-api.polymarket.com/events?id=${encodeURIComponent(gameId)}`);
+          if (!r.ok) return;
+          const d = await r.json();
+          const ev = Array.isArray(d) ? d[0] : d;
+          if (ev) apply({ score: ev.score, homeScore: ev.homeScore, awayScore: ev.awayScore, ended: ev.ended });
+        } catch (e) {
+        }
+      };
+      iv = setInterval(poll, 15e3);
       return () => {
+        cancelled = true;
+        clearInterval(iv);
         try {
           ws && ws.close();
         } catch (e) {
