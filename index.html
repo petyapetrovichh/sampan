@@ -29821,7 +29821,7 @@ input,button{font-family:inherit}
       } }, localTrade.m.id + "-" + localTrade.side)
     ] });
   }
-  function LeveragePill({ value, max, onChange }) {
+  function LeveragePill({ value, max, onChange, full = false }) {
     const ref = (0, import_react4.useRef)(null);
     const KNOB = 16;
     const HIT = 48;
@@ -29838,26 +29838,30 @@ input,button{font-family:inherit}
       onChange(1 + Math.round(f * (max - 1)));
     };
     const digits = String(max).length;
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, background: "#F7F7F7", borderRadius: 999, padding: "3px 10px 3px 6px", flex: "0 1 210px", minWidth: 0 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref, style: { position: "relative", flex: 1, minWidth: 60, height: KNOB, display: "flex", alignItems: "center", touchAction: "none", userSelect: "none" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: "50%", left: KNOB / 2, right: KNOB / 2, height: 3, transform: "translateY(-50%)", background: "#D8D6D0", borderRadius: 2 } }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: "50%", left: KNOB / 2, width: `calc(${frac} * (100% - ${KNOB}px))`, height: 3, transform: "translateY(-50%)", background: C.ink, borderRadius: 2 } }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: "50%", left: `calc(${frac} * (100% - ${KNOB}px))`, width: KNOB, height: KNOB, transform: "translateY(-50%)", borderRadius: "50%", background: C.ink, boxShadow: "0 2px 6px rgba(0,0,0,.25)", pointerEvents: "none" } }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { onPointerDown: (e) => {
-          e.currentTarget.setPointerCapture?.(e.pointerId);
-          setFromX(e.clientX);
-        }, onPointerMove: (e) => {
-          if (e.currentTarget.hasPointerCapture?.(e.pointerId)) setFromX(e.clientX);
-        }, style: { position: "absolute", left: -8, right: -8, top: (KNOB - HIT) / 2, height: HIT, cursor: "pointer", touchAction: "none" } })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 550, color: C.ink, whiteSpace: "nowrap", lineHeight: 1, flexShrink: 0 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { style: { fontFamily: MONO, minWidth: `${digits + 1}ch`, textAlign: "right" }, children: [
-          value,
-          "x"
+    return (
+      // `full` lets the limit-order screen stretch it edge to edge; the market order keeps the
+      // fixed 210px basis so it still sits between the two balance pills
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, background: "#F7F7F7", borderRadius: 999, padding: "3px 10px 3px 6px", flex: full ? "1 1 auto" : "0 1 210px", minWidth: 0 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref, style: { position: "relative", flex: 1, minWidth: 60, height: KNOB, display: "flex", alignItems: "center", touchAction: "none", userSelect: "none" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: "50%", left: KNOB / 2, right: KNOB / 2, height: 3, transform: "translateY(-50%)", background: "#D8D6D0", borderRadius: 2 } }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: "50%", left: KNOB / 2, width: `calc(${frac} * (100% - ${KNOB}px))`, height: 3, transform: "translateY(-50%)", background: C.ink, borderRadius: 2 } }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: "50%", left: `calc(${frac} * (100% - ${KNOB}px))`, width: KNOB, height: KNOB, transform: "translateY(-50%)", borderRadius: "50%", background: C.ink, boxShadow: "0 2px 6px rgba(0,0,0,.25)", pointerEvents: "none" } }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { onPointerDown: (e) => {
+            e.currentTarget.setPointerCapture?.(e.pointerId);
+            setFromX(e.clientX);
+          }, onPointerMove: (e) => {
+            if (e.currentTarget.hasPointerCapture?.(e.pointerId)) setFromX(e.clientX);
+          }, style: { position: "absolute", left: -8, right: -8, top: (KNOB - HIT) / 2, height: HIT, cursor: "pointer", touchAction: "none" } })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "leverage" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 550, color: C.ink, whiteSpace: "nowrap", lineHeight: 1, flexShrink: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { style: { fontFamily: MONO, minWidth: `${digits + 1}ch`, textAlign: "right" }, children: [
+            value,
+            "x"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "leverage" })
+        ] })
       ] })
-    ] });
+    );
   }
   function Trade({ m, side: s0, onClose, onDone, onOpenMarket }) {
     const { lang } = useLang();
@@ -29917,7 +29921,7 @@ input,button{font-family:inherit}
     const liqNum = pxMeta.current ? o.n === "Short" ? pxMeta.current.cur * (1 + liqOffset) : pxMeta.current.cur * (1 - liqOffset) : 0;
     const liqStr = pxMeta.current ? fmtPx(liqNum, pxMeta.current.decimals, pxMeta.current.hasDollar) : "";
     const liqPct = pxMeta.current ? (liqNum - pxMeta.current.cur) / pxMeta.current.cur * 100 : 0;
-    const balance = 0;
+    const balance = 100;
     const potential = p > 0 ? amt / (p / 100) : 0;
     const fmtCommas = (s) => {
       if (s === "") return "";
@@ -30155,7 +30159,14 @@ input,button{font-family:inherit}
     const decimalAllowed = chance <= 1 || chance >= 99;
     const fmtPrice = (v) => decimalAllowed ? v.toFixed(1) : String(Math.round(v));
     const [field, setField] = (0, import_react4.useState)("shares");
-    const [priceStr, setPriceStr] = (0, import_react4.useState)(presetPrice != null ? String(presetPrice) : fmtPrice(chance));
+    const [priceStr, setPriceStr] = (0, import_react4.useState)(() => {
+      if (presetPrice != null) return String(presetPrice);
+      if (m.perp && m.px) {
+        const pp = parsePx(m.px);
+        return pp.num.toFixed(2);
+      }
+      return fmtPrice(chance);
+    });
     const [sharesStr, setSharesStr] = (0, import_react4.useState)("");
     const [expSheet, setExpSheet] = (0, import_react4.useState)(false);
     const [expiration, setExpiration] = (0, import_react4.useState)("Never");
@@ -30173,13 +30184,42 @@ input,button{font-family:inherit}
         setPriceStr(fmtPrice(chance));
       }
     }, [chance]);
+    const perp = !!m.perp;
+    const maxLev = m.maxLev || 10;
+    const [lev, setLev] = (0, import_react4.useState)(Math.min(5, maxLev));
+    const balance = 100;
+    const midMeta = (0, import_react4.useRef)(perp && m.px ? (() => {
+      const pp = parsePx(m.px);
+      return { ...pp, cur: pp.num };
+    })() : null);
+    const [, setMidTick] = (0, import_react4.useState)(0);
+    (0, import_react4.useEffect)(() => {
+      if (!perp || !midMeta.current) return;
+      const t2 = setInterval(() => {
+        const mm = midMeta.current;
+        mm.cur = mm.cur * (1 + (Math.random() * 2 - 1) * 4e-3);
+        setMidTick((x) => x + 1);
+      }, 1e3);
+      return () => clearInterval(t2);
+    }, [perp]);
+    const liveMid = midMeta.current ? midMeta.current.cur : 0;
+    const bestAsk = (0, import_react4.useMemo)(() => buildBook(m, o).bestAsk, [m.id, o.n, o.p, m.px]);
     const priceNum = parseFloat(priceStr) || 0;
     const shares = parseFloat(sharesStr) || 0;
     const toWin = shares;
-    const matchedShares = priceNum >= chance ? shares : 0;
-    const totalCost = priceNum / 100 * shares * 1.01;
-    const clampPrice = (v) => Math.max(0, Math.min(100, v));
-    const stepPrice = (d) => setPriceStr(fmtPrice(clampPrice((parseFloat(priceStr) || 0) + d)));
+    const matchedShares = perp ? priceNum > 0 ? shares / priceNum : 0 : priceNum >= chance ? shares : 0;
+    const totalCost = perp ? shares * 1.01 : priceNum / 100 * shares * 1.01;
+    const margin = shares;
+    const liqOffset = maxLev > 1 ? (10 - (10 - 0.5) * (lev - 1) / (maxLev - 1)) / 100 : 0.1;
+    const liqNum = o.n === "Short" ? priceNum * (1 + liqOffset) : priceNum * (1 - liqOffset);
+    const perpStep = (p) => p >= 100 ? 1 : p >= 10 ? 0.1 : 0.01;
+    const fmtPerpPrice = (v) => v.toFixed(2);
+    const clampPrice = (v) => perp ? Math.max(0, v) : Math.max(0, Math.min(100, v));
+    const stepPrice = (dir) => setPriceStr((s) => {
+      const cur = parseFloat(s) || 0;
+      if (!perp) return fmtPrice(clampPrice(cur + dir));
+      return fmtPerpPrice(clampPrice(cur + dir * perpStep(cur)));
+    });
     const stepShares = (d) => setSharesStr((s) => {
       const n = Math.max(0, Math.round(((parseFloat(s) || 0) + d) * 10) / 10);
       return n ? String(n) : "";
@@ -30189,13 +30229,13 @@ input,button{font-family:inherit}
         setPriceStr((s) => {
           if (k === "\u232B") return s.slice(0, -1) || "0";
           if (k === ".") {
-            if (!decimalAllowed || s.includes(".")) return s;
+            if (!perp && !decimalAllowed || s.includes(".")) return s;
             return s === "" ? "0." : s + ".";
           }
           const [, dec] = s.split(".");
-          if (dec !== void 0 && dec.length >= 1) return s;
+          if (dec !== void 0 && dec.length >= (perp ? 2 : 1)) return s;
           const next = s === "0" || s === "" ? String(k) : s + k;
-          if ((parseFloat(next) || 0) > 100) return s;
+          if (!perp && (parseFloat(next) || 0) > 100) return s;
           return next;
         });
       } else {
@@ -30213,7 +30253,7 @@ input,button{font-family:inherit}
         });
       }
     };
-    const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, field === "shares" || decimalAllowed ? "." : "", 0, "\u232B"];
+    const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, field === "shares" || decimalAllowed || perp ? "." : "", 0, "\u232B"];
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 6px" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: onOpenModes, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: [
@@ -30241,26 +30281,32 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 14, color: C.mute, marginTop: 1 }, children: [
             t("Ask"),
             " ",
-            fmtPrice(chance),
-            "%"
+            perp ? "$" + bestAsk.toFixed(2) : fmtPrice(chance) + "%"
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Stepper, { active: field === "price", onMinus: () => stepPrice(-1), onPlus: () => stepPrice(1), onTapField: () => setField("price"), minusGrey: priceNum <= 0, plusGrey: priceNum >= 100, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "flex-end" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Stepper, { active: field === "price", onMinus: () => stepPrice(-1), onPlus: () => stepPrice(1), onTapField: () => setField("price"), minusGrey: priceNum <= 0, plusGrey: !perp && priceNum >= 100, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "flex-end" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO, fontSize: 20, fontWeight: 550, color: C.ink, lineHeight: 1 }, children: priceStr === "" ? "0" : priceStr }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Caret, { active: field === "price" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, color: C.mute, marginLeft: 2, lineHeight: 1 }, children: "%" })
+          !perp && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, color: C.mute, marginLeft: 2, lineHeight: 1 }, children: "%" })
         ] }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { borderTop: `1px dashed ${C.line}`, margin: "0 20px" } }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 16, fontWeight: 550, letterSpacing: -0.3 }, children: t("Shares") }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 16, fontWeight: 550, letterSpacing: -0.3 }, children: t(perp ? "Amount" : "Shares") }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Stepper, { active: field === "shares", onMinus: () => stepShares(-1), onPlus: () => stepShares(1), onTapField: () => setField("shares"), minusGrey: shares <= 0, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO, fontSize: 20, fontWeight: 550, color: sharesStr === "" ? "#C9CCD4" : C.ink }, children: sharesStr === "" ? "0" : sharesStr }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Caret, { active: field === "shares" })
         ] }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 10, padding: "0 16px 14px", justifyContent: "center" }, children: [
-        [["-100", -100], ["-10", -10], ["+10", 10], ["+100", 100]].map(([lbl, d]) => {
+        perp ? [10, 25, 50, 75].map((pct) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => {
+          setField("shares");
+          const v = Math.round(balance * pct) / 100;
+          setSharesStr(v ? String(v) : "");
+        }, style: { flex: 1, border: "none", background: C.card, boxShadow: "inset 0 0 0 1px #F3F2EF", borderRadius: 999, padding: "7px 0", fontSize: 15, fontWeight: 600, color: balance > 0 ? C.ink : "#C9CCD4", cursor: "pointer" }, children: [
+          pct,
+          "%"
+        ] }, pct)) : [["-100", -100], ["-10", -10], ["+10", 10], ["+100", 100]].map(([lbl, d]) => {
           const grey = d === -100 ? shares < 100 : d === -10 ? shares < 10 : false;
           return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => {
             setField("shares");
@@ -30268,16 +30314,21 @@ input,button{font-family:inherit}
           }, style: { flex: 1, border: "none", background: C.card, boxShadow: grey ? "inset 0 0 0 1px rgba(0,0,0,.04)" : "inset 0 0 0 1px #F3F2EF", borderRadius: 999, padding: "7px 0", fontSize: 15, fontWeight: 600, color: grey ? "#C9CCD4" : C.ink, cursor: "pointer" }, children: lbl }, lbl);
         }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => {
+          if (perp) {
+            setField("shares");
+            setSharesStr(balance ? String(balance) : "");
+          }
         }, style: { flex: 1, border: "none", background: C.card, boxShadow: "inset 0 0 0 1px #F3F2EF", borderRadius: 999, padding: "7px 0", fontSize: 15, fontWeight: 600, color: C.ink, cursor: "pointer" }, children: t("Max") })
       ] }),
+      perp && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", padding: "0 16px 14px" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, display: "flex" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LeveragePill, { value: lev, max: maxLev, onChange: setLev, full: true }) }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { borderTop: `1px dashed ${C.line}`, margin: "0 20px" } }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { minHeight: 116 }, children: [
         shares > 0 && priceNum > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: C.mute }, children: t("To win") }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, color: C.up, marginLeft: "auto" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: C.mute }, children: t(perp ? "Margin" : "To win") }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, color: perp ? C.ink : C.up, marginLeft: "auto" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
             "$",
-            toWin.toLocaleString(void 0, { maximumFractionDigits: 1 })
+            (perp ? margin : toWin).toLocaleString(void 0, { maximumFractionDigits: 2 })
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: shares > 0 && priceNum > 0 ? "3px 20px" : "16px 20px" }, children: [
@@ -30296,6 +30347,13 @@ input,button{font-family:inherit}
           ] })
         ] }),
         shares > 0 && priceNum > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          perp && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px 3px" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: C.mute }, children: t("Liquidation price") }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 14, fontWeight: 600, color: C.down, marginLeft: "auto" }, children: [
+              "$",
+              liqNum.toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            ] })
+          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px 3px" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: C.mute }, children: t("Matched shares") }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, fontWeight: 600, color: C.ink, marginLeft: "auto" }, children: matchedShares.toLocaleString(void 0, { maximumFractionDigits: 1 }) })
@@ -30336,44 +30394,80 @@ input,button{font-family:inherit}
     }
     return h;
   }
+  function perpTickOf(p) {
+    return p >= 100 ? 1 : p >= 10 ? 0.1 : 0.01;
+  }
+  function buildBook(m, o) {
+    const perp = !!m.perp;
+    if (perp) {
+      const base = m.px ? parsePx(m.px).num : m.price || 0;
+      const tick = perpTickOf(base);
+      const dp = tick >= 1 ? 2 : tick >= 0.1 ? 2 : 2;
+      const round = (v) => Math.round(v / tick) * tick;
+      const rand2 = mulberry32(hashStr(String(m.id) + o.n + String(Math.round(base * 100))));
+      const genSide2 = (startPrice, dir, n) => {
+        const levels = [];
+        for (let i = 0; i < n; i++) {
+          const price = round(startPrice + dir * tick * i);
+          if (price <= 0) break;
+          const roll = rand2();
+          let shares;
+          if (roll > 0.93) shares = Math.round(8e3 + rand2() * 32e3);
+          else if (roll > 0.75) shares = Math.round(400 + rand2() * 4e3);
+          else shares = Math.round(1 + rand2() * 900);
+          levels.push({ price, shares });
+        }
+        let cum = 200 + rand2() * 800;
+        for (const lv of levels) {
+          cum += lv.shares * (0.3 + rand2() * 1.2) + rand2() * 400;
+          lv.total = Math.round(cum);
+        }
+        return levels;
+      };
+      const askLevels2 = genSide2(round(base + tick), 1, 24);
+      const bidLevels2 = genSide2(round(base), -1, 24);
+      const maxTotal2 = Math.max(1, ...askLevels2.map((l) => l.total), ...bidLevels2.map((l) => l.total));
+      return { perp, dp, asks: [...askLevels2].reverse(), bids: bidLevels2, maxTotal: maxTotal2, bestAsk: askLevels2[0]?.price ?? base };
+    }
+    const chance = Math.round(o.p);
+    const askStart = Math.min(99, Math.max(1, chance));
+    const bidStart = Math.max(1, askStart - 1);
+    const rand = mulberry32(hashStr(String(m.id) + o.n + askStart));
+    const genSide = (start, end, dir) => {
+      const levels = [];
+      const span = Math.max(1, Math.abs(end - start));
+      for (let p = start; dir > 0 ? p <= end : p >= end; p += dir) {
+        const dist = Math.abs(p - start);
+        const tt = dist / span;
+        const prob = dist <= 9 ? 1 : 0.15 + 0.8 * Math.pow(tt, 1.7);
+        if (rand() < prob) {
+          const roll = rand();
+          let shares;
+          if (roll > 0.93) shares = Math.round(8e3 + rand() * 32e3);
+          else if (roll > 0.75) shares = Math.round(400 + rand() * 4e3);
+          else shares = Math.round(1 + rand() * 900);
+          levels.push({ price: p, shares });
+        }
+      }
+      let cum = 200 + rand() * 800;
+      for (const lv of levels) {
+        cum += lv.shares * (0.3 + rand() * 1.2) + rand() * 400;
+        lv.total = Math.round(cum);
+      }
+      return levels;
+    };
+    const askLevels = genSide(askStart, 99, 1);
+    const bidLevels = genSide(bidStart, 1, -1);
+    const maxTotal = Math.max(1, ...askLevels.map((l) => l.total), ...bidLevels.map((l) => l.total));
+    return { perp, dp: 0, asks: [...askLevels].reverse(), bids: bidLevels, maxTotal, bestAsk: askLevels[0]?.price ?? askStart };
+  }
   function OrderBook({ m, o, onClose, onPick }) {
     const { lang } = useLang();
     const t = (s) => translate(lang, s);
     const [closing, setClosing] = (0, import_react4.useState)(false);
     const close = () => setClosing(true);
-    const chance = Math.round(o.p);
-    const askStart = Math.min(99, Math.max(1, chance));
-    const bidStart = Math.max(1, askStart - 1);
-    const { asks, bids, maxTotal } = (0, import_react4.useMemo)(() => {
-      const rand = mulberry32(hashStr(String(m.id) + o.n + askStart));
-      const genSide = (start, end, dir) => {
-        const levels = [];
-        const span = Math.max(1, Math.abs(end - start));
-        for (let p = start; dir > 0 ? p <= end : p >= end; p += dir) {
-          const dist = Math.abs(p - start);
-          const t2 = dist / span;
-          const prob = dist <= 9 ? 1 : 0.15 + 0.8 * Math.pow(t2, 1.7);
-          if (rand() < prob) {
-            const roll = rand();
-            let shares;
-            if (roll > 0.93) shares = Math.round(8e3 + rand() * 32e3);
-            else if (roll > 0.75) shares = Math.round(400 + rand() * 4e3);
-            else shares = Math.round(1 + rand() * 900);
-            levels.push({ price: p, shares });
-          }
-        }
-        let cum = 200 + rand() * 800;
-        for (const lv of levels) {
-          cum += lv.shares * (0.3 + rand() * 1.2) + rand() * 400;
-          lv.total = Math.round(cum);
-        }
-        return levels;
-      };
-      const askLevels = genSide(askStart, 99, 1);
-      const bidLevels = genSide(bidStart, 1, -1);
-      const maxTotal2 = Math.max(1, ...askLevels.map((l) => l.total), ...bidLevels.map((l) => l.total));
-      return { asks: [...askLevels].reverse(), bids: bidLevels, maxTotal: maxTotal2 };
-    }, [m.id, o.n, askStart]);
+    const { asks, bids, maxTotal, perp, dp } = (0, import_react4.useMemo)(() => buildBook(m, o), [m.id, o.n, o.p, m.px]);
+    const fmtLevel = (p) => perp ? "$" + p.toFixed(dp) : p + "%";
     const scrollRef = (0, import_react4.useRef)(null);
     const dividerRef = (0, import_react4.useRef)(null);
     (0, import_react4.useEffect)(() => {
@@ -30388,10 +30482,7 @@ input,button{font-family:inherit}
       const pct = Math.max(4, Math.min(100, total / maxTotal * 100));
       return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { onClick: () => onPick && onPick(price), className: "tap", style: { position: "relative", display: "flex", alignItems: "center", padding: "12px 20px", marginBottom: 6, overflow: "hidden", cursor: "pointer" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, bottom: 0, left: 20, right: 20, pointerEvents: "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: 0, bottom: 0, left: 0, width: `${pct}%`, background: up ? C.upSoft : C.downSoft, borderRadius: "0 14px 14px 0" } }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", flex: "0 0 30%", paddingLeft: 8, fontSize: 16, fontWeight: 600, color: up ? C.up : C.down }, children: [
-          price,
-          "%"
-        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", flex: "0 0 30%", paddingLeft: 8, fontSize: 16, fontWeight: 600, color: up ? C.up : C.down }, children: fmtLevel(price) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", flex: 1, fontSize: 16, color: C.ink }, children: shares.toLocaleString() }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", flex: "0 0 28%", paddingRight: 8, fontSize: 16, color: C.ink, textAlign: "right" }, children: [
           "$",
@@ -30404,7 +30495,7 @@ input,button{font-family:inherit}
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 40 } }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { height: 40, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 600, letterSpacing: -0.3, lineHeight: 1.15 }, children: t("Order Book") }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 15, fontWeight: 500, color: C.ink, lineHeight: 1.15 }, children: (() => {
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 15, fontWeight: 500, color: C.ink, lineHeight: 1.15 }, children: perp ? m.sym || m.title || "" : (() => {
             const ev = o.px ? (o.dir ? o.dir === "up" ? "\u2191 " : "\u2193 " : "") + o.px : o.sub || m.resolution || "";
             return (ev ? ev + " \xB7 " : "") + t(o.n);
           })() })
@@ -30413,7 +30504,7 @@ input,button{font-family:inherit}
       ] }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", padding: "10px 20px 10px", flexShrink: 0 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: "0 0 30%", paddingLeft: 8, fontSize: 15, color: C.mute }, children: t("Price") }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, fontSize: 15, color: C.mute }, children: t("Shares") }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, fontSize: 15, color: C.mute }, children: t(perp ? "Amount" : "Shares") }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: "0 0 28%", paddingRight: 8, fontSize: 15, color: C.mute, textAlign: "right" }, children: t("Total") })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { borderTop: `1px dashed ${C.line}`, margin: "0 20px", flexShrink: 0 } }),
@@ -31453,6 +31544,8 @@ input,button{font-family:inherit}
       "To win": "\u53EF\u8D62",
       "Matched shares": "\u64AE\u5408\u4EFD\u989D",
       "Total": "\u5408\u8BA1",
+      "Amount": "\u91D1\u989D",
+      "Margin": "\u4FDD\u8BC1\u91D1",
       "Order Book": "\u8BA2\u5355\u7C3F",
       "Order book": "\u8BA2\u5355\u7C3F",
       "Price": "\u4EF7\u683C",
