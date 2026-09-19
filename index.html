@@ -29812,7 +29812,7 @@ input,button{font-family:inherit}
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: scrollRef, style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 18, minWidth: 0, alignItems: "center" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 56, height: 56, clipPath: "url(#squircle)", background: lg ? "#fff" : st.bg, display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden", color: "#fff", fontSize: st.sym.length > 5 ? 12 : 16, fontWeight: 800, letterSpacing: -0.3, textAlign: "center", padding: 2 }, children: lg ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: lg, alt: "", style: { width: "100%", height: "100%", objectFit: "cover" } }) : st.sym }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 56, height: 56, clipPath: "url(#squircle)", background: lg ? "#fff" : st.bg, display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden", color: "#fff", fontSize: st.sym.length > 5 ? 12 : 16, fontWeight: 800, letterSpacing: -0.3, textAlign: "center", lineHeight: 1, padding: 0 }, children: lg ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: lg, alt: "", style: { width: "100%", height: "100%", objectFit: "cover" } }) : st.sym }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 20, fontWeight: 800, letterSpacing: -0.3 }, children: st.sym }) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10, minWidth: 0 }, children: [
@@ -30052,6 +30052,7 @@ input,button{font-family:inherit}
       ] })
     );
   }
+  var LAST_ORDER_MODE = "market";
   function Trade({ m, side: s0, onClose, onDone, onOpenMarket }) {
     const { lang } = useLang();
     const [side, setSide] = (0, import_react4.useState)(s0);
@@ -30060,7 +30061,7 @@ input,button{font-family:inherit}
     const [err, setErr] = (0, import_react4.useState)(false);
     const [closing, setClosing] = (0, import_react4.useState)(false);
     const [sheet, setSheet] = (0, import_react4.useState)(false);
-    const [orderMode, setOrderMode] = (0, import_react4.useState)("market");
+    const [orderMode, setOrderMode] = (0, import_react4.useState)(() => m.cat === "Meme" ? "market" : LAST_ORDER_MODE);
     const [orderBookOpen, setOrderBookOpen] = (0, import_react4.useState)(false);
     const [obPrice, setObPrice] = (0, import_react4.useState)(null);
     const goOrderBook = () => setOrderBookOpen(true);
@@ -30068,6 +30069,7 @@ input,button{font-family:inherit}
     const pickFromOrderBook = (price) => {
       setObPrice(price);
       setOrderBookOpen(false);
+      LAST_ORDER_MODE = "limit";
       setOrderMode("limit");
     };
     const setAmtNum = (n) => setAmtStr(n ? String(n) : "");
@@ -30265,7 +30267,14 @@ input,button{font-family:inherit}
         ] }) : k }, k)) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: "auto", padding: "16px 16px calc(env(safe-area-inset-bottom) - 1px)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: swipeW ? swipeW * 0.95 : "100%", margin: "0 auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Swipe, { label: swipeLabel, color: col, onConfirm: confirm }) }) })
       ] }),
-      sheet && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TradingModeSheet, { mode: orderMode, perp, onSelect: (id) => id === "orderbook" ? goOrderBook() : setOrderMode(id), onClose: () => setSheet(false) }),
+      sheet && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TradingModeSheet, { mode: orderMode, perp, onSelect: (id) => {
+        if (id === "orderbook") {
+          goOrderBook();
+          return;
+        }
+        LAST_ORDER_MODE = id;
+        setOrderMode(id);
+      }, onClose: () => setSheet(false) }),
       orderBookOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OrderBook, { m, o, onClose: () => setOrderBookOpen(false), onPick: pickFromOrderBook })
     ] });
   }
@@ -30401,6 +30410,7 @@ input,button{font-family:inherit}
     const margin = shares;
     const liqOffset = maxLev > 1 ? (10 - (10 - 0.5) * (lev - 1) / (maxLev - 1)) / 100 : 0.1;
     const liqNum = o.n === "Short" ? priceNum * (1 + liqOffset) : priceNum * (1 - liqOffset);
+    const liqPct = priceNum > 0 ? (liqNum - priceNum) / priceNum * 100 : 0;
     const perpStep = (p) => p >= 100 ? 1 : p >= 10 ? 0.1 : 0.01;
     const fmtPerpPrice = (v) => v.toFixed(2);
     const clampPrice = (v) => perp ? Math.max(0, v) : Math.max(0, Math.min(100, v));
@@ -30513,11 +30523,11 @@ input,button{font-family:inherit}
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { borderTop: `1px dashed ${C.line}`, margin: "0 20px" } }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { minHeight: 116 }, children: [
         shares > 0 && priceNum > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: C.mute }, children: t(perp ? "Margin" : "To win") }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: C.mute }, children: t(perp ? "Position size" : "To win") }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, color: perp ? C.ink : C.up, marginLeft: "auto" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
             "$",
-            (perp ? margin : toWin).toLocaleString(void 0, { maximumFractionDigits: 2 })
+            (perp ? margin * lev : toWin).toLocaleString(void 0, { maximumFractionDigits: 2 })
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: shares > 0 && priceNum > 0 ? "3px 20px" : "16px 20px" }, children: [
@@ -30538,9 +30548,26 @@ input,button{font-family:inherit}
         shares > 0 && priceNum > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
           perp && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px 3px" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: C.mute }, children: t("Liquidation price") }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 14, fontWeight: 600, color: C.down, marginLeft: "auto" }, children: [
-              "$",
-              liqNum.toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", fontSize: 14, fontWeight: 600 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { width: "12", height: "12", viewBox: "0 0 12 12", fill: "none", style: { flexShrink: 0 }, children: o.n === "Short" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "6", y1: "10.5", x2: "6", y2: "1.5", stroke: C.ink, strokeWidth: "1.3", strokeLinecap: "round" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "6", y1: "1.5", x2: "2.8", y2: "4.7", stroke: C.ink, strokeWidth: "1.3", strokeLinecap: "round" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "6", y1: "1.5", x2: "9.2", y2: "4.7", stroke: C.ink, strokeWidth: "1.3", strokeLinecap: "round" })
+              ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "6", y1: "1.5", x2: "6", y2: "10.5", stroke: C.ink, strokeWidth: "1.3", strokeLinecap: "round" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "6", y1: "10.5", x2: "2.8", y2: "7.3", stroke: C.ink, strokeWidth: "1.3", strokeLinecap: "round" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: "6", y1: "10.5", x2: "9.2", y2: "7.3", stroke: C.ink, strokeWidth: "1.3", strokeLinecap: "round" })
+              ] }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { style: { color: C.down }, children: [
+                "$",
+                liqNum.toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { color: C.ink, fontWeight: 550 }, children: [
+                "(",
+                liqPct >= 0 ? "+" : "",
+                liqPct.toFixed(1),
+                "%)"
+              ] })
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px 3px" }, children: [
@@ -30554,7 +30581,7 @@ input,button{font-family:inherit}
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: "auto" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", padding: "0 8px" }, children: keys.map((k, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "tap", onClick: () => k !== "" && key(k), disabled: k === "", style: { border: "none", background: "transparent", fontSize: 30, fontWeight: 600, padding: "10px 0", color: C.ink, fontFamily: MONO, display: "grid", placeItems: "center", cursor: k === "" ? "default" : "pointer", visibility: k === "" ? "hidden" : "visible" }, children: k === "\u232B" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "42", height: "30", viewBox: "0 0 42 30", style: { display: "block" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", padding: "0 8px" }, children: keys.map((k, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "tap", onClick: () => k !== "" && key(k), disabled: k === "", style: { border: "none", background: "transparent", fontSize: 30, fontWeight: 600, padding: "7.5px 0", color: C.ink, fontFamily: MONO, display: "grid", placeItems: "center", cursor: k === "" ? "default" : "pointer", visibility: k === "" ? "hidden" : "visible" }, children: k === "\u232B" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "42", height: "30", viewBox: "0 0 42 30", style: { display: "block" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M13 2 L40 2 Q42 2 42 4 L42 26 Q42 28 40 28 L13 28 Q12 28 11.3 27.2 L1.2 16.3 Q0 15 1.2 13.7 L11.3 2.8 Q12 2 13 2 Z", fill: C.ink }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M20 11 L30 21 M30 11 L20 21", stroke: "#fff", strokeWidth: "2.6", strokeLinecap: "round" })
         ] }) : k }, i)) }),
