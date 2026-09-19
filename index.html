@@ -28538,9 +28538,11 @@ input,button{font-family:inherit}
     const n = candles.length;
     const all = candles.flatMap((c) => [c.hi, c.lo]);
     const mn = all.length ? Math.min(...all) : 0, mx = all.length ? Math.max(...all) : 1;
-    const pad = (mx - mn) * 0.12 || 1;
+    const scale = mx || 1;
+    const pad = (mx - mn) * 0.12 || scale * 0.05;
     const yMin = mn - pad, yMax = mx + pad;
-    const yPx = (v) => h - (v - yMin) / Math.max(1, yMax - yMin) * h;
+    const span = Math.max(yMax - yMin, scale * 1e-6);
+    const yPx = (v) => h - (v - yMin) / span * h;
     const xOf = (i) => n > 1 ? i / (n - 1) * 100 : 50;
     const pick = (clientX) => {
       const el = drawRef.current;
@@ -29672,7 +29674,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0, gap: 8 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 18, minWidth: 0, gap: 8 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mm.vol })
