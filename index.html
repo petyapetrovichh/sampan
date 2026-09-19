@@ -27851,6 +27851,40 @@ input,button{font-family:inherit}
     }, [key]);
     return ref;
   }
+  function useCoinLiveTrail(anchorPrice, rawValue, windowMs = 3e4) {
+    const eased = useSmoothedValue(rawValue, 0.16);
+    const trailRef = (0, import_react4.useRef)([]);
+    const seededRef = (0, import_react4.useRef)(false);
+    const [buf, setBuf] = (0, import_react4.useState)([]);
+    (0, import_react4.useEffect)(() => {
+      if (seededRef.current || !anchorPrice) return;
+      const now = Date.now();
+      trailRef.current = [{ t: now - windowMs, p: anchorPrice }, { t: now, p: anchorPrice }];
+      seededRef.current = true;
+      setBuf(trailRef.current.slice());
+    }, [anchorPrice, windowMs]);
+    (0, import_react4.useEffect)(() => {
+      if (eased == null || !seededRef.current) return;
+      const now = Date.now();
+      const arr = trailRef.current;
+      const SLOT = 250;
+      const slot = Math.floor(now / SLOT) * SLOT;
+      const last = arr[arr.length - 1];
+      if (!last || last.t !== slot) arr.push({ t: slot, p: eased });
+      else last.p = eased;
+      const cutoff = now - windowMs - 3e3;
+      let drop = 0;
+      while (drop < arr.length - 1 && arr[drop].t < cutoff) drop++;
+      if (drop) trailRef.current = arr.slice(drop);
+      setBuf(trailRef.current.slice());
+    }, [eased, windowMs]);
+    (0, import_react4.useEffect)(() => {
+      trailRef.current = [];
+      seededRef.current = false;
+      setBuf([]);
+    }, [windowMs]);
+    return buf;
+  }
   function useLiveTrail(rawValue, windowMs = 3e4, seedTokenId = null) {
     const eased = useSmoothedValue(rawValue, 0.16);
     const trailRef = (0, import_react4.useRef)([]);
@@ -27936,7 +27970,7 @@ input,button{font-family:inherit}
     }, [windowMs]);
     return buf;
   }
-  function LiveOddsChart({ series: series2, h = 170, onScrub }) {
+  function LiveOddsChart({ series: series2, h = 170, onScrub, fmtY = (v) => `${Math.round(v)}%`, clampPercent = true }) {
     const { lang } = useLang();
     const [dragMs, setDragMs] = (0, import_react4.useState)(null);
     const drawRef = (0, import_react4.useRef)(null);
@@ -27968,8 +28002,9 @@ input,button{font-family:inherit}
     const allVals = trimmed.flatMap((s) => s.pts.map((p) => p.p));
     const dataMin = allVals.length ? Math.min(...allVals) : 0;
     const dataMax = allVals.length ? Math.max(...allVals) : 100;
-    const padded = Math.max(dataMax - dataMin, 3) * 0.22;
-    const wantMin = Math.max(0, dataMin - padded), wantMax = Math.min(100, dataMax + padded);
+    const padded = Math.max(dataMax - dataMin, clampPercent ? 3 : (dataMax - dataMin) * 0.1 || dataMax * 0.02 || 1) * 0.22;
+    const wantMin = clampPercent ? Math.max(0, dataMin - padded) : dataMin - padded;
+    const wantMax = clampPercent ? Math.min(100, dataMax + padded) : dataMax + padded;
     const smoothMin = useSmoothedValue(wantMin, 0.12), smoothMax = useSmoothedValue(wantMax, 0.12);
     const yMin = Math.min(smoothMin ?? wantMin, dataMin - padded * 0.5);
     const yMax = Math.max(smoothMax ?? wantMax, dataMax + padded * 0.5);
@@ -28014,9 +28049,12 @@ input,button{font-family:inherit}
     const TICK_SEC = 10;
     const xTicks = [];
     for (let t = Math.ceil(spanStartMs / (TICK_SEC * 1e3)) * TICK_SEC * 1e3; t <= spanEndMs; t += TICK_SEC * 1e3) xTicks.push(t);
-    const yStep = 10;
+    const yStep = clampPercent ? 10 : (yMax - yMin) / 4 || 1;
     const yTicks = [];
-    for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) yTicks.push(v);
+    for (let i = 0; i <= 4; i++) {
+      const v = yMin + (yMax - yMin) * (i / 4);
+      yTicks.push(v);
+    }
     const fmtClock = (ms) => {
       const dt = new Date(ms);
       const p = (v) => String(v).padStart(2, "0");
@@ -28067,17 +28105,11 @@ input,button{font-family:inherit}
               ] }, "dot" + si);
             }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: [
-              yTicks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: [
-                v,
-                "%"
-              ] }, i)),
+              yTicks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtY(v) }, i)),
               trimmed.map((s, si) => {
                 const p = s.pts[s.pts.length - 1];
                 if (!p) return null;
-                return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", top: yPx(p.p), right: 0, transform: "translateY(-50%)", color: s.color, fontWeight: 700, background: "#fff", paddingLeft: 2 }, children: [
-                  Math.round(p.p),
-                  "%"
-                ] }, "lbl" + si);
+                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(p.p), right: 0, transform: "translateY(-50%)", color: s.color, fontWeight: 700, background: "#fff", paddingLeft: 2 }, children: fmtY(p.p) }, "lbl" + si);
               })
             ] })
           ] }),
@@ -28441,7 +28473,7 @@ input,button{font-family:inherit}
     ];
     return { id: mk.id, cat: "Prediction", league: "", emoji: "\u20BF", icon: mk.icon, cover: mk.iconBg, title: mk.q, fmt: "", t: "", vol: 1e6, opts, yesno: true, pmSource: mk };
   }
-  function genCandles(seed0, n = 40, stepSec = 3600) {
+  function genCandles(seed0, n = 40, stepSec = 3600, basePrice = null) {
     let s = 0;
     for (let i = 0; i < seed0.length; i++) s = s * 31 + seed0.charCodeAt(i) >>> 0;
     const rnd = () => {
@@ -28449,12 +28481,12 @@ input,button{font-family:inherit}
       return (s >>> 8) / 16777216;
     };
     const out = [];
-    let p = 40 + rnd() * 40;
+    let p = basePrice && basePrice > 0 ? basePrice * (0.85 + rnd() * 0.3) : 40 + rnd() * 40;
     const nowSec = Math.floor(Date.now() / 1e3);
     const t0 = nowSec - n * stepSec;
     for (let i = 0; i < n; i++) {
       const o = p;
-      p = Math.max(2, p * (1 + (rnd() - 0.48) * 0.14));
+      p = Math.max(p * 0.02, p * (1 + (rnd() - 0.48) * 0.14));
       const c = p;
       const hi = Math.max(o, c) * (1 + rnd() * 0.05);
       const lo = Math.min(o, c) * (1 - rnd() * 0.05);
@@ -28596,7 +28628,7 @@ input,button{font-family:inherit}
             ] })
           ] }),
           dragIdx != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragIdx)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
-          n > 0 && (() => {
+          mode === "line" && n > 0 && (() => {
             const idx = dragIdx ?? n - 1;
             const c = candles[idx];
             const x = dragIdx != null ? xOf(idx) : 100;
@@ -29587,7 +29619,8 @@ input,button{font-family:inherit}
     const tfOptions = ["Live", "1H", "1D", "1W", "All"];
     const candleCount = { Live: 20, "1H": 24, "1D": 30, "1W": 35, All: 48 }[tf] || 30;
     const stepSecFor = { Live: 60, "1H": 300, "1D": 3600, "1W": 14400, All: 86400 }[tf] || 3600;
-    const demoCandles = (0, import_react4.useMemo)(() => genCandles(mm.name + "|" + tf, candleCount, stepSecFor), [mm.name, tf, candleCount, stepSecFor]);
+    const anchorPx = parseFloat(String(mm.px).replace(/[$,]/g, "")) || null;
+    const demoCandles = (0, import_react4.useMemo)(() => genCandles(mm.name + "|" + tf, candleCount, stepSecFor, anchorPx), [mm.name, tf, candleCount, stepSecFor, anchorPx]);
     const [realCandles, setRealCandles] = (0, import_react4.useState)(null);
     (0, import_react4.useEffect)(() => {
       setRealCandles(null);
@@ -29603,12 +29636,18 @@ input,button{font-family:inherit}
     const seedCandles = realCandles || demoCandles;
     const livePrice = useLiveCoinPrice(mm.poolNetwork || "solana", mm.poolAddress, true, 4e3);
     const candles = useLiveCandles(seedCandles, stepSecFor, livePrice, candleCount);
-    const px0 = parseFloat(String(mm.px).replace(/[$,]/g, "")) || 0;
+    const isLive = tf === "Live";
+    (0, import_react4.useEffect)(() => {
+      if (isLive && chartMode === "candle") setChartMode("line");
+    }, [isLive]);
+    const liveTrailBuf = useCoinLiveTrail(anchorPx, livePrice, 3e4);
+    const px0 = anchorPx || 0;
     const chg0 = mm.chgNum ?? parseFloat(mm.chg) ?? 0;
     const basePrice = (0, import_react4.useMemo)(() => px0 && chg0 > -100 ? px0 / (1 + chg0 / 100) : px0, [mm.name]);
     const shownPrice = livePrice ?? px0;
     const shownChg = basePrice > 0 ? (shownPrice - basePrice) / basePrice * 100 : chg0;
     const shownUp = shownChg >= 0;
+    const liveSeries = (0, import_react4.useMemo)(() => [{ label: mm.tk, color: shownUp ? C.up : C.down, buf: liveTrailBuf }], [liveTrailBuf, mm.tk, shownUp]);
     const fmtPx2 = (v) => "$" + (v < 0.01 ? v.toFixed(6) : v < 10 ? v.toFixed(4) : v.toFixed(2));
     const lg = mm.icon || MEME_LOGOS[mm.name];
     const desc = mm.desc || `${mm.name} (${mm.tk}) meme token. Buy or sell on the live price feed.`;
@@ -29653,7 +29692,7 @@ input,button{font-family:inherit}
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode }),
+          isLive ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveOddsChart, { series: liveSeries, fmtY: fmtPx2, clampPercent: false }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0, gap: 8 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
@@ -29664,7 +29703,7 @@ input,button{font-family:inherit}
                 const on = tf === t;
                 return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
               }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartTypeToggle, { mode: chartMode, onToggle: () => setChartMode((m) => m === "candle" ? "line" : "candle") })
+              !isLive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartTypeToggle, { mode: chartMode, onToggle: () => setChartMode((m) => m === "candle" ? "line" : "candle") })
             ] })
           ] })
         ] }),
