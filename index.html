@@ -26320,7 +26320,8 @@ input,button{font-family:inherit}
       const team = sportsTeams.find((t) => t.name === label);
       return { label, pct: yesPct, mkt: mk, tokenId, noTokenId, conditionId: mk.conditionId, vol: fmtVol(mk.volume || mk.volumeNum || 0), icon: team?.logo || mk.icon || mk.image || "", abbr: team?.abbreviation || "", ordering: team?.ordering || null };
     }).sort((a, b) => b.pct - a.pct).map((c, i) => ({ ...c, id: base.id + "-c" + i }));
-    const hasSportTag = (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase()));
+    const isMoreMarketsSibling = /-more-markets$/i.test(String(ev.slug || ""));
+    const hasSportTag = !isMoreMarketsSibling && (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase()));
     const titleLooksLikeMatch = /\bvs\.?\b/i.test(ev.title || "");
     const isSports = hasSportTag && (sportsTeams.length === 2 || titleLooksLikeMatch);
     if (isSports) {
