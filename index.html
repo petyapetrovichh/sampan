@@ -28676,7 +28676,7 @@ input,button{font-family:inherit}
             ] }),
             shownCandle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, top: yPx(shownCandle.c), height: 0, borderTop: `1px dashed ${lineColor}`, opacity: 0.6, pointerEvents: "none" } }),
             dragMs != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragMs)}%`, top: 0, bottom: 0, width: 1, background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
-            shownCandle && (() => {
+            mode === "line" && shownCandle && (() => {
               const x = dragIdx != null ? xOf(shownCandle.t * 1e3) : live ? xOf(spanEndMs) : 100;
               return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: `${x}%`, top: yPx(shownCandle.c), transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, pointerEvents: "none", overflow: "visible", zIndex: 2 }, children: [
                 dragIdx == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: KCHART_DOT / 2, background: lineColor } }),
@@ -28691,7 +28691,7 @@ input,button{font-family:inherit}
               return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragMs)}%`, top: -22, transform: `translateX(${shift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: label });
             })(),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: ticks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtY(v) }, i)) }),
-            shownCandle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: yPx(shownCandle.c), transform: "translateY(-50%)", pointerEvents: "none", zIndex: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", background: lineColor, color: "#fff", fontFamily: MONO, fontWeight: 700, fontSize: 11, padding: "2px 6px", borderRadius: 7, whiteSpace: "nowrap" }, children: fmtY(shownCandle.c) }) })
+            shownCandle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: "100%", marginLeft: 3, top: yPx(shownCandle.c), transform: "translateY(-50%)", pointerEvents: "none", zIndex: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", background: lineColor, color: "#fff", fontFamily: MONO, fontWeight: 700, fontSize: 10, padding: "1px 4px", borderRadius: 5, whiteSpace: "nowrap" }, children: fmtY(shownCandle.c) }) })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden", maskImage: X_FADE, WebkitMaskImage: X_FADE }, children: xTicks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${xOf(t)}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: live ? fmtClock(t) : fmtTickDate(t) }, t)) })
         ]
@@ -28827,7 +28827,7 @@ input,button{font-family:inherit}
       if (overflow > 0) for (const p of byY) p.y -= overflow;
     }
     const pillY = Object.fromEntries(pillLayout.map((p) => [p.i, p.y]));
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
       "div",
       {
         onPointerDown: onDown,
@@ -28835,42 +28835,52 @@ input,button{font-family:inherit}
         onPointerUp: release,
         onPointerCancel: release,
         style: { position: "relative", height: h + 24, minWidth: 0, paddingTop: 24, touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none", cursor: "pointer" },
-        children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: `0 0 ${W} ${h}`, style: { width: `calc(100% + ${KCHART_LINE_EXTEND}px)`, height: h, display: "block" }, preserveAspectRatio: "none", children: ordered.map((it, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: pathSegment(it.arr, W, h, 0, effIdx, yMin, yMax), fill: "none", stroke: it.color, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" }),
-            dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: pathSegment(it.arr, W, h, effIdx, n - 1, yMin, yMax), fill: "none", stroke: it.color, strokeOpacity: 0.22, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" })
-          ] }, i)) }),
-          dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: xLeft, top: 0, bottom: 0, width: 1, transform: "translateX(-0.5px)", background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
-          dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: xLeft, top: -22, transform: `translateX(${labelShift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: dateLabel }),
-          ordered.flatMap((it, i) => {
-            const val = it.arr[effIdx];
-            const dotTopPx = yPx(val);
-            const availableRightPx = containerW > 0 ? containerW + KCHART_GUTTER - xPct / 100 * containerW : Infinity;
-            const flipped = !live && estPillPx(val, it.label) > availableRightPx;
-            return [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: xLeft, top: `${dotTopPx}px`, transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, zIndex: i, pointerEvents: "none" }, children: [
-                live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } })
-              ] }, "dot" + i),
-              // live/at-rest: pill hugs the app's standard right inset (same edge as the star icon
-              // / timeframe pills). While dragging it trails right after the dot -- unless it's
-              // grown too wide (label included) to fit before the right edge, in which case it
-              // flips to the left of the crosshair instead (measured in the layout effect above).
-              // Vertically it uses the collision-avoided `pillY`, not the dot's own true position.
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", top: `${pillY[i]}px`, zIndex: i, pointerEvents: "none", whiteSpace: "nowrap", ...live ? { right: -KCHART_GUTTER, transform: "translateY(-50%)" } : flipped ? { left: xLeft, transform: `translate(calc(-100% - ${KCHART_DOT / 2 + KCHART_GAP}px),-50%)` } : { left: xLeft, transform: `translate(${KCHART_DOT / 2 + KCHART_GAP}px,-50%)` } }, children: [
-                live && showTeamLabels && it.label && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { textAlign: "right", fontSize: 11, fontWeight: 700, color: it.color, marginBottom: 2, whiteSpace: "nowrap" }, children: it.label }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, justifyContent: "center", whiteSpace: "nowrap" }, children: [
-                  !live && labelBeforePct && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis" }, children: it.label }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-                    Math.round(val),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "100%" }, children: "%" })
-                  ] }),
-                  !live && !labelBeforePct && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis" }, children: it.label })
-                ] })
-              ] }, "pill" + i)
-            ];
-          })
-        ] })
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: drawRef, style: { position: "relative", marginRight: KCHART_GUTTER, height: h }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: `0 0 ${W} ${h}`, style: { width: `calc(100% + ${KCHART_LINE_EXTEND}px)`, height: h, display: "block" }, preserveAspectRatio: "none", children: ordered.map((it, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: pathSegment(it.arr, W, h, 0, effIdx, yMin, yMax), fill: "none", stroke: it.color, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" }),
+              dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: pathSegment(it.arr, W, h, effIdx, n - 1, yMin, yMax), fill: "none", stroke: it.color, strokeOpacity: 0.22, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" })
+            ] }, i)) }),
+            dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: xLeft, top: 0, bottom: 0, width: 1, transform: "translateX(-0.5px)", background: "rgba(21,23,27,.22)", pointerEvents: "none" } }),
+            dragging && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: xLeft, top: -22, transform: `translateX(${labelShift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: dateLabel }),
+            ordered.flatMap((it, i) => {
+              const val = it.arr[effIdx];
+              const dotTopPx = yPx(val);
+              const availableRightPx = containerW > 0 ? containerW + KCHART_GUTTER - xPct / 100 * containerW : Infinity;
+              const flipped = !live && estPillPx(val, it.label) > availableRightPx;
+              return [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: xLeft, top: `${dotTopPx}px`, transform: "translate(-50%,-50%)", width: KCHART_DOT, height: KCHART_DOT, zIndex: i, pointerEvents: "none" }, children: [
+                  live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "kdot-ping", style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", inset: 0, borderRadius: 5, background: it.color } })
+                ] }, "dot" + i),
+                // live/at-rest: pill hugs the app's standard right inset (same edge as the star icon
+                // / timeframe pills). While dragging it trails right after the dot -- unless it's
+                // grown too wide (label included) to fit before the right edge, in which case it
+                // flips to the left of the crosshair instead (measured in the layout effect above).
+                // Vertically it uses the collision-avoided `pillY`, not the dot's own true position.
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", top: `${pillY[i]}px`, zIndex: i, pointerEvents: "none", whiteSpace: "nowrap", ...live ? { right: -KCHART_GUTTER, transform: "translateY(-50%)" } : flipped ? { left: xLeft, transform: `translate(calc(-100% - ${KCHART_DOT / 2 + KCHART_GAP}px),-50%)` } : { left: xLeft, transform: `translate(${KCHART_DOT / 2 + KCHART_GAP}px,-50%)` } }, children: [
+                  live && showTeamLabels && it.label && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { textAlign: "right", fontSize: 11, fontWeight: 700, color: it.color, marginBottom: 2, whiteSpace: "nowrap" }, children: it.label }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, justifyContent: "center", whiteSpace: "nowrap" }, children: [
+                    !live && labelBeforePct && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis" }, children: it.label }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                      Math.round(val),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "100%" }, children: "%" })
+                    ] }),
+                    !live && !labelBeforePct && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis" }, children: it.label })
+                  ] })
+                ] }, "pill" + i)
+              ];
+            })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden", maskImage: X_FADE, WebkitMaskImage: X_FADE }, children: Array.from({ length: 4 }, (_, i) => {
+            const frac = (i + 0.5) / 4;
+            const idx = Math.round(frac * (n - 1));
+            const d = new Date(Date.now() - (n - 1 - idx) * spec.stepSec * 1e3);
+            const totalSec = n * spec.stepSec;
+            const label = totalSec > 3 * 86400 ? `${d.getDate()}/${d.getMonth() + 1}` : `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${frac * 100}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: label }, i);
+          }) })
+        ]
       }
     );
   }
@@ -29450,7 +29460,7 @@ input,button{font-family:inherit}
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", justifyContent: "flex-end", marginBottom: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 }) }),
-          isLiveTf ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveOddsChart, { series: liveSeries, onScrub: setLiveScrub, h: 150, showTeamLabels: true }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf, showTeamLabels: true }),
+          isLiveTf ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiveOddsChart, { series: liveSeries, onScrub: setLiveScrub, showTeamLabels: true }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KLineChart, { items: chartItems, tf, showTeamLabels: true }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
@@ -29692,7 +29702,8 @@ input,button{font-family:inherit}
     }, [mm.poolAddress, mm.poolNetwork, tf, isLive]);
     const seedCandles = realCandles || demoCandles;
     const livePrice = useLiveCoinPrice(mm.poolNetwork || "solana", mm.poolAddress, true, isLive ? 1e3 : 4e3);
-    const candles = useLiveCandles(seedCandles, stepSecFor, livePrice, candleCount);
+    const liveCandles = useLiveCandles(seedCandles, stepSecFor, livePrice, candleCount);
+    const candles = isLive ? liveCandles : seedCandles;
     const px0 = anchorPx || 0;
     const chg0 = mm.chgNum ?? parseFloat(mm.chg) ?? 0;
     const basePrice = (0, import_react4.useMemo)(() => px0 && chg0 > -100 ? px0 / (1 + chg0 / 100) : px0, [mm.name]);
