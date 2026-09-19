@@ -28626,7 +28626,22 @@ input,button{font-family:inherit}
           const ev = Array.isArray(d) ? d[0] : d;
           const teams2 = ev?.sports?.teams;
           if (!cancelled && Array.isArray(teams2) && teams2.length) setTeamInfo(teams2);
+          try {
+            console.log(
+              "[team-logos]",
+              mk.slug,
+              "| teams from API:",
+              JSON.stringify((teams2 || []).map((t) => ({ name: t.name, hasLogo: !!t.logo }))),
+              "| our contract labels:",
+              JSON.stringify((mk.contracts || []).map((c) => c.label))
+            );
+          } catch (e2) {
+          }
         } catch (e) {
+          try {
+            console.log("[team-logos]", mk.slug, "| fetch failed:", e.message);
+          } catch (e2) {
+          }
         }
       })();
       return () => {
