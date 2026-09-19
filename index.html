@@ -26102,6 +26102,59 @@ input,button{font-family:inherit}
     { sym: "USDJPY", bg: "#BC002D", px: "149.32", chg: "+0.24 (0.16%)", up: true, vol: "$4M", sec: "FX" },
     { sym: "AUDUSD", bg: "#00843D", px: "0.6598", chg: "-0.0009 (0.14%)", up: false, vol: "$921K", sec: "FX" }
   ];
+  var STOCK_ABOUT = {
+    NVDA: "Nvidia designs the GPUs and accelerators behind most modern AI training and inference workloads, alongside gaming graphics and data-centre networking. Its results are widely treated as a barometer for AI infrastructure spending.",
+    AMD: "AMD builds CPUs, GPUs and adaptive chips for data centres, PCs and embedded systems, positioning its Instinct accelerators as the main challenger to Nvidia in AI compute.",
+    TSM: "TSMC is the world's largest contract chip manufacturer, fabricating designs for Apple, Nvidia, AMD and others. Its leading-edge nodes make it a chokepoint for the entire semiconductor industry.",
+    ARM: "Arm licenses the CPU architecture used in nearly every smartphone, and increasingly in data-centre and automotive silicon. It earns licence fees and per-chip royalties rather than selling chips itself.",
+    INTC: "Intel designs and manufactures x86 processors for PCs and servers, and is investing heavily in becoming a contract foundry for external customers.",
+    MU: "Micron makes DRAM and NAND memory. Its earnings swing sharply with memory pricing cycles, which AI server demand has recently tightened.",
+    ASML: "ASML is the sole supplier of EUV lithography machines, the equipment required to produce the most advanced chips. That monopoly makes it structurally central to the industry.",
+    AVGO: "Broadcom combines networking and custom-silicon businesses with a large enterprise software arm, and co-designs bespoke AI accelerators for hyperscale customers.",
+    QCOM: "Qualcomm supplies mobile processors and modems, and licenses a broad wireless patent portfolio, while expanding into automotive and PC chips.",
+    SKHY: "SK Hynix is a major memory manufacturer and an early leader in high-bandwidth memory (HBM), the memory type used alongside AI accelerators.",
+    SNDK: "SanDisk supplies NAND flash storage products across consumer and enterprise segments.",
+    KIOXIA: "Kioxia, formerly Toshiba Memory, is one of the largest NAND flash producers and a pioneer of the technology.",
+    MSFT: "Microsoft spans cloud (Azure), productivity software, Windows and gaming, and is a principal commercial partner in the deployment of large language models.",
+    AMZN: "Amazon operates the largest Western e-commerce marketplace plus AWS, the biggest cloud provider, which supplies most of the group's operating profit.",
+    GOOG: "Alphabet earns primarily from Google search and YouTube advertising, with Google Cloud and its DeepMind AI research as growth arms.",
+    META: "Meta runs Facebook, Instagram, WhatsApp and Threads, monetising them through advertising while funding heavy AI and reality-lab investment.",
+    AAPL: "Apple sells the iPhone, Mac, iPad and wearables, with a large and higher-margin services business layered on its installed base.",
+    ORCL: "Oracle sells enterprise databases and applications, and has expanded aggressively into cloud infrastructure aimed at AI workloads.",
+    DELL: "Dell supplies PCs, servers and storage, and has become a significant channel for AI server systems.",
+    PLTR: "Palantir builds data-integration and analytics platforms for government and commercial customers, increasingly packaged around AI decision workflows.",
+    CRWV: "CoreWeave rents out GPU compute for AI training and inference, operating as a specialised cloud provider rather than a general-purpose one.",
+    NBIS: "Nebius runs AI-focused cloud infrastructure in Europe, built from the former Yandex international technology assets.",
+    ZM: "Zoom provides video conferencing and a broader communications suite for businesses.",
+    COIN: "Coinbase is a regulated crypto exchange earning transaction fees, plus custody, staking and stablecoin-related revenue.",
+    MSTR: "MicroStrategy runs an enterprise analytics business while holding a very large corporate bitcoin treasury, so its shares trade largely as leveraged bitcoin exposure.",
+    HOOD: "Robinhood is a retail brokerage for equities, options and crypto, monetising order flow, margin lending and subscriptions.",
+    CRCL: "Circle issues USDC, a fully reserved dollar stablecoin, and earns primarily from interest on the reserves backing it.",
+    TSLA: "Tesla makes electric vehicles and energy storage, and is pursuing autonomy and robotics as long-term growth options.",
+    RIVN: "Rivian builds electric trucks, SUVs and commercial delivery vans, and is scaling production toward profitability.",
+    RKLB: "Rocket Lab provides small-satellite launch services and builds spacecraft components and complete satellites.",
+    BABA: "Alibaba operates Chinese e-commerce marketplaces alongside Alibaba Cloud, the largest cloud provider in China.",
+    SAMSUNG: "Samsung Electronics spans memory and logic chips, smartphones, displays and consumer electronics, making it both a chip supplier and a device maker.",
+    STRC: "Structured strategy instrument tracking a rules-based basket, offered here as a perpetual.",
+    LITE: "Lumentum supplies optical and photonic components used in data-centre interconnects and telecom networks.",
+    DRAM: "Basket exposure to DRAM memory pricing, which moves with data-centre and consumer demand cycles.",
+    NAS100: "Index exposure to the 100 largest non-financial companies listed on the Nasdaq, heavily weighted toward technology.",
+    USA500: "Index exposure to 500 large-cap US companies, the standard broad benchmark for the American equity market.",
+    BRENTOIL: "Brent crude is the seaborne light sweet crude benchmark used to price most internationally traded oil.",
+    WTIOIL: "West Texas Intermediate is the US crude benchmark, priced at Cushing, Oklahoma, and typically trading at a spread to Brent.",
+    GOLD: "Spot gold, traded as a monetary metal and a hedge against inflation and currency debasement.",
+    SILVER: "Spot silver, which carries both precious-metal demand and substantial industrial use in electronics and solar.",
+    SPCX: "Pre-IPO exposure to SpaceX, which operates Falcon launch vehicles, the Starlink satellite internet network and the Starship programme.",
+    OPENAI: "Pre-IPO exposure to OpenAI, developer of the GPT model family and ChatGPT, selling access through consumer subscriptions and an API.",
+    STRIPE: "Pre-IPO exposure to Stripe, a payments infrastructure company processing online transactions for businesses worldwide.",
+    ANTHRP: "Pre-IPO exposure to Anthropic, an AI safety company and developer of the Claude model family, sold through consumer and enterprise products and an API.",
+    EURUSD: "The euro against the US dollar, the most heavily traded currency pair, driven by ECB and Federal Reserve policy divergence.",
+    GBPUSD: "Sterling against the US dollar, sensitive to Bank of England policy and UK growth and inflation data.",
+    USDJPY: "The US dollar against the Japanese yen, historically dominated by the interest-rate gap between the Fed and the Bank of Japan."
+  };
+  function stockAbout(st) {
+    return STOCK_ABOUT[st.sym] || `${st.sym} is traded here as a perpetual in the ${st.sec} category. Go long or short with leverage; positions settle against the live ${st.sym} price feed.`;
+  }
   function stockToMarket(st) {
     const pxNum = parseFloat(st.px.replace(/[$,]/g, "")) || 100;
     return { id: 9e4 + (st.sym.charCodeAt(0) + st.sym.length), cat: "Stock", league: st.sec, emoji: st.sym.slice(0, 2), sym: st.sym, bg: STOCK_LOGOS[st.sym] ? "#fff" : st.bg, icon: STOCK_LOGOS[st.sym], title: st.sym, fmt: st.sec, t: "24h", live: true, vol: 1e6, opts: [{ n: "Long", p: 50 }, { n: "Short", p: 50 }], desc: `${st.sym} perpetual. Long or short with leverage; settles on the live ${st.sym} price feed.`, price: pxNum, target: pxNum, secs: 0, perp: true, px: st.px, chg: st.chg, chgUp: st.up, maxLev: 3 + st.sym.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % 48 };
@@ -26111,10 +26164,9 @@ input,button{font-family:inherit}
     const icon = mm.icon || MEME_LOGOS[mm.name];
     return { id: 95e3 + mm.name.length + mm.tk.charCodeAt(1), cat: "Meme", league: "Meme coin", emoji: mm.emoji, icon, cover: icon ? "#fff" : mm.cover, title: mm.name, fmt: mm.tk, t: "24h", live: true, vol: 5e5, opts: [{ n: "Buy", p: 50 }, { n: "Sell", p: 50 }], desc: `${mm.name} (${mm.tk}) meme token. Buy or sell on the live price feed.`, price: pxNum, target: pxNum, secs: 0, perp: true, px: mm.px, chg: mm.chg, chgUp: mm.up };
   }
-  function StockCard({ st, onOpen, onCopy, showType }) {
-    const open = () => onOpen && onOpen(stockToMarket(st));
+  function StockCard({ st, onOpenMarket, onCopy, showType }) {
     const trade = (i) => onCopy && onCopy(stockToMarket(st), i);
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { background: C.card, borderRadius: 25, padding: 16, border: `1px solid ${C.line}`, minHeight: 210, overflow: "hidden" }, children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { onClick: () => onOpenMarket && onOpenMarket(st), style: { background: C.card, borderRadius: 25, padding: 16, border: `1px solid ${C.line}`, minHeight: 210, overflow: "hidden", cursor: onOpenMarket ? "pointer" : "default" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }, children: [
         (() => {
           const lg = STOCK_LOGOS[st.sym];
@@ -26757,7 +26809,7 @@ input,button{font-family:inherit}
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fx", style: { padding: "4px 16px 20px", display: "grid", gap: 16, minWidth: 0, overflowX: "hidden" }, children: [
         tab === "For You" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BannerCarousel, {}),
-        tab === "For You" ? forYou.map((it, i) => it.kind === "stock" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockCard, { st: liveStock(it.data), onOpen, onCopy, showType: true }, "fy" + i) : it.kind === "meme" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MemeCard, { mm: liveMeme(it.data), onOpenMarket, onCopy, showType: true }, "fy" + i) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MarketFeedCard, { mk: it.data, onOpen, onOpenMarket, onCopy, showType: true }, "fy" + i)) : tab === "Stocks" ? (stockSub === "All" ? STOCKS : STOCKS.filter((st) => st.sec === stockSub)).map((st) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockCard, { st: liveStock(st), onOpen, onCopy }, st.sym)) : tab === "Meme coins" ? memeCoinsFor(memeSub).map((mm) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MemeCard, { mm: realMemes ? mm : liveMeme(mm), onOpenMarket, onCopy }, mm.name)) : predsToShow().map((mk) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MarketFeedCard, { mk, onOpen, onOpenMarket, onCopy }, mk.id))
+        tab === "For You" ? forYou.map((it, i) => it.kind === "stock" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockCard, { st: liveStock(it.data), onOpenMarket, onCopy, showType: true }, "fy" + i) : it.kind === "meme" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MemeCard, { mm: liveMeme(it.data), onOpenMarket, onCopy, showType: true }, "fy" + i) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MarketFeedCard, { mk: it.data, onOpen, onOpenMarket, onCopy, showType: true }, "fy" + i)) : tab === "Stocks" ? (stockSub === "All" ? STOCKS : STOCKS.filter((st) => st.sec === stockSub)).map((st) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockCard, { st: liveStock(st), onOpenMarket, onCopy }, st.sym)) : tab === "Meme coins" ? memeCoinsFor(memeSub).map((mm) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MemeCard, { mm: realMemes ? mm : liveMeme(mm), onOpenMarket, onCopy }, mm.name)) : predsToShow().map((mk) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MarketFeedCard, { mk, onOpen, onOpenMarket, onCopy }, mk.id))
       ] }, tab)
     ] });
   }
@@ -26850,7 +26902,7 @@ input,button{font-family:inherit}
         ] }),
         q && total === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { icon: "\u{1F50D}", title: "No markets found", sub: "Try a different keyword" }),
         predHits.map((mk) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MarketFeedCard, { mk, onOpen, onOpenMarket, onCopy, showType: true }, mk.id)),
-        stockHits.map((st) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockCard, { st, onOpen, onCopy, showType: true }, st.sym)),
+        stockHits.map((st) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockCard, { st, onOpenMarket, onCopy, showType: true }, st.sym)),
         memeHits.map((mm) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MemeCard, { mm, onOpenMarket, onCopy, showType: true }, mm.name))
       ] })
     ] });
@@ -29328,6 +29380,7 @@ input,button{font-family:inherit}
     if (mk.binaryYesNo) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BinaryMarketPage, { mk, ...props }, mk.id);
     if (mk.isSports) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SportsMarketPage, { mk, ...props }, mk.id);
     if (mk.tk !== void 0 && mk.px !== void 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MemeMarketPage, { mk, ...props }, mk.name);
+    if (mk.sym !== void 0 && mk.sec !== void 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockMarketPage, { mk, ...props }, mk.sym);
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PredMarket, { mk, ...props }, mk.id);
   }
   function SportsMarketPage({ mk, onBack, onToast, onDone, onTrader }) {
@@ -29683,6 +29736,137 @@ input,button{font-family:inherit}
         onDone && onDone(...a);
       } }, localTrade.m.id + "-" + localTrade.side),
       showAllSheet && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllContractsSheet, { mk, contracts, onBack: () => setShowAllSheet(false), onDone })
+    ] });
+  }
+  function StockMarketPage({ mk: st, onBack, onToast, onDone, onTrader }) {
+    const scrollRef = usePreservedScroll(st.sym);
+    const { lang } = useLang();
+    const [fav, setFav] = (0, import_react4.useState)(false);
+    const [descOpen, setDescOpen] = (0, import_react4.useState)(false);
+    const [closing, setClosing] = (0, import_react4.useState)(false);
+    const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
+    const [tf, setTf] = (0, import_react4.useState)("Live");
+    const [chartMode, setChartMode] = (0, import_react4.useState)("candle");
+    const tfOptions = ["Live", "5m", "15m", "1H", "1D", "All"];
+    const isLive = tf === "Live";
+    const candleCount = { Live: 30, "5m": 45, "15m": 45, "1H": 45, "1D": 45, All: 60 }[tf] || 45;
+    const stepSecFor = { Live: 1, "5m": 300, "15m": 900, "1H": 3600, "1D": 86400, All: 86400 }[tf] || 3600;
+    const anchorPx = parseFloat(String(st.px).replace(/[$,]/g, "")) || null;
+    const seedCandles = (0, import_react4.useMemo)(() => {
+      if (isLive) {
+        const nowSec = Math.floor(Date.now() / 1e3);
+        const p = anchorPx || 1;
+        return Array.from({ length: candleCount }, (_, i) => ({ t: nowSec - (candleCount - 1 - i), o: p, hi: p, lo: p, c: p }));
+      }
+      return genCandles(st.sym + "|" + tf, candleCount, stepSecFor, anchorPx);
+    }, [st.sym, tf, candleCount, stepSecFor, anchorPx, isLive]);
+    const pxMetaRef = (0, import_react4.useRef)(null);
+    if (!pxMetaRef.current && anchorPx) {
+      const pp = parsePx(st.px);
+      pxMetaRef.current = { ...pp, base: pp.num, cur: pp.num };
+    }
+    const [, setPxTick] = (0, import_react4.useState)(0);
+    (0, import_react4.useEffect)(() => {
+      const t = setInterval(() => {
+        const pm = pxMetaRef.current;
+        if (!pm) return;
+        pm.cur = pm.cur * (1 + (Math.random() * 2 - 1) * 4e-3);
+        setPxTick((x) => x + 1);
+      }, 1e3);
+      return () => clearInterval(t);
+    }, []);
+    const livePrice = pxMetaRef.current ? pxMetaRef.current.cur : null;
+    const liveCandles = useLiveCandles(seedCandles, stepSecFor, livePrice, candleCount);
+    const candles = (0, import_react4.useMemo)(() => {
+      if (isLive) return liveCandles;
+      if (livePrice == null || !seedCandles.length) return seedCandles;
+      const out = seedCandles.slice();
+      const last = { ...out[out.length - 1] };
+      last.c = livePrice;
+      last.hi = Math.max(last.hi, livePrice);
+      last.lo = Math.min(last.lo, livePrice);
+      out[out.length - 1] = last;
+      return out;
+    }, [isLive, liveCandles, seedCandles, livePrice]);
+    const [scrubCandle, setScrubCandle] = (0, import_react4.useState)(null);
+    const basePrice = pxMetaRef.current ? pxMetaRef.current.base : anchorPx || 0;
+    const shownPrice = scrubCandle ? scrubCandle.c : livePrice ?? anchorPx ?? 0;
+    const shownChg = basePrice > 0 ? (shownPrice - basePrice) / basePrice * 100 : 0;
+    const shownUp = shownChg >= 0;
+    const fmtPx2 = (v) => "$" + (v < 0.01 ? v.toFixed(6) : v < 10 ? v.toFixed(4) : v.toFixed(2));
+    const lg = STOCK_LOGOS[st.sym];
+    const goBack = () => setClosing(true);
+    const trade = (i) => setLocalTrade({ m: stockToMarket(st), side: i });
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: "#fff", height: "100%", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flexShrink: 0, zIndex: 20, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px 12px" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontWeight: 800, fontSize: 15, pointerEvents: "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Market" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 18, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconOnlyBtn, { onClick: () => onToast(translate(lang, "Link copied")), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Share, { size: 20, color: C.ink }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconOnlyBtn, { onClick: () => {
+            setFav(!fav);
+            onToast(translate(lang, fav ? "Removed from watchlist" : "Added to watchlist"));
+          }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { size: 20, fill: fav ? C.amber : "none", color: fav ? C.amber : C.ink, strokeWidth: fav ? 1.5 : 2, strokeLinejoin: "round" }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: scrollRef, style: { flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px", minWidth: 0, overflowX: "hidden" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", gap: 12, marginBottom: 18, minWidth: 0, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 56, height: 56, clipPath: "url(#squircle)", background: lg ? "#fff" : st.bg, display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden", color: "#fff", fontSize: st.sym.length > 5 ? 12 : 16, fontWeight: 800, letterSpacing: -0.3, textAlign: "center", padding: 2 }, children: lg ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: lg, alt: "", style: { width: "100%", height: "100%", objectFit: "cover" } }) : st.sym }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 20, fontWeight: 800, letterSpacing: -0.3 }, children: st.sym }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, color: C.mute, fontWeight: 600 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: st.sec }) })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 28, fontWeight: 900, fontFamily: MONO }, children: fmtPx2(shownPrice) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 16, fontWeight: 700, fontFamily: MONO, color: shownUp ? C.up : C.down }, children: [
+            shownUp ? "\u25B2" : "\u25BC",
+            " ",
+            shownChg >= 0 ? "+" : "",
+            shownChg.toFixed(2),
+            "%"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 18, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 4, minWidth: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, background: C.soft, padding: "2px 10px", borderRadius: 999, lineHeight: 1.5, whiteSpace: "nowrap" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: st.sec }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinChart, { candles, mode: chartMode, live: isLive, onScrub: setScrubCandle }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, minWidth: 0, gap: 8 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: st.vol })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "stretch", gap: 8, minWidth: 0 }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", alignItems: "center", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
+                const on = tf === t;
+                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
+              }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartTypeToggle, { mode: chartMode, onToggle: () => setChartMode((m) => m === "candle" ? "line" : "candle") })
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { marginBottom: 26, minWidth: 0 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 18, fontWeight: 900, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "About" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: descOpen ? { fontSize: 14, lineHeight: 1.65, color: C.ink2 } : { fontSize: 14, lineHeight: 1.65, color: C.ink2, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }, children: stockAbout(st) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setDescOpen((x) => !x), className: "tap", style: { border: "none", background: "none", padding: 0, marginTop: 6, color: C.mute, fontWeight: 700, fontSize: 13, textDecoration: "underline", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: descOpen ? "Less" : "More" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => onToast(translate(lang, "AI analysis coming soon")), className: "tap", style: { width: "100%", marginTop: 14, border: `1px solid ${C.line}`, background: "transparent", borderRadius: 999, padding: "13px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontWeight: 700, fontSize: 15, color: C.ink, cursor: "pointer" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogoMark, { s: 20 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Use AI analysis" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoinHoldersSection, { mm: { name: st.sym, tk: st.sym }, onTrader }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 100, flexShrink: 0 } })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", left: 0, right: 0, bottom: 0, display: "flex", gap: 8, padding: "40px 16px 12px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,.75) 38%, #fff 72%)", pointerEvents: "none", zIndex: 5 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => trade(1), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.down, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", pointerEvents: "auto", boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Short" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => trade(0), className: "tap btn-soft", style: { flex: 1, border: "none", background: C.up, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", pointerEvents: "auto", boxShadow: "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Long" }) })
+      ] }),
+      localTrade && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trade, { m: localTrade.m, side: localTrade.side, onClose: () => setLocalTrade(null), onDone: (...a) => {
+        setLocalTrade(null);
+        onDone && onDone(...a);
+      } }, localTrade.m.id + "-" + localTrade.side)
     ] });
   }
   function MemeMarketPage({ mk: mm, onBack, onToast, onDone, onTrader }) {
@@ -30525,8 +30709,8 @@ input,button{font-family:inherit}
     const close = () => setClosing(true);
     const opts = [
       { id: "market", icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { size: 22, color: "#fff", fill: "#fff" }), bg: "#F5871F", title: "Market order", sub: "Buy at the current price" },
-      { id: "limit", icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartColumn, { size: 22, color: "#fff" }), bg: "#3B9DF8", title: "Limit order", sub: perp ? "Predictions only" : "Buy or sell at a set price" },
-      { id: "orderbook", icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReceiptText, { size: 22, color: "#fff" }), bg: "#14B8A6", title: "Order book", sub: perp ? "Predictions only" : "View live bids and asks" }
+      { id: "limit", icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartColumn, { size: 22, color: "#fff" }), bg: "#3B9DF8", title: "Limit order", sub: "Buy or sell at a set price" },
+      { id: "orderbook", icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReceiptText, { size: 22, color: "#fff" }), bg: "#14B8A6", title: "Order book", sub: "View live bids and asks" }
     ];
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", inset: 0, zIndex: 40, display: "flex", flexDirection: "column", justifyContent: "flex-end" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { onClick: close, className: closing ? "fadeout" : "fadein", style: { position: "absolute", inset: 0, background: "rgba(0,0,0,.45)" } }),
@@ -30538,7 +30722,7 @@ input,button{font-family:inherit}
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gap: 12 }, children: opts.map((o) => {
           const on = mode === o.id;
-          const disabled = perp && o.id !== "market";
+          const disabled = false;
           return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => {
             if (disabled) return;
             onSelect(o.id);
@@ -31237,11 +31421,11 @@ input,button{font-family:inherit}
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 13, color: C.mute }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Available" }),
                 ": ",
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { style: { color: C.ink, fontWeight: 600 }, children: "$0" })
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { style: { color: C.ink, fontWeight: 600 }, children: "$100" })
               ] })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(N, { s: 34, style: { display: "block", margin: "6px 0 14px" }, children: "$0" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(N, { s: 34, style: { display: "block", margin: "6px 0 14px" }, children: "$100" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 10 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Btn, { color: YEL, fg: C.ink, cls: "btn-soft", style: { borderRadius: 999, padding: "11px 15px", letterSpacing: 0.5, boxShadow: "inset 0 2px 1px rgba(255,255,255,.6), inset 0 -2px 2px rgba(0,0,0,.18)" }, onClick: onDeposit, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wallet, { size: 17 }),
