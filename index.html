@@ -26325,7 +26325,7 @@ input,button{font-family:inherit}
     const isSports = hasSportTag && (sportsTeams.length === 2 || titleLooksLikeMatch);
     if (isSports) {
       const teamNames = sportsTeams.map((t) => t.name.toLowerCase());
-      const isDraw = (c) => String(c.label || "").trim().toLowerCase() === "draw";
+      const isDraw = (c) => /^draw\b/i.test(String(c.label || "").trim());
       let moneyline, others;
       if (teamNames.length === 2) {
         const isMoneyline = (c) => teamNames.includes(c.label.toLowerCase()) || isDraw(c);
@@ -26356,7 +26356,10 @@ input,button{font-family:inherit}
             noTokenId: p.tokenIds[i === 0 ? 1 : 0],
             conditionId: m.conditionId,
             vol: fmtVol(m.volume || m.volumeNum || 0),
-            icon: m.icon || m.image || "",
+            // no per-team crest data exists on this branch -- m.icon/m.image is the sport's generic
+            // artwork (same for every outcome), which looked like a duplicated logo when shown next
+            // to each side. Leave it empty so the UI's neutral placeholder shows instead.
+            icon: "",
             abbr: "",
             ordering: null,
             id: base.id + "-ml" + i
@@ -27258,7 +27261,7 @@ input,button{font-family:inherit}
               const p = m?.payload ?? m;
               if (!p) continue;
               const id = p.game_id ?? p.gameId ?? p.id;
-              if (id != null && String(id) !== String(gameId)) continue;
+              if (id == null || String(id) !== String(gameId)) continue;
               apply(p);
             }
           } catch (err) {
@@ -28673,9 +28676,9 @@ input,button{font-family:inherit}
     const predictSub = (c, side) => setLocalTrade({ m: contractToMarket(mk, c), side });
     const predictMoneyline = (c) => setLocalTrade({ m: contractToMarket(mk, { ...c, outLabels: ["Yes", "No"] }), side: 0 });
     const goBack = () => setClosing(true);
-    const nonDraw = moneyline.filter((c) => c.label.toLowerCase() !== "draw");
+    const nonDraw = moneyline.filter((c) => !/^draw\b/i.test(String(c.label || "").trim()));
     const teams = [...nonDraw].sort((a, b) => (a.ordering === "home" ? 0 : 1) - (b.ordering === "home" ? 0 : 1)).slice(0, 2);
-    const drawContract = moneyline.find((c) => c.label.toLowerCase() === "draw");
+    const drawContract = moneyline.find((c) => /^draw\b/i.test(String(c.label || "").trim()));
     const { score: liveScore, ended: wsEnded } = useSportsLiveScore(mk.gameId, !!mk.isLiveGame && !mk.gameEnded);
     const gameEnded = mk.gameEnded || wsEnded;
     const [trFilter, setTrFilter] = (0, import_react4.useState)(moneyline[0]?.id);
@@ -28775,7 +28778,7 @@ input,button{font-family:inherit}
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 120, flexShrink: 0 } })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, bottom: 0, display: "flex", gap: 8, padding: "40px 16px 12px", paddingBottom: IS_H5 ? "calc(12px + env(safe-area-inset-bottom))" : 12, background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,.75) 38%, #fff 72%)", pointerEvents: "none", zIndex: 5 }, children: [teams[0], drawContract, teams[1]].filter(Boolean).map((c) => {
-        const isDraw = c.label.toLowerCase() === "draw";
+        const isDraw = /^draw\b/i.test(String(c.label || "").trim());
         const i = moneyline.findIndex((x) => x.id === c.id);
         return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => predictMoneyline(c), className: "tap btn-soft", style: { flex: 1, border: isDraw ? `1px solid ${C.line}` : "none", background: isDraw ? "transparent" : colorFor(c, i), color: isDraw ? C.ink : "#fff", fontWeight: 700, fontSize: 15, padding: "12px 13px", borderRadius: 999, cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", boxShadow: isDraw ? "none" : "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }, children: [
           isDraw ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HandshakeIcon, { size: 18 }) : c.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: c.icon, alt: "", style: { width: 20, height: 20, borderRadius: "50%", objectFit: "cover", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontWeight: 900 }, children: c.abbr || c.label }),
