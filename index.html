@@ -26232,12 +26232,26 @@ input,button{font-family:inherit}
       const team = sportsTeams.find((t) => t.name === label);
       return { label, pct: yesPct, mkt: mk, tokenId, noTokenId, conditionId: mk.conditionId, vol: fmtVol(mk.volume || mk.volumeNum || 0), icon: team?.logo || mk.icon || mk.image || "", abbr: team?.abbreviation || "", ordering: team?.ordering || null };
     }).sort((a, b) => b.pct - a.pct).map((c, i) => ({ ...c, id: base.id + "-c" + i }));
-    const isSports = sportsTeams.length === 2 && (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase()));
+    const hasSportTag = (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase()));
+    const titleLooksLikeMatch = /\bvs\.?\b/i.test(ev.title || "");
+    const isSports = hasSportTag && (sportsTeams.length === 2 || titleLooksLikeMatch);
     if (isSports) {
       const teamNames = sportsTeams.map((t) => t.name.toLowerCase());
-      const isMoneyline = (c) => teamNames.includes(c.label.toLowerCase()) || c.label.toLowerCase() === "draw";
-      const moneyline = contracts.filter(isMoneyline);
-      const others = contracts.filter((c) => !isMoneyline(c));
+      const isDraw = (c) => c.label.toLowerCase() === "draw";
+      let moneyline, others;
+      if (teamNames.length === 2) {
+        const isMoneyline = (c) => teamNames.includes(c.label.toLowerCase()) || isDraw(c);
+        moneyline = contracts.filter(isMoneyline);
+        others = contracts.filter((c) => !isMoneyline(c));
+      } else {
+        const titleLc = (ev.title || "").toLowerCase();
+        const inTitle = contracts.filter((c) => c.label && titleLc.includes(c.label.toLowerCase()));
+        const picked = inTitle.length >= 2 ? inTitle : contracts.filter((c) => !isDraw(c)).slice(0, 2);
+        const drawC = contracts.find(isDraw);
+        moneyline = drawC ? [...picked, drawC] : picked;
+        const mlIds = new Set(moneyline.map((c) => c.id));
+        others = contracts.filter((c) => !mlIds.has(c.id));
+      }
       if (moneyline.length >= 2) {
         const gStart = ev.startDate ? new Date(ev.startDate).getTime() : null;
         const gEnd = ev.endDate ? new Date(ev.endDate).getTime() : null;
@@ -26302,15 +26316,18 @@ input,button{font-family:inherit}
       out.push(mk);
     }
     try {
+      const games = [...sp, ...es].filter((m) => m.isSports);
       console.log(
         "[live-games] sports:",
         sp.length,
         "esports:",
         es.length,
         "| games:",
-        [...sp, ...es].filter((m) => m.isSports).length,
+        games.length,
         "live:",
-        out.length
+        out.length,
+        "| sample:",
+        games.slice(0, 3).map((g) => g.q)
       );
     } catch (e) {
     }
@@ -28436,7 +28453,32 @@ input,button{font-family:inherit}
         cancelled = true;
       };
     }, [mk.slug]);
-    const moneyline = mk.contracts || [];
+    const [teamInfo, setTeamInfo] = (0, import_react4.useState)(null);
+    (0, import_react4.useEffect)(() => {
+      if (!IS_H5 || !mk.slug) {
+        setTeamInfo(null);
+        return;
+      }
+      let cancelled = false;
+      (async () => {
+        try {
+          const r = await fetch(`https://gamma-api.polymarket.com/events/slug/${mk.slug}`);
+          if (!r.ok) throw new Error("bad status");
+          const d = await r.json();
+          const ev = Array.isArray(d) ? d[0] : d;
+          const teams2 = ev?.sports?.teams;
+          if (!cancelled && Array.isArray(teams2) && teams2.length) setTeamInfo(teams2);
+        } catch (e) {
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [mk.slug]);
+    const moneyline = (0, import_react4.useMemo)(() => (mk.contracts || []).map((c) => {
+      const t = (teamInfo || []).find((x) => String(x.name || "").toLowerCase() === String(c.label || "").toLowerCase());
+      return t ? { ...c, icon: t.logo || c.icon, abbr: t.abbreviation || c.abbr, ordering: t.ordering || c.ordering } : c;
+    }), [mk.contracts, teamInfo]);
     const top3 = moneyline.slice(0, 3);
     const [teamColors, setTeamColors] = (0, import_react4.useState)({});
     (0, import_react4.useEffect)(() => {
