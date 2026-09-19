@@ -25800,7 +25800,7 @@ input,button{font-family:inherit}
     const low = shown.pct < 1;
     const [labelYes, labelNo] = shown.outLabels || ["Yes", "No"];
     const SOFT = "inset 0 2px 1px rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.15)";
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "14px 0", borderBottom: `1px dashed ${C.line}`, minWidth: 0 }, children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "14px 0", borderBottom: "1px solid #D8D5CD", minWidth: 0 }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, minWidth: 0, marginBottom: 10 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { minWidth: 0, flex: 1 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 16, fontWeight: 700, color: C.ink, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 }, children: [
@@ -25995,7 +25995,7 @@ input,button{font-family:inherit}
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
             isGameCard ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
+              !showType && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: CAT_EMOJI[mk.catKind || "Sports"] }),
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catKind || "Sports" })
               ] }),
@@ -26007,7 +26007,7 @@ input,button{font-family:inherit}
               mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0 } }) : null,
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.assetLabel })
             ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-              mk.catSub && mk.catSub !== "All" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
+              !showType && mk.catSub && mk.catSub !== "All" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
                 catPillIcon(mk.catSub) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: catPillIcon(mk.catSub), alt: "", style: { width: 15, height: 15, objectFit: "contain", flexShrink: 0 } }) : CAT_EMOJI[mk.catSub] ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: CAT_EMOJI[mk.catSub] }) : null,
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catSub })
               ] }),
@@ -26244,7 +26244,7 @@ input,button{font-family:inherit}
       return null;
     }
   }
-  var GT_TF = { Live: ["minute", 1, 60], "1H": ["minute", 5, 48], "1D": ["hour", 1, 48], "1W": ["hour", 4, 60], All: ["day", 1, 90] };
+  var GT_TF = { Live: ["minute", 1, 60], "1m": ["minute", 1, 60], "5m": ["minute", 5, 60], "15m": ["minute", 15, 60], "1H": ["hour", 1, 60], "1D": ["day", 1, 60], All: ["day", 1, 180] };
   async function gtFetchOHLCV(network, poolAddress, tf) {
     const [unit, aggregate, limit] = GT_TF[tf] || GT_TF["1D"];
     const json = await gtFetch(`/networks/${network}/pools/${poolAddress}/ohlcv/${unit}?aggregate=${aggregate}&limit=${limit}&currency=usd`);
@@ -26307,7 +26307,7 @@ input,button{font-family:inherit}
           " ",
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mm.mc })
         ] }),
-        mm.sub && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap" }, children: [
+        !showType && mm.sub && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, whiteSpace: "nowrap" }, children: [
           MEME_SUB_ICONS[mm.sub] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: MEME_SUB_ICONS[mm.sub], alt: "", style: { width: 15, height: 15, objectFit: "contain", flexShrink: 0 } }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mm.sub })
         ] })
@@ -26346,6 +26346,8 @@ input,button{font-family:inherit}
   }
   function fmtVol(vol) {
     const v = Number(vol || 0);
+    if (v >= 1e12) return `$${(v / 1e12).toFixed(1)}T`;
+    if (v >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
     return v >= 1e6 ? `$${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v / 1e3).toFixed(1)}k` : `$${v.toFixed(0)}`;
   }
   function pmDeriveAbbr(label) {
@@ -28519,7 +28521,7 @@ input,button{font-family:inherit}
       const tick = () => {
         const arr = bufRef.current;
         if (!arr.length) return;
-        const p = easedRef.current;
+        const p = easedRef.current ?? arr[arr.length - 1].c;
         if (p == null) return;
         const nowBucket = Math.floor(Date.now() / 1e3 / stepSec) * stepSec;
         const last = arr[arr.length - 1];
@@ -28539,6 +28541,13 @@ input,button{font-family:inherit}
       return () => clearInterval(iv);
     }, [stepSec, maxLen]);
     return buf.length ? buf : seedCandles;
+  }
+  function stepMsOf(candles) {
+    if (!candles || candles.length < 2) return 1e3;
+    const diffs = [];
+    for (let i = 1; i < candles.length; i++) diffs.push((candles[i].t - candles[i - 1].t) * 1e3);
+    diffs.sort((a, b) => a - b);
+    return diffs[Math.floor(diffs.length / 2)] || 1e3;
   }
   function CoinChart({ candles, mode, h = 170, onScrub, live = false, windowSec = 30 }) {
     const { lang } = useLang();
@@ -28572,7 +28581,10 @@ input,button{font-family:inherit}
     const spanStartMs = live ? nowMs - windowSec * 1e3 : n ? candles[0].t * 1e3 : nowMs;
     const spanEndMs = live ? nowMs : n ? candles[n - 1].t * 1e3 : nowMs;
     const spanMs = Math.max(1, spanEndMs - spanStartMs);
-    const xOf = (ms) => (ms - spanStartMs) / spanMs * 100;
+    const vnForW = live ? Math.max(Math.round(windowSec * 1e3 / Math.max(1, stepMsOf(candles))), 1) : Math.max(candles.length, 1);
+    const bwPct = Math.max(0.8, 100 / vnForW * 0.55);
+    const halfB = bwPct / 2;
+    const xOf = (ms) => halfB + (ms - spanStartMs) / spanMs * (100 - 2 * halfB);
     const visible = live ? candles.filter((c) => c.t * 1e3 >= spanStartMs - 2e3) : candles;
     const vn = visible.length;
     const all = visible.flatMap((c) => [c.hi, c.lo]);
@@ -28663,7 +28675,7 @@ input,button{font-family:inherit}
                 const up = c.c >= c.o;
                 const col = up ? C.up : C.down;
                 const cx = xOf(c.t * 1e3);
-                const bw = Math.max(0.8, 100 / Math.max(vn, 1) * 0.55);
+                const bw = bwPct;
                 const dimmed = dragIdx != null && i > dragIdx;
                 return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { opacity: dimmed ? 0.25 : 1, children: [
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: cx, y1: yPx(c.hi), x2: cx, y2: yPx(c.lo), stroke: col, strokeWidth: "1", vectorEffect: "non-scaling-stroke" }),
@@ -28691,7 +28703,11 @@ input,button{font-family:inherit}
               return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `${xOf(dragMs)}%`, top: -22, transform: `translateX(${shift})`, fontSize: 11, fontWeight: 700, color: C.mute, fontFamily: MONO, whiteSpace: "nowrap", pointerEvents: "none" }, children: label });
             })(),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", right: -KCHART_GUTTER, top: 0, bottom: 0, width: KCHART_GUTTER, pointerEvents: "none", fontSize: 10, fontFamily: MONO, color: C.mute, overflow: "hidden", maskImage: Y_FADE, WebkitMaskImage: Y_FADE }, children: ticks.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", top: yPx(v), right: 0, transform: "translateY(-50%)" }, children: fmtY(v) }, i)) }),
-            shownCandle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: "100%", marginLeft: 3, top: yPx(shownCandle.c), transform: "translateY(-50%)", pointerEvents: "none", zIndex: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", background: lineColor, color: "#fff", fontFamily: MONO, fontWeight: 700, fontSize: 10, padding: "1px 4px", borderRadius: 5, whiteSpace: "nowrap" }, children: fmtY(shownCandle.c) }) })
+            shownCandle && (() => {
+              const gapPx = KCHART_DOT / 2 + KCHART_GAP;
+              const anchorPct = mode === "line" ? dragIdx != null ? xOf(shownCandle.t * 1e3) : live ? xOf(spanEndMs) : xOf(candles[candles.length - 1].t * 1e3) : 100;
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `calc(${anchorPct}% + ${gapPx}px)`, top: yPx(shownCandle.c), transform: "translateY(-50%)", pointerEvents: "none", zIndex: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", background: lineColor, color: "#fff", fontFamily: MONO, fontWeight: 700, fontSize: 10, padding: "1px 4px", borderRadius: 5, whiteSpace: "nowrap" }, children: fmtY(shownCandle.c) }) });
+            })()
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden", maskImage: X_FADE, WebkitMaskImage: X_FADE }, children: xTicks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${xOf(t)}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: live ? fmtClock(t) : fmtTickDate(t) }, t)) })
         ]
@@ -29675,10 +29691,10 @@ input,button{font-family:inherit}
     const [localTrade, setLocalTrade] = (0, import_react4.useState)(null);
     const [tf, setTf] = (0, import_react4.useState)("Live");
     const [chartMode, setChartMode] = (0, import_react4.useState)("candle");
-    const tfOptions = ["Live", "1H", "1D", "1W", "All"];
+    const tfOptions = ["Live", "1m", "5m", "15m", "1H", "1D", "All"];
     const isLive = tf === "Live";
-    const candleCount = { Live: 30, "1H": 24, "1D": 30, "1W": 35, All: 48 }[tf] || 30;
-    const stepSecFor = { Live: 1, "1H": 300, "1D": 3600, "1W": 14400, All: 86400 }[tf] || 3600;
+    const candleCount = { Live: 30, "1m": 45, "5m": 45, "15m": 45, "1H": 45, "1D": 45, All: 60 }[tf] || 45;
+    const stepSecFor = { Live: 1, "1m": 60, "5m": 300, "15m": 900, "1H": 3600, "1D": 86400, All: 86400 }[tf] || 3600;
     const anchorPx = parseFloat(String(mm.px).replace(/[$,]/g, "")) || null;
     const demoCandles = (0, import_react4.useMemo)(() => {
       if (isLive) {
@@ -29703,7 +29719,17 @@ input,button{font-family:inherit}
     const seedCandles = realCandles || demoCandles;
     const livePrice = useLiveCoinPrice(mm.poolNetwork || "solana", mm.poolAddress, true, isLive ? 1e3 : 4e3);
     const liveCandles = useLiveCandles(seedCandles, stepSecFor, livePrice, candleCount);
-    const candles = isLive ? liveCandles : seedCandles;
+    const candles = (0, import_react4.useMemo)(() => {
+      if (isLive) return liveCandles;
+      if (livePrice == null || !seedCandles.length) return seedCandles;
+      const out = seedCandles.slice();
+      const last = { ...out[out.length - 1] };
+      last.c = livePrice;
+      last.hi = Math.max(last.hi, livePrice);
+      last.lo = Math.min(last.lo, livePrice);
+      out[out.length - 1] = last;
+      return out;
+    }, [isLive, liveCandles, seedCandles, livePrice]);
     const px0 = anchorPx || 0;
     const chg0 = mm.chgNum ?? parseFloat(mm.chg) ?? 0;
     const basePrice = (0, import_react4.useMemo)(() => px0 && chg0 > -100 ? px0 / (1 + chg0 / 100) : px0, [mm.name]);
