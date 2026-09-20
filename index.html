@@ -17388,9 +17388,15 @@ input,button{font-family:inherit}
       }
     };
     const nowISO = (/* @__PURE__ */ new Date()).toISOString();
+    const fetchSoon = async () => {
+      const withMin = await fetchList(`order=startDate&ascending=true&start_date_min=${encodeURIComponent(nowISO)}`);
+      if (withMin.length >= 5) return withMin;
+      const noMin = await fetchList("order=startDate&ascending=true");
+      return noMin.length > withMin.length ? noMin : withMin;
+    };
     const [volRaw, soonRaw] = await Promise.all([
       fetchList("order=volume&ascending=false"),
-      fetchList(`order=startDate&ascending=true&start_date_min=${encodeURIComponent(nowISO)}`)
+      fetchSoon()
     ]);
     const mapFilter = (raw) => raw.map((ev) => pmMapEvent(ev, kind)).filter((mk) => mk && mk.isSports && !mk.isSubMarket && (!kind || mk.catKind === kind));
     const volGames = mapFilter(volRaw);
@@ -17400,6 +17406,13 @@ input,button{font-family:inherit}
     const upcoming = soonGames.filter((mk) => !mk.gameEnded && !mk.isLiveGame && !liveIds.has(mk.id)).slice(0, 12);
     try {
       console.log(`[pm-games ${ck}] volRaw:${volRaw.length} soonRaw:${soonRaw.length} volGames:${volGames.length} soonGames:${soonGames.length} live:${live.length} upcoming:${upcoming.length}`);
+      if (soonGames.length === 0 && soonRaw.length > 0) {
+        const sample = soonRaw.slice(0, 6).map((ev) => {
+          const mk = pmMapEvent(ev, kind);
+          return { title: ev.title, startDate: ev.startDate, tags: (ev.tags || []).map((t) => t.slug), isSports: !!(mk && mk.isSports), catKind: mk && mk.catKind, isSubMarket: !!(mk && mk.isSubMarket) };
+        });
+        console.log(`[pm-games ${ck}] soon sample:`, JSON.stringify(sample));
+      }
     } catch (e) {
     }
     PM_GAMES_CACHE[ck] = [...live, ...upcoming];
