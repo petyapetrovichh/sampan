@@ -30477,13 +30477,10 @@ input,button{font-family:inherit}
           top3.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, marginBottom: 10, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gap: 3, minWidth: 0 }, children: top3.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 9, height: 9, borderRadius: 5, background: KLINE_COLORS[i], flexShrink: 0 } }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 14, color: C.ink, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 14, color: C.ink, minWidth: 0, display: "inline-flex", alignItems: "center", gap: 4, overflow: "hidden", whiteSpace: "nowrap" }, children: [
                 c.label,
                 " ",
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { style: { fontWeight: 700 }, children: [
-                  c.pct,
-                  "%"
-                ] })
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { style: { fontWeight: 700, display: "inline-flex", alignItems: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerText, { text: `${c.pct}%` }) })
               ] })
             ] }, c.id)) }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GreyLogo, { s: 25 })
@@ -30637,7 +30634,7 @@ input,button{font-family:inherit}
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, minWidth: 0, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 20, fontWeight: 800, letterSpacing: -0.3 }, children: st.sym }) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10, minWidth: 0 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 28, fontWeight: 900, fontFamily: MONO }, children: fmtPx2(shownPrice) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 28, fontWeight: 900, fontFamily: MONO }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerText, { text: fmtPx2(shownPrice) }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 16, fontWeight: 700, fontFamily: MONO, color: shownUp ? C.up : C.down }, children: [
             shownUp ? "\u25B2" : "\u25BC",
             " ",
@@ -30777,7 +30774,7 @@ input,button{font-family:inherit}
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10, minWidth: 0 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 28, fontWeight: 900, fontFamily: MONO }, children: fmtPx2(shownPrice) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 28, fontWeight: 900, fontFamily: MONO }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerText, { text: fmtPx2(shownPrice) }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 16, fontWeight: 700, fontFamily: MONO, color: shownUp ? C.up : C.down }, children: [
             shownUp ? "\u25B2" : "\u25BC",
             " ",
@@ -31905,15 +31902,9 @@ input,button{font-family:inherit}
       };
       return [...map.entries()].sort((a, b) => a[0] === "live" ? -1 : b[0] === "live" ? 1 : a[0] === "later" ? 1 : b[0] === "later" ? -1 : Number(a[0]) - Number(b[0])).map(([k, items]) => ({ head: label(k), items }));
     }, [shown, tab, lang]);
-    const pill = (on, onClick, icon, emoji, label) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick, className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, border: "none", background: on ? C.filterOn : C.filterOff, color: on ? "#fff" : C.mute, borderRadius: 14, padding: "6px 13px", fontSize: 14, fontWeight: 550, cursor: "pointer", whiteSpace: "nowrap" }, children: [
-      icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: icon, alt: "", style: { width: 18, height: 18, borderRadius: 5, objectFit: "contain", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18 }, children: emoji }),
-      label
-    ] }, label);
-    const tile = (on, onClick, icon, emoji, label) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick, className: "tap", style: { flexShrink: 0, width: 70, height: 70, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, border: "none", background: on ? C.filterOn : C.filterOff, clipPath: "url(#squircle)", padding: "0 4px", cursor: "pointer" }, children: [
-      icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: icon, alt: "", style: { width: 32, height: 32, objectFit: "contain" } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 26, lineHeight: 1 }, children: emoji }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 10, fontWeight: 550, color: on ? "#fff" : C.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }, children: label })
-    ] }, label);
-    const row = { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 12px" };
+    const pill = (on, onClick, icon, emoji, label) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", border: "none", background: on ? C.filterOn : C.filterOff, color: on ? "#fff" : C.mute, borderRadius: 14, padding: "6px 13px", fontSize: 14, fontWeight: 550, cursor: "pointer", whiteSpace: "nowrap" }, children: label }, label);
+    const tile = (on, onClick, icon, emoji, label) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap", style: { flexShrink: 0, width: 70, height: 70, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", border: "none", background: on ? C.filterOn : C.filterOff, clipPath: "url(#squircle)", padding: "0 6px", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11, fontWeight: 600, color: on ? "#fff" : C.ink, lineHeight: 1.25, textAlign: "center", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" }, children: label }) }, label);
+    const row = { display: "flex", alignItems: "center", gap: 8, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 12px" };
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: C.bg, height: "100%", minHeight: "100%", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", display: "flex", alignItems: "center", padding: "8px 16px 12px", flexShrink: 0 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
@@ -31933,7 +31924,13 @@ input,button{font-family:inherit}
       ] })
     ] });
   }
-  var TOPIC_NO_CAROUSEL = ["IPOs", "Live"];
+  var TOPIC_NO_CAROUSEL = ["IPOs"];
+  var LIVE_SUBS = ["Sports", "Esports", "Bitcoin", "Ethereum", "XRP", "BNB", "Solana", "Dogecoin"];
+  var liveMatch = (mk, name) => {
+    if (name === "Sports" || name === "Esports") return mk.catKind === name;
+    const k = pmNorm(name);
+    return pmNorm(mk.assetLabel || "") === k || (mk.allTags || []).some((x) => pmNorm(x.label) === k || pmNorm(x.slug) === k);
+  };
   var TOPIC_SORTS = [{ k: "Volume", t: true }, { k: "Newest", t: true }];
   function TopicScreen({ kind, tag, mode, onBack, onOpen, onOpenMarket, onCopy }) {
     const { lang } = useLang();
@@ -31961,6 +31958,7 @@ input,button{font-family:inherit}
       };
     }, [kind]);
     const subs = (0, import_react4.useMemo)(() => {
+      if (kind === "Live") return LIVE_SUBS.map((n) => ({ name: n, image: "", emoji: "", n: (evts || []).filter((mk) => liveMatch(mk, n)).length }));
       const kk = pmNorm(kind);
       const out = /* @__PURE__ */ new Map();
       (evts || []).forEach((mk) => {
@@ -31996,24 +31994,21 @@ input,button{font-family:inherit}
     const curDay = day != null && days.includes(day) ? day : days.find((d) => d >= (/* @__PURE__ */ new Date()).setHours(0, 0, 0, 0)) ?? days[0];
     const shown = (0, import_react4.useMemo)(() => {
       let list = tagged;
-      if (!flat && sub !== "All") list = list.filter((mk) => (mk.allTags || []).some((x) => x.label === sub));
+      if (!flat && sub !== "All") list = kind === "Live" ? list.filter((mk) => liveMatch(mk, sub)) : list.filter((mk) => (mk.allTags || []).some((x) => x.label === sub));
       if (mode === "games") list = list.filter((mk) => gtab === "GAMES" ? mk.isSports && !mk.isSubMarket : !(mk.isSports && !mk.isSubMarket));
       if (dateMode && curDay != null) list = list.filter((mk) => new Date(mk.resolveMs || mk.startMs || 0).setHours(0, 0, 0, 0) === curDay);
       if (sort === "Newest") return [...list].sort((a, b) => (b.createdMs || 0) - (a.createdMs || 0));
       return [...list].sort((a, b) => (b.volNum || 0) - (a.volNum || 0));
-    }, [tagged, sub, sort, flat, mode, gtab, curDay, dateMode]);
-    const pill = (on, onClick, icon, emoji, label, node) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick, className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, border: "none", background: on ? C.filterOn : C.filterOff, color: on ? "#fff" : C.mute, borderRadius: 14, padding: "6px 13px", fontSize: 14, fontWeight: 550, cursor: "pointer", whiteSpace: "nowrap" }, children: [
-      node ? node : icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: icon, alt: "", style: { width: 18, height: 18, borderRadius: 5, objectFit: "contain", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18 }, children: emoji || "\u2022" }),
-      label
-    ] }, label);
+    }, [tagged, sub, sort, flat, mode, gtab, curDay, dateMode, kind]);
+    const pill = (on, onClick, icon, emoji, label) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", border: "none", background: on ? C.filterOn : C.filterOff, color: on ? "#fff" : C.mute, borderRadius: 14, padding: "6px 13px", fontSize: 14, fontWeight: 550, cursor: "pointer", whiteSpace: "nowrap" }, children: label }, label);
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: C.bg, height: "100%", minHeight: "100%", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", display: "flex", alignItems: "center", padding: "8px 16px 12px", flexShrink: 0 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontSize: 22, fontWeight: 800, letterSpacing: -0.5, pointerEvents: "none" }, children: t(title) })
       ] }),
       evts == null ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", placeItems: "center", padding: "90px 0" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 28, height: 28, borderRadius: "50%", border: `3px solid ${C.line}`, borderTopColor: C.ink, animation: "spin .7s linear infinite" } }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" }, children: [
-        !flat && subs.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 12px" }, children: [
-          pill(sub === "All", () => setSub("All"), "", "", t("All"), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllIcon, {})),
+        !flat && subs.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 12px" }, children: [
+          pill(sub === "All", () => setSub("All"), "", "", t("All")),
           subs.map((x) => pill(sub === x.name, () => setSub(x.name), x.image, x.emoji, x.name))
         ] }),
         mode === "games" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "0 16px 14px" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seg, { items: ["GAMES", "PROPS"], val: gtab, onChange: setGtab, bg: C.filterOff }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "0 16px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }, children: [
