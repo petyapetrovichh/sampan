@@ -31757,6 +31757,7 @@ input,button{font-family:inherit}
   ] });
   function useExGames() {
     const [games, setGames] = (0, import_react4.useState)(null);
+    const fallback = (0, import_react4.useMemo)(() => EX_FALLBACK(), []);
     (0, import_react4.useEffect)(() => {
       let dead = false;
       Promise.all([
@@ -31765,15 +31766,15 @@ input,button{font-family:inherit}
       ]).then(([sp, es]) => {
         if (dead) return;
         const all = [...sp, ...es].filter((mk) => mk && !mk.gameEnded && (mk.contracts || []).length >= 2).map(exFromPm);
-        setGames(all.length ? all : EX_FALLBACK());
+        setGames(all.length ? all : null);
       }).catch(() => {
-        if (!dead) setGames(EX_FALLBACK());
+        if (!dead) setGames(null);
       });
       return () => {
         dead = true;
       };
     }, []);
-    return games || EX_FALLBACK();
+    return games || fallback;
   }
   var exOpenGame = (g, onOpen, onOpenMarket) => {
     if (g.src) onOpenMarket && onOpenMarket(g.src);
@@ -31902,12 +31903,17 @@ ${m[2]}` : g.when;
           return null;
         }
       })).then((res) => {
-        if (!dead) setTeamsById(Object.fromEntries(res.filter(Boolean)));
+        if (dead) return;
+        const next = Object.fromEntries(res.filter(Boolean));
+        setTeamsById((prev) => {
+          const pk = Object.keys(prev), nk = Object.keys(next);
+          return pk.length === nk.length && nk.every((k) => prev[k] === next[k]) ? prev : next;
+        });
       });
       return () => {
         dead = true;
       };
-    }, [trending]);
+    }, [trending.map((g) => g.slug || g.id).join("|")]);
     const topics = (0, import_react4.useMemo)(() => {
       const out = [], seen = /* @__PURE__ */ new Set();
       const add = (label, icon, emoji, go) => {
