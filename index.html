@@ -24827,6 +24827,9 @@
     segInk: "#15171B",
     fadeUp: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,.75) 38%, #fff 72%)",
     loginGlow: "linear-gradient(to top, #F8E058 0%, #F7E054 8%, transparent 52%)",
+    segRim: "0 1px 3px rgba(0,0,0,.1)",
+    chipRim: "none",
+    chipOn: "#FFFFFF",
     loginAlt: "rgba(255,255,255,.35)",
     tabBar: "rgba(255,255,255,.55)",
     tabBarRim: "inset 0 0 0 1px rgba(255,255,255,.5)",
@@ -24876,12 +24879,18 @@
     fadeUp: "linear-gradient(to bottom, rgba(20,20,22,0) 0%, rgba(20,20,22,.75) 38%, #141416 72%)",
     loginGlow: "none",
     loginAlt: "#1E1E20",
+    segRim: "inset 0 0 0 1.5px #F7E054, 0 1px 3px rgba(0,0,0,.1)",
+    chipRim: "inset 0 0 0 1.5px #F7E054",
+    chipOn: "#15171B",
     tabBar: "rgba(28,28,31,.72)",
     tabBarRim: "inset 0 0 0 1px rgba(255,255,255,.08)",
     cardShadow: "0 1px 2px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.06)"
   };
   var C = { ...C_LIGHT };
-  var applyTheme = (dark) => Object.assign(C, dark ? C_DARK : C_LIGHT);
+  var applyTheme = (dark) => {
+    Object.assign(C, dark ? C_DARK : C_LIGHT);
+    KLINE_COLORS[2] = dark ? "#FFFFFF" : "#111111";
+  };
   var FEE = 2;
   var MONO = "'Poppins',ui-rounded,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
   var SANS = "'Poppins',ui-rounded,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
@@ -24989,7 +24998,7 @@ input,button{font-family:inherit}
   var N = ({ children, s = 24, c = C.ink, style }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO, fontSize: s, fontWeight: 600, color: c, letterSpacing: -0.5, fontVariantNumeric: "tabular-nums", ...style }, children });
   var Chip = ({ children, on, onClick, tone = "ink", style, cls }) => {
     const bg = on ? { ink: C.ink, brand: C.brand, amber: C.amber }[tone] : C.card;
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap" + (cls ? " " + cls : ""), style: { border: "none", borderRadius: 999, padding: "8px 14px", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", background: bg, color: on ? tone === "ink" ? "#fff" : C.onAmber : C.ink, boxShadow: on ? "none" : `inset 0 0 0 1px ${C.line}`, display: "inline-flex", alignItems: "center", gap: 6, ...style }, children: typeof children === "string" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children }) : children });
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap" + (cls ? " " + cls : ""), style: { border: "none", borderRadius: 999, padding: "8px 14px", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", background: bg, color: on ? tone === "ink" ? C.bg : C.chipOn : C.ink, boxShadow: on ? "none" : `inset 0 0 0 1px ${C.line}`, display: "inline-flex", alignItems: "center", gap: 6, ...style }, children: typeof children === "string" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children }) : children });
   };
   var Btn = ({ children, onClick, color = C.brand, ghost, sm, style, fg, cls }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick, className: "tap" + (cls ? " " + cls : ""), style: { width: "100%", border: ghost ? `1.5px solid ${color}` : "none", background: ghost ? "transparent" : color, color: ghost ? color : fg || "#fff", borderRadius: sm ? 12 : 16, padding: sm ? "10px 12px" : 15, fontSize: sm ? 13 : 15, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, ...style }, children: typeof children === "string" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children }) : children });
   var IconBtn = ({ children, onClick, style }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick, style: { position: "relative", border: "none", background: C.btnSoft, clipPath: "url(#squircle)", width: 40, height: 40, display: "grid", placeItems: "center", color: C.onBtnSoft, cursor: "pointer", ...style }, children: [
@@ -25165,7 +25174,7 @@ input,button{font-family:inherit}
       children
     ] });
   }
-  var Seg = ({ items, val, onChange, bg, maxBtn, radius, pad }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "inline-flex", background: bg || C.soft, borderRadius: radius ?? 999, padding: pad ?? 3, maxWidth: "100%" }, children: items.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => onChange(i), style: { border: "none", background: val === i ? C.segOn : "transparent", color: val === i ? C.segInk : C.mute, borderRadius: (radius ?? 999) - 3, padding: "5px 18px", fontSize: 13, fontWeight: 600, boxShadow: val === i ? `inset 0 0 0 1.5px ${C.amber}, 0 1px 3px rgba(0,0,0,.1)` : "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", cursor: "pointer", ...maxBtn ? { maxWidth: maxBtn } : {} }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: i }) }, i)) });
+  var Seg = ({ items, val, onChange, bg, maxBtn, radius, pad }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "inline-flex", background: bg || C.soft, borderRadius: radius ?? 999, padding: pad ?? 3, maxWidth: "100%" }, children: items.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => onChange(i), style: { border: "none", background: val === i ? C.segOn : "transparent", color: val === i ? C.segInk : C.mute, borderRadius: (radius ?? 999) - 3, padding: "5px 18px", fontSize: 13, fontWeight: 600, boxShadow: val === i ? C.segRim : "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", cursor: "pointer", ...maxBtn ? { maxWidth: maxBtn } : {} }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: i }) }, i)) });
   var Empty = ({ icon, title, sub, action }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fu", style: { textAlign: "center", padding: "36px 20px", color: C.mute }, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 44 }, children: icon }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { color: C.ink, fontWeight: 800, fontSize: 17, marginTop: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: title }) }),
@@ -26178,7 +26187,7 @@ input,button{font-family:inherit}
           ] }),
           variants && variants.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 6, marginTop: 8, overflowX: "auto", scrollbarWidth: "none" }, children: variants.map((v) => {
             const on = v.id === shown.id;
-            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setSelId(v.id), className: "tap", style: { flexShrink: 0, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.ink : "transparent", color: on ? "#fff" : C.ink, borderRadius: 10, padding: "5px 11px", fontSize: 13, fontWeight: 700, cursor: "pointer" }, children: v.variantLabel }, v.id);
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setSelId(v.id), className: "tap", style: { flexShrink: 0, border: on ? "none" : `1px solid ${C.line}`, background: on ? C.filterOn : "transparent", color: on ? "#fff" : C.ink, boxShadow: on ? C.chipRim : "none", borderRadius: 10, padding: "5px 11px", fontSize: 13, fontWeight: 700, cursor: "pointer" }, children: v.variantLabel }, v.id);
           }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, fontWeight: 500, color: C.mute, marginTop: variants && variants.length > 1 ? 8 : 2 }, children: [
             shown.vol,
@@ -27872,6 +27881,13 @@ input,button{font-family:inherit}
     ] });
   }
   var KLINE_COLORS = ["#F7931A", "#2F80ED", "#111111"];
+  var onColor = (hex) => {
+    const h = String(hex || "").replace("#", "");
+    const v = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+    if (v.length < 6) return "#fff";
+    const r = parseInt(v.slice(0, 2), 16), g = parseInt(v.slice(2, 4), 16), b = parseInt(v.slice(4, 6), 16);
+    return (r * 299 + g * 587 + b * 114) / 1e3 > 150 ? "#15171B" : "#fff";
+  };
   function catPillIcon(catSub) {
     const key = catSub === "IPOs" ? "IPO" : catSub;
     return TOPIC_ICON[key] || TAB_ICONS[catSub] || null;
@@ -28900,7 +28916,7 @@ input,button{font-family:inherit}
               if (!p) return null;
               return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", top: yPx(p.p), right: -KCHART_GUTTER, transform: "translateY(-50%)", zIndex: si, pointerEvents: "none", whiteSpace: "nowrap" }, children: [
                 showTeamLabels && s.label && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { textAlign: "right", fontSize: 11, fontWeight: 700, color: s.color, marginBottom: 2, whiteSpace: "nowrap" }, children: s.label }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: s.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, justifyContent: "center", whiteSpace: "nowrap" }, children: fmtY(p.p) })
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: s.color, color: onColor(s.color), fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, justifyContent: "center", whiteSpace: "nowrap" }, children: fmtY(p.p) })
               ] }, "pill" + si);
             })
           ] }),
@@ -29568,7 +29584,7 @@ input,button{font-family:inherit}
             shownCandle && (() => {
               const gapPx = KCHART_DOT / 2 + KCHART_GAP;
               const anchorPct = mode === "line" ? dragIdx != null ? xOf(shownCandle.t * 1e3) : live ? xOf(spanEndMs) : xOf(candles[candles.length - 1].t * 1e3) : 100;
-              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `calc(${anchorPct}% + ${gapPx}px)`, top: yPx(shownCandle.c), transform: "translateY(-50%)", pointerEvents: "none", zIndex: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", background: lineColor, color: "#fff", fontFamily: MONO, fontWeight: 700, fontSize: 10, padding: "1px 4px", borderRadius: 5, whiteSpace: "nowrap" }, children: fmtY(shownCandle.c) }) });
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `calc(${anchorPct}% + ${gapPx}px)`, top: yPx(shownCandle.c), transform: "translateY(-50%)", pointerEvents: "none", zIndex: 3 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-block", background: lineColor, color: onColor(lineColor), fontFamily: MONO, fontWeight: 700, fontSize: 10, padding: "1px 4px", borderRadius: 5, whiteSpace: "nowrap" }, children: fmtY(shownCandle.c) }) });
             })()
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "relative", marginRight: KCHART_GUTTER, height: 14, marginTop: 6, overflow: "hidden", maskImage: X_FADE, WebkitMaskImage: X_FADE }, children: xTicks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { position: "absolute", left: `${xOf(t)}%`, transform: "translateX(-50%)", fontSize: 10, fontFamily: MONO, color: C.mute, whiteSpace: "nowrap" }, children: live ? fmtClock(t) : fmtTickDate(t) }, t)) })
@@ -29738,7 +29754,7 @@ input,button{font-family:inherit}
                 // Vertically it uses the collision-avoided `pillY`, not the dot's own true position.
                 /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "absolute", top: `${pillY[i]}px`, zIndex: i, pointerEvents: "none", whiteSpace: "nowrap", ...live ? { right: -KCHART_GUTTER, transform: "translateY(-50%)" } : flipped ? { left: xLeft, transform: `translate(calc(-100% - ${KCHART_DOT / 2 + KCHART_GAP}px),-50%)` } : { left: xLeft, transform: `translate(${KCHART_DOT / 2 + KCHART_GAP}px,-50%)` } }, children: [
                   live && showTeamLabels && it.label && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { textAlign: "right", fontSize: 11, fontWeight: 700, color: it.color, marginBottom: 2, whiteSpace: "nowrap" }, children: it.label }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: it.color, color: "#fff", fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, justifyContent: "center", whiteSpace: "nowrap" }, children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, background: it.color, color: onColor(it.color), fontFamily: MONO, fontWeight: 600, fontSize: 13, padding: "3px 8px", borderRadius: 8, minWidth: KCHART_PILL_W, justifyContent: "center", whiteSpace: "nowrap" }, children: [
                     !live && labelBeforePct && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis" }, children: it.label }),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
                       Math.round(val),
@@ -29912,7 +29928,7 @@ input,button{font-family:inherit}
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
               const on = tf === t;
-              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.segOn : "transparent", color: on ? C.segInk : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? C.segRim : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
             }) })
           ] })
         ] }),
@@ -30345,7 +30361,7 @@ input,button{font-family:inherit}
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
               const on = tf === t;
-              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.segOn : "transparent", color: on ? C.segInk : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? C.segRim : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
             }) })
           ] })
         ] }),
@@ -30480,7 +30496,7 @@ input,button{font-family:inherit}
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
               const on = tf === t;
-              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.segOn : "transparent", color: on ? C.segInk : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? C.segRim : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
             }) })
           ] })
         ] }),
@@ -30651,7 +30667,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "stretch", gap: 8, minWidth: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", alignItems: "center", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
                 const on = tf === t;
-                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
+                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.segOn : "transparent", color: on ? C.segInk : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? C.segRim : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
               }) }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartTypeToggle, { mode: chartMode, onToggle: () => setChartMode((m) => m === "candle" ? "line" : "candle") })
             ] })
@@ -30788,7 +30804,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "stretch", gap: 8, minWidth: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", alignItems: "center", background: C.soft, borderRadius: 999, padding: 3, gap: 1, overflowX: "auto", scrollbarWidth: "none", minWidth: 0 }, children: tfOptions.map((t) => {
                 const on = tf === t;
-                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.card : "transparent", color: on ? C.ink : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? "0 1px 3px rgba(0,0,0,.1)" : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
+                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setTf(t), className: "tap", style: { flexShrink: 0, border: "none", background: on ? C.segOn : "transparent", color: on ? C.segInk : C.mute, borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 700, boxShadow: on ? C.segRim : "none", cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t }) }, t);
               }) }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartTypeToggle, { mode: chartMode, onToggle: () => setChartMode((m) => m === "candle" ? "line" : "candle") })
             ] })
@@ -31072,7 +31088,7 @@ input,button{font-family:inherit}
             }, style: { border: "none", background: C.btnSoft, color: C.onBtnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 18px", fontSize: 15, fontWeight: 600, color: C.ink, cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Max" }) })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", padding: "0 8px", marginTop: 8 }, children: [1, 2, 3, 4, 5, 6, 7, 8, 9, ".", 0, "\u232B"].map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "tap", onClick: () => key(k), style: { border: "none", background: "transparent", fontSize: 30, fontWeight: 600, padding: "8px 0", color: C.ink, fontFamily: MONO, display: "grid", placeItems: "center" }, children: k === "\u232B" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "42", height: "30", viewBox: "0 0 42 30", style: { display: "block" }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M13 2 L40 2 Q42 2 42 4 L42 26 Q42 28 40 28 L13 28 Q12 28 11.3 27.2 L1.2 16.3 Q0 15 1.2 13.7 L11.3 2.8 Q12 2 13 2 Z", fill: C.ink }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M13 2 L40 2 Q42 2 42 4 L42 26 Q42 28 40 28 L13 28 Q12 28 11.3 27.2 L1.2 16.3 Q0 15 1.2 13.7 L11.3 2.8 Q12 2 13 2 Z", fill: C.filterOn }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M20 11 L30 21 M30 11 L20 21", stroke: "#fff", strokeWidth: "2.6", strokeLinecap: "round" })
           ] }) : k }, k)) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: "auto", padding: "16px 16px calc(env(safe-area-inset-bottom) - 1px)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: swipeW ? swipeW * 0.95 : "100%", margin: "0 auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Swipe, { label: swipeLabel, color: col, onConfirm: confirm }) }) })
@@ -31393,7 +31409,7 @@ input,button{font-family:inherit}
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: "auto", flexShrink: 0 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", padding: "0 8px" }, children: keys.map((k, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "tap", onClick: () => k !== "" && key(k), disabled: k === "", style: { border: "none", background: "transparent", fontSize: 30, fontWeight: 600, padding: "3.75px 0", color: C.ink, fontFamily: MONO, display: "grid", placeItems: "center", cursor: k === "" ? "default" : "pointer", visibility: k === "" ? "hidden" : "visible" }, children: k === "\u232B" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "42", height: "30", viewBox: "0 0 42 30", style: { display: "block" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M13 2 L40 2 Q42 2 42 4 L42 26 Q42 28 40 28 L13 28 Q12 28 11.3 27.2 L1.2 16.3 Q0 15 1.2 13.7 L11.3 2.8 Q12 2 13 2 Z", fill: C.ink }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M13 2 L40 2 Q42 2 42 4 L42 26 Q42 28 40 28 L13 28 Q12 28 11.3 27.2 L1.2 16.3 Q0 15 1.2 13.7 L11.3 2.8 Q12 2 13 2 Z", fill: C.filterOn }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M20 11 L30 21 M30 11 L20 21", stroke: "#fff", strokeWidth: "2.6", strokeLinecap: "round" })
         ] }) : k }, i)) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12, padding: "12px 16px calc(20px + env(safe-area-inset-bottom))" }, children: [
@@ -31799,10 +31815,103 @@ input,button{font-family:inherit}
       ] })
     ] });
   }
+  var plWalk = (seed, n) => {
+    let s = Math.abs(hashStr(String(seed))) % 2147483647 || 7;
+    const rnd = () => (s = s * 16807 % 2147483647) / 2147483647;
+    const drift = (rnd() - 0.45) * 0.015;
+    const out = [];
+    let v = 0, mom = 0;
+    for (let i = 0; i < n; i++) {
+      mom = mom * 0.72 + (rnd() - 0.5) * 0.09;
+      v += mom + drift;
+      out.push(v);
+    }
+    const last = out[out.length - 1];
+    return out.map((x) => x - last);
+  };
+  var PL_LEN = { "1D": 28, "1W": 64, "1M": 150, "Max": 320 };
+  function PLBlock({ seed, pnl }) {
+    const [range, setRange] = (0, import_react4.useState)("1D");
+    const [scrub, setScrub] = (0, import_react4.useState)(null);
+    const boxRef = (0, import_react4.useRef)(null);
+    const master = (0, import_react4.useMemo)(() => plWalk(seed, PL_LEN.Max), [seed]);
+    const vals = (0, import_react4.useMemo)(() => {
+      const amp = Math.max(Math.abs(pnl) * 0.55, 180);
+      return master.slice(-PL_LEN[range]).map((u) => pnl + u * amp);
+    }, [master, range, pnl]);
+    (0, import_react4.useEffect)(() => {
+      setScrub(null);
+    }, [range]);
+    const nRef = (0, import_react4.useRef)(vals.length);
+    nRef.current = vals.length;
+    (0, import_react4.useEffect)(() => {
+      const el = boxRef.current;
+      if (!el) return;
+      const at = (e) => {
+        const x = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+        const r = el.getBoundingClientRect();
+        const f = Math.max(0, Math.min(1, (x - r.left) / (r.width || 1)));
+        setScrub(Math.round(f * (nRef.current - 1)));
+      };
+      let on = false;
+      const start = (e) => {
+        on = true;
+        at(e);
+      };
+      const move = (e) => {
+        if (!on) return;
+        if (e.cancelable) e.preventDefault();
+        at(e);
+      };
+      const end = () => {
+        if (!on) return;
+        on = false;
+        setScrub(null);
+      };
+      el.addEventListener("touchstart", start, { passive: true });
+      el.addEventListener("touchmove", move, { passive: false });
+      el.addEventListener("touchend", end, { passive: true });
+      el.addEventListener("touchcancel", end, { passive: true });
+      el.addEventListener("mousedown", start);
+      window.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", end);
+      return () => {
+        el.removeEventListener("touchstart", start);
+        el.removeEventListener("touchmove", move);
+        el.removeEventListener("touchend", end);
+        el.removeEventListener("touchcancel", end);
+        el.removeEventListener("mousedown", start);
+        window.removeEventListener("mousemove", move);
+        window.removeEventListener("mouseup", end);
+      };
+    }, []);
+    const YEL = "#F7E054";
+    const n = vals.length;
+    const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo || 1) * 0.18;
+    const X2 = (i) => 8 + 304 * i / (n - 1);
+    const Y = (v) => 56 - (v - (lo - pad)) / (hi + pad - (lo - pad)) * 52;
+    const seg = (a, b) => vals.slice(a, b + 1).map((v, k) => `${k ? "L" : "M"}${X2(a + k).toFixed(1)} ${Y(v).toFixed(1)}`).join(" ");
+    const d = seg(0, n - 1);
+    const idx = scrub == null ? n - 1 : scrub;
+    const shown = vals[idx];
+    const txt = (Math.abs(shown) < 5e-3 ? "" : shown > 0 ? "+" : "\u2212") + money(Math.abs(shown));
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 16 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Cap, { children: "Profit/Loss" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "block", margin: "2px 0 14px", fontFamily: MONO, fontSize: 34, fontWeight: 600, letterSpacing: -0.5, color: Math.abs(shown) < 5e-3 ? C.ink : shown > 0 ? C.up : C.down }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OdometerText, { text: txt }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { ref: boxRef, style: { position: "relative", touchAction: "pan-y", cursor: "crosshair" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { className: "fu", viewBox: "0 0 320 60", style: { width: "100%", height: 54, display: "block" }, preserveAspectRatio: "none", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d, fill: "none", stroke: YEL, opacity: scrub == null ? 1 : 0.3, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" }),
+          scrub != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: seg(0, idx), fill: "none", stroke: YEL, strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round", vectorEffect: "non-scaling-stroke" }),
+          scrub != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: X2(idx), y1: "0", x2: X2(idx), y2: "60", stroke: C.line, strokeWidth: "1", strokeDasharray: "3 3", vectorEffect: "non-scaling-stroke" })
+        ] }, range),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: `calc(${X2(idx) / 320 * 100}% - 6px)`, top: `calc(${Y(shown) / 60 * 100}% - 6px)`, width: 12, height: 12, borderRadius: "50%", background: YEL, pointerEvents: "none", transition: scrub == null ? "left .2s, top .2s" : "none" }, children: scrub == null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pl-pulse", style: { position: "absolute", inset: 0, borderRadius: "50%" } }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 26 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seg, { items: ["1D", "1W", "1M", "Max"], val: range, onChange: setRange, bg: C.cardPill }) })
+    ] });
+  }
   function Trader({ t, onBack, onCopy, onOpen }) {
     const { lang } = useLang();
     const [tab, setTab] = (0, import_react4.useState)("Positions");
-    const [range, setRange] = (0, import_react4.useState)("1D");
     const [fol, setFol] = (0, import_react4.useState)(false);
     const YEL = "#F7E054";
     const inv = t.pos.reduce((a, p) => a + p.amt, 0);
@@ -31841,18 +31950,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(N, { s: 20, children: v })
           ] }, k)) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { borderTop: `1px dashed ${C.line}`, margin: "16px -18px 0" } }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 16 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Cap, { children: "Profit/Loss" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(N, { s: 34, c: C.up, style: { display: "block", margin: "2px 0 14px" }, children: [
-              "+",
-              money(t.pnl)
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", paddingRight: 14 }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: "0 0 320 60", style: { width: "100%", height: 54, display: "block" }, preserveAspectRatio: "none", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { className: "pl-line", style: { "--pl-len": 316 }, x1: "2", y1: "30", x2: "318", y2: "30", stroke: YEL, strokeWidth: "3", strokeLinecap: "round" }, range) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pl-dot", style: { position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", width: 12, height: 12, borderRadius: "50%", background: YEL }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pl-pulse", style: { position: "absolute", inset: 0, borderRadius: "50%" } }) }, range)
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 26 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seg, { items: ["1D", "1W", "1M", "Max"], val: range, onChange: setRange, bg: C.cardPill }) })
-          ] })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PLBlock, { seed: "traders", pnl: t.pnl })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seg, { items: ["Positions", "History"], val: tab, onChange: setTab, bg: C.filterOff }),
@@ -32280,7 +32378,6 @@ input,button{font-family:inherit}
   function Profile({ positions, hasCode, onDeposit, onWithdraw, onSettings, onOpen, isBroker, onBroker }) {
     const { lang } = useLang();
     const [tab, setTab] = (0, import_react4.useState)("Positions");
-    const [range, setRange] = (0, import_react4.useState)("1D");
     const inv = positions.reduce((a, p) => a + p.amt, 0);
     const YEL = "#F7E054";
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
@@ -32307,15 +32404,7 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(N, { s: 20, children: v })
           ] }, k)) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { borderTop: `1px dashed ${C.line}`, margin: "16px -18px 0" } }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 16 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Cap, { children: "Profit/Loss" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(N, { s: 34, c: C.up, style: { display: "block", margin: "2px 0 14px" }, children: "$0.00" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", paddingRight: 14 }, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: "0 0 320 60", style: { width: "100%", height: 54, display: "block" }, preserveAspectRatio: "none", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { className: "pl-line", style: { "--pl-len": 316 }, x1: "2", y1: "30", x2: "318", y2: "30", stroke: YEL, strokeWidth: "3", strokeLinecap: "round" }, range) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pl-dot", style: { position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", width: 12, height: 12, borderRadius: "50%", background: YEL }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pl-pulse", style: { position: "absolute", inset: 0, borderRadius: "50%" } }) }, range)
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 26 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seg, { items: ["1D", "1W", "1M", "Max"], val: range, onChange: setRange, bg: C.cardPill }) })
-          ] })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PLBlock, { seed: "petya", pnl: 0 })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, { className: "fu", style: { overflow: "hidden" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
@@ -32373,8 +32462,9 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Start trading today." })
           ] }), action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Chip, { on: true, tone: "amber", cls: "btn-soft", style: { color: C.onAmber, background: YEL, borderRadius: 999, padding: "11px 22px", fontSize: 15, fontWeight: 700, letterSpacing: 0.5, boxShadow: "inset 0 2px 1px rgba(255,255,255,.6), inset 0 -2px 2px rgba(0,0,0,.18)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Explore Sampan" }) }) }),
           tab === "Positions" && positions.map((p, i) => {
-            const m = M.find((x) => x.id === p.m);
-            const o = m.opts[p.side];
+            const m = M.find((x) => x.id === p.m) || p.mk;
+            if (!m || !m.opts) return null;
+            const o = m.opts[p.side] || m.opts[0];
             const col = o.n === "Up" ? C.up : o.n === "Down" ? C.down : (TEAM[o.n]?.[0] === "#000" ? "#334155" : TEAM[o.n]?.[0]) || C.brand;
             return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, { onClick: () => onOpen(m), children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }, children: [
@@ -32412,8 +32502,10 @@ input,button{font-family:inherit}
           tab === "History" && positions.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { icon: "\u{1F4DC}", title: "No Activity Yet", sub: "Your trades, balance changes, and market resolutions will be recorded here.", action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Chip, { on: true, tone: "amber", cls: "btn-soft", style: { color: C.onAmber, background: YEL, borderRadius: 999, padding: "11px 22px", fontSize: 15, fontWeight: 700, letterSpacing: 0.5, boxShadow: "inset 0 2px 1px rgba(255,255,255,.6), inset 0 -2px 2px rgba(0,0,0,.18)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Explore Sampan" }) }) }),
           tab === "History" && positions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Card, { style: { padding: "4px 16px" }, children: [
             ...positions.slice().reverse().flatMap((p) => {
-              const m = M.find((x) => x.id === p.m);
-              return [["Fee", `${m.title} \xB7 ${m.opts[p.side].n}`, -(p.amt * FEE / 100), p.t], ["Buy", `${m.title} \xB7 ${m.opts[p.side].n}`, -p.amt, p.t]];
+              const m = M.find((x) => x.id === p.m) || p.mk;
+              if (!m || !m.opts) return [];
+              const side = (m.opts[p.side] || m.opts[0]).n;
+              return [["Fee", `${m.title} \xB7 ${side}`, -(p.amt * FEE / 100), p.t], ["Buy", `${m.title} \xB7 ${side}`, -p.amt, p.t]];
             }),
             ["Deposit", "Polygon \xB7 USDC", 500, "Aug 21"]
           ].map(([k, d, v, t], i, arr) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: i < arr.length - 1 ? `1px solid ${C.line}` : "none" }, children: [
@@ -33568,7 +33660,7 @@ input,button{font-family:inherit}
       setTimeout(() => setToast(""), 1800);
     };
     const onDone = (m, side, amt) => {
-      setPositions((p) => [...p, { m: m.id, side, amt, t: "just now" }]);
+      setPositions((p) => [...p, { m: m.id, mk: m, side, amt, t: "just now" }]);
       setTrade(null);
       say(`Bought ${m.opts[side].n} \xB7 ${money(amt)}`);
     };
