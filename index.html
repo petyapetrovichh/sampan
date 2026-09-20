@@ -16752,24 +16752,33 @@ input,button{font-family:inherit}
             ] })
           ] }, i)),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, marginTop: 6, minWidth: 0, overflow: "hidden" }, children: [
-            showType && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TypePill, { label: isUpDown ? "Crypto" : "Predictions", emoji: isUpDown ? "\u{1FA99}" : "\u{1F52E}" }),
+            showType && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TypePill, { label: "Predictions", emoji: "\u{1F52E}" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: USDT_ICON, alt: "", style: { width: 18, height: 18 } }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontFamily: MONO }, children: mk.vol })
             ] }),
             isGameCard ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-              !showType && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: CAT_EMOJI[mk.catKind || "Sports"] }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catKind || "Sports" })
+              !showType && mk.catSub && mk.catSub !== "All" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
+                catPillIcon(mk.catSub) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: catPillIcon(mk.catSub), alt: "", style: { width: 15, height: 15, objectFit: "contain", flexShrink: 0 } }) : CAT_EMOJI[mk.catSub] ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: CAT_EMOJI[mk.catSub] }) : null,
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catSub })
               ] }),
               mk.league ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, minWidth: 0 }, children: [
                 mk.leagueIcon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.leagueIcon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0, objectFit: "cover" } }) : null,
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.league })
               ] }) : null
-            ] }) : isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, minWidth: 0 }, children: [
-              mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0 } }) : null,
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.assetLabel })
+            ] }) : isUpDown ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: showType ? mk.catSub && mk.catSub !== "All" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
+              catPillIcon(mk.catSub) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: catPillIcon(mk.catSub), alt: "", style: { width: 15, height: 15, objectFit: "contain", flexShrink: 0 } }) : CAT_EMOJI[mk.catSub] ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: CAT_EMOJI[mk.catSub] }) : null,
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catSub })
             ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              mk.catSub && mk.catSub !== "All" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
+                catPillIcon(mk.catSub) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: catPillIcon(mk.catSub), alt: "", style: { width: 15, height: 15, objectFit: "contain", flexShrink: 0 } }) : CAT_EMOJI[mk.catSub] ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: CAT_EMOJI[mk.catSub] }) : null,
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catSub })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, minWidth: 0 }, children: [
+                mk.icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: mk.icon, alt: "", style: { width: 18, height: 18, borderRadius: "50%", flexShrink: 0 } }) : null,
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: mk.assetLabel })
+              ] })
+            ] }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
               !showType && mk.catSub && mk.catSub !== "All" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, background: C.cardPill, borderRadius: 999, padding: "4px 8px", fontSize: 13, fontWeight: 500, lineHeight: 1.35, flexShrink: 0 }, children: [
                 catPillIcon(mk.catSub) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: catPillIcon(mk.catSub), alt: "", style: { width: 15, height: 15, objectFit: "contain", flexShrink: 0 } }) : CAT_EMOJI[mk.catSub] ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: CAT_EMOJI[mk.catSub] }) : null,
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: mk.catSub })
@@ -17205,7 +17214,7 @@ input,button{font-family:inherit}
     const tail = t.split(/\s+[-\u2013]\s+/).slice(1).join(" - ");
     return PM_SUBMARKET_RE.test(tail) || /more markets/i.test(t);
   }
-  function pmMapEvent(ev) {
+  function pmMapEvent(ev, forceSportsKind) {
     const tradable = (mk) => {
       if (!mk.active || mk.closed || mk.archived) return false;
       if (mk.acceptingOrders === false) return false;
@@ -17261,7 +17270,7 @@ input,button{font-family:inherit}
     }).sort((a, b) => b.pct - a.pct).map((c, i) => ({ ...c, id: base.id + "-c" + i }));
     const rows = contracts.slice(0, 2).map((c) => ({ dir: "up", label: c.label, pct: c.pct, mkt: c.mkt, yesNo: true }));
     const isMoreMarketsSibling = /-more-markets$/i.test(String(ev.slug || ""));
-    const hasSportTag = !isMoreMarketsSibling && (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase()));
+    const hasSportTag = !isMoreMarketsSibling && (!!forceSportsKind || (ev.tags || []).some((t) => ["sports", "esports"].includes((t.slug || "").toLowerCase())));
     const titleLooksLikeMatch = /\bvs\.?\b/i.test(ev.title || "");
     const isSports = hasSportTag && (sportsTeams.length === 2 || titleLooksLikeMatch);
     if (isSports) {
@@ -17347,7 +17356,13 @@ input,button{font-family:inherit}
           isSubMarket: pmIsSubMarketTitle(ev.title),
           league: leagueTag?.label || "",
           leagueIcon: leagueTag?.image || leagueTag?.icon || "",
-          catKind: (ev.tags || []).some((t) => (t.slug || "").toLowerCase() === "esports") ? "Esports" : "Sports"
+          // Trust the literal tag when the event actually carries one (handles a genuine
+          // cross-category leak from `related_tags` -- an Esports-tagged event slipping into a
+          // Sports-scoped query, or vice versa -- which the caller's `kind` context can't catch).
+          // Only fall back to that context when neither literal tag is present at all, which is
+          // exactly the case for ordinary not-yet-started fixtures that only carry their specific
+          // league tag (nba, dota-2...).
+          catKind: (ev.tags || []).some((t) => (t.slug || "").toLowerCase() === "esports") ? "Esports" : (ev.tags || []).some((t) => (t.slug || "").toLowerCase() === "sports") ? "Sports" : forceSportsKind || "Sports"
         };
       }
     }
@@ -17375,14 +17390,18 @@ input,button{font-family:inherit}
     const nowISO = (/* @__PURE__ */ new Date()).toISOString();
     const [volRaw, soonRaw] = await Promise.all([
       fetchList("order=volume&ascending=false"),
-      fetchList(`order=startDate&ascending=true&start_date_min=${nowISO}`)
+      fetchList(`order=startDate&ascending=true&start_date_min=${encodeURIComponent(nowISO)}`)
     ]);
-    const mapFilter = (raw) => raw.map(pmMapEvent).filter((mk) => mk && mk.isSports && !mk.isSubMarket && (!kind || mk.catKind === kind));
+    const mapFilter = (raw) => raw.map((ev) => pmMapEvent(ev, kind)).filter((mk) => mk && mk.isSports && !mk.isSubMarket && (!kind || mk.catKind === kind));
     const volGames = mapFilter(volRaw);
     const soonGames = mapFilter(soonRaw);
     const live = volGames.filter((mk) => mk.isLiveGame && !mk.gameEnded).slice(0, 12);
     const liveIds = new Set(live.map((mk) => mk.id));
     const upcoming = soonGames.filter((mk) => !mk.gameEnded && !mk.isLiveGame && !liveIds.has(mk.id)).slice(0, 12);
+    try {
+      console.log(`[pm-games ${ck}] volRaw:${volRaw.length} soonRaw:${soonRaw.length} volGames:${volGames.length} soonGames:${soonGames.length} live:${live.length} upcoming:${upcoming.length}`);
+    } catch (e) {
+    }
     PM_GAMES_CACHE[ck] = [...live, ...upcoming];
     PM_GAMES_CACHE_AT[ck] = Date.now();
     return PM_GAMES_CACHE[ck];
@@ -17441,7 +17460,7 @@ input,button{font-family:inherit}
       let mapped = (Array.isArray(data) ? data : []).map(pmMapEvent).filter(Boolean).filter((mk) => (mk.rows?.length ?? 2) >= 2).map((mk) => ({ ...mk, catSub: sub }));
       if (sub === "Crypto") {
         try {
-          mapped = interleave(mapped, await pmFetchUpDownFeedCards(), 4);
+          mapped = interleave(mapped, (await pmFetchUpDownFeedCards()).map((mk) => ({ ...mk, catSub: "Crypto" })), 4);
         } catch (e) {
         }
       }
