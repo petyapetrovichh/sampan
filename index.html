@@ -26860,7 +26860,7 @@ input,button{font-family:inherit}
     const volStr = fmtVol(vol);
     const GENERIC = /* @__PURE__ */ new Set(["politics", "sports", "crypto", "tech", "pop-culture", "economy", "geopolitics", "elections", "finance", "esports", "weather", "ipo", "world", "2025-predictions", "2026-predictions"]);
     const tagLabel = (ev.tags || []).map((t) => ({ l: t.label, s: (t.slug || "").toLowerCase() })).find((t) => t.l && !GENERIC.has(t.s));
-    const base = { id: "pm" + ev.id, icon: ev.icon || ev.image || "", iconBg: "#EDEBE6", q: ev.title || "", vol: volStr, token: tagLabel ? tagLabel.l : "", desc: ev.description || "", allTags: (ev.tags || []).map((t) => ({ label: t.label, emoji: CAT_EMOJI[t.label] || "" })).filter((t) => t.label) };
+    const base = { id: "pm" + ev.id, icon: ev.icon || ev.image || "", iconBg: "#EDEBE6", q: ev.title || "", vol: volStr, volNum: vol, createdMs: new Date(ev.createdAt || ev.startDate || ev.endDate || 0).getTime() || 0, resolveMs: new Date(ev.endDate || ev.startDate || 0).getTime() || 0, token: tagLabel ? tagLabel.l : "", desc: ev.description || "", allTags: (ev.tags || []).map((t) => ({ label: t.label, slug: (t.slug || "").toLowerCase(), image: t.image || t.icon || "", emoji: CAT_EMOJI[t.label] || "" })).filter((t) => t.label) };
     if (children.length === 1) {
       const parsed = pmParseOutcome(children[0]);
       if (!parsed) return null;
@@ -26874,7 +26874,7 @@ input,button{font-family:inherit}
             { dir: "up", label: "Yes", pct: yesPct, mkt: children[0], yesNo: true, binary: true, side: "Yes" },
             { dir: "up", label: "No", pct: 100 - yesPct, mkt: children[0], yesNo: true, binary: true, side: "No" }
           ];
-          const allTags = (ev.tags || []).map((t) => ({ label: t.label, emoji: CAT_EMOJI[t.label] || "" })).filter((t) => t.label);
+          const allTags = (ev.tags || []).map((t) => ({ label: t.label, slug: (t.slug || "").toLowerCase(), image: t.image || t.icon || "", emoji: CAT_EMOJI[t.label] || "" })).filter((t) => t.label);
           return { ...base, rows: rows4, binaryYesNo: true, yesPct, conditionId: children[0].conditionId, yesTokenId: parsed.tokenIds[yesIdx < 0 ? 0 : yesIdx], noTokenId: parsed.tokenIds[noIdx < 0 ? 1 : noIdx], allTags };
         }
         const rows3 = [{ dir: "up", label, pct: yesPct, mkt: children[0], yesNo: true }];
@@ -31074,7 +31074,7 @@ input,button{font-family:inherit}
             [10, 25, 50].map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => {
               setErr(false);
               setAmtNum(amt + v);
-            }, style: { border: "none", background: C.btnSoft, color: C.onBtnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 18px", fontSize: 15, fontWeight: 600, color: C.ink, cursor: "pointer" }, children: [
+            }, style: { border: "none", background: C.btnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 18px", fontSize: 15, fontWeight: 600, color: C.ink, cursor: "pointer" }, children: [
               "+$",
               v
             ] }, v)),
@@ -31085,7 +31085,7 @@ input,button{font-family:inherit}
                 setErr(false);
                 setAmtNum(balance);
               }
-            }, style: { border: "none", background: C.btnSoft, color: C.onBtnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 18px", fontSize: 15, fontWeight: 600, color: C.ink, cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Max" }) })
+            }, style: { border: "none", background: C.btnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 18px", fontSize: 15, fontWeight: 600, color: C.ink, cursor: "pointer" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Max" }) })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", padding: "0 8px", marginTop: 8 }, children: [1, 2, 3, 4, 5, 6, 7, 8, 9, ".", 0, "\u232B"].map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "tap", onClick: () => key(k), style: { border: "none", background: "transparent", fontSize: 30, fontWeight: 600, padding: "8px 0", color: C.ink, fontFamily: MONO, display: "grid", placeItems: "center" }, children: k === "\u232B" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { width: "42", height: "30", viewBox: "0 0 42 30", style: { display: "block" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M13 2 L40 2 Q42 2 42 4 L42 26 Q42 28 40 28 L13 28 Q12 28 11.3 27.2 L1.2 16.3 Q0 15 1.2 13.7 L11.3 2.8 Q12 2 13 2 Z", fill: C.filterOn }),
@@ -31329,7 +31329,7 @@ input,button{font-family:inherit}
           setField("shares");
           const v = Math.round(balance * pct) / 100;
           setSharesStr(v ? String(v) : "");
-        }, style: { flex: 1, border: "none", background: C.btnSoft, color: C.onBtnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 0", fontSize: 15, fontWeight: 600, color: balance > 0 ? C.ink : "#C9CCD4", cursor: "pointer" }, children: [
+        }, style: { flex: 1, border: "none", background: C.btnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 0", fontSize: 15, fontWeight: 600, color: balance > 0 ? C.ink : "#C9CCD4", cursor: "pointer" }, children: [
           pct,
           "%"
         ] }, pct)) : [["-100", -100], ["-10", -10], ["+10", 10], ["+100", 100]].map(([lbl, d]) => {
@@ -31344,7 +31344,7 @@ input,button{font-family:inherit}
             setField("shares");
             setSharesStr(balance ? String(balance) : "");
           }
-        }, style: { flex: 1, border: "none", background: C.btnSoft, color: C.onBtnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 0", fontSize: 15, fontWeight: 600, color: C.ink, cursor: "pointer" }, children: t("Max") })
+        }, style: { flex: 1, border: "none", background: C.btnSoft, boxShadow: `inset 0 0 0 1px ${C.field}`, borderRadius: 999, padding: "7px 0", fontSize: 15, fontWeight: 600, color: C.ink, cursor: "pointer" }, children: t("Max") })
       ] }),
       perp && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", padding: "0 16px 14px" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, display: "flex" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LeveragePill, { value: lev, max: maxLev, onChange: setLev, full: true }) }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { borderTop: `1px dashed ${C.line}`, margin: "0 20px" } }),
@@ -31726,24 +31726,384 @@ input,button{font-family:inherit}
     ] });
   }
   var ALL_TOPICS_TRENDING = [
-    { name: "Bitcoin", emoji: "\u20BF", bg: "#F7931A" },
-    { name: "CS2", emoji: "\u{1F52B}", bg: "#E7B23A" },
-    { name: "LoL", emoji: "\u{1F3AE}", bg: "#0AC8B9" },
-    { name: "Club Friendlies", emoji: "\u26BD", bg: "#E7E7E7" },
-    { name: "Dota 2", emoji: "\u{1F409}", bg: "#B32424" },
-    { name: "ATP", emoji: "\u{1F3BE}", bg: "#1B2A5B" },
-    { name: "WTA", emoji: "\u{1F3BE}", bg: "#00A99D" },
-    { name: "Valorant", emoji: "\u25B2", bg: "#FF4655" },
+    { name: "Pre-IPO", emoji: "\u{1F680}", bg: "#E7E7E7", list: "stock" },
+    { name: "Big Tech", emoji: "\u{1F4BB}", bg: "#D7E6FF", list: "stock" },
+    { name: "Bitcoin", emoji: "\u20BF", bg: "#F7931A", cat: "Crypto", mode: "sort" },
+    { name: "CS2", emoji: "\u{1F52B}", bg: "#E7B23A", cat: "Esports", mode: "games" },
+    { name: "LoL", emoji: "\u{1F3AE}", bg: "#0AC8B9", cat: "Esports", mode: "games" },
+    { name: "Dota 2", emoji: "\u{1F409}", bg: "#B32424", cat: "Esports", mode: "games" },
     { name: "IPOs", emoji: "\u{1F4C8}", bg: "#111" },
-    { name: "Temperature", emoji: "\u{1F321}\uFE0F", bg: "#7DB8E8" }
+    { name: "Temperature", emoji: "\u{1F321}\uFE0F", bg: "#7DB8E8", cat: "Weather", mode: "date" },
+    { name: "Movers", emoji: "\u2728", bg: "#FFE6A7", list: "meme" },
+    { name: "Market cap", emoji: "\u{1F4B0}", bg: "#CDEFD3", list: "meme" },
+    { name: "Agents", emoji: "\u{1F916}", bg: "#E3D7FF", list: "meme" }
   ];
-  function AllTopicsScreen({ onBack, onToast }) {
+  var PM_TOPIC_CACHE = {};
+  var PM_TOPIC_AT = {};
+  var PM_TOPIC_TTL = 12e4;
+  async function pmFetchTopic(tagId, kind) {
+    const ck = tagId + ":" + (kind || "any");
+    if (PM_TOPIC_CACHE[ck] !== void 0 && Date.now() - (PM_TOPIC_AT[ck] || 0) < PM_TOPIC_TTL) return PM_TOPIC_CACHE[ck];
+    const fetchList = async (params) => {
+      try {
+        const r = await fetch(`https://gamma-api.polymarket.com/events?tag_id=${tagId}&related_tags=true&active=true&closed=false&${params}&limit=300`);
+        if (!r.ok) throw new Error("bad status");
+        const d = await r.json();
+        return Array.isArray(d) ? d : [];
+      } catch (e) {
+        return [];
+      }
+    };
+    const nowISO = (/* @__PURE__ */ new Date()).toISOString();
+    const [volRaw, soonRaw] = await Promise.all([
+      fetchList("order=volume&ascending=false"),
+      fetchList(`order=startDate&ascending=true&start_date_min=${encodeURIComponent(nowISO)}`)
+    ]);
+    const seen = /* @__PURE__ */ new Set();
+    const out = [];
+    for (const ev of [...soonRaw, ...volRaw]) {
+      const mk = pmMapEvent(ev, kind);
+      if (!mk || seen.has(mk.id)) continue;
+      if (mk.isSports && mk.gameEnded) continue;
+      seen.add(mk.id);
+      out.push(mk);
+    }
+    PM_TOPIC_CACHE[ck] = out;
+    PM_TOPIC_AT[ck] = Date.now();
+    return out;
+  }
+  var PM_SPORT_CATS = [
+    ["NFL", "\u{1F3C8}"],
+    ["MLB", "\u26BE"],
+    ["NBA", "\u{1F3C0}"],
+    ["College Football", "\u{1F3C8}"],
+    ["College Basketball", "\u{1F3C0}"],
+    ["UFC", "\u{1F94A}"],
+    ["Soccer", "\u26BD"],
+    ["Tennis", "\u{1F3BE}"],
+    ["Cricket", "\u{1F3CF}"],
+    ["Basketball", "\u{1F3C0}"],
+    ["Baseball", "\u26BE"],
+    ["Football", "\u{1F3C8}"],
+    ["Hockey", "\u{1F3D2}"],
+    ["Rugby", "\u{1F3C9}"],
+    ["Aussie Rules", "\u{1F3C9}"],
+    ["Table Tennis", "\u{1F3D3}"],
+    ["Darts", "\u{1F3AF}"],
+    ["Volleyball", "\u{1F3D0}"],
+    ["Handball", "\u{1F93E}"],
+    ["Golf", "\u26F3"],
+    ["Combat", "\u{1F94B}"],
+    ["Boxing", "\u{1F94A}"],
+    ["Motorsports", "\u{1F3CE}\uFE0F"],
+    ["Formula 1", "\u{1F3CE}\uFE0F"],
+    ["Poker", "\u{1F0CF}"],
+    ["Chess", "\u265F\uFE0F"],
+    ["Lacrosse", "\u{1F94D}"],
+    ["Cycling", "\u{1F6B4}"],
+    ["Olympics", "\u{1F3C5}"]
+  ];
+  var PM_ESPORT_CATS = [
+    ["CS2", "\u{1F52B}"],
+    ["Counter-Strike", "\u{1F52B}"],
+    ["Dota 2", "\u{1F409}"],
+    ["League of Legends", "\u{1F3AE}"],
+    ["Valorant", "\u{1F3AF}"],
+    ["Rocket League", "\u{1F697}"],
+    ["Overwatch", "\u{1F6E1}\uFE0F"],
+    ["Rainbow Six", "\u{1F530}"],
+    ["StarCraft", "\u{1F680}"],
+    ["Call of Duty", "\u{1F3AF}"],
+    ["Mobile Legends", "\u{1F4F1}"],
+    ["PUBG", "\u{1FA82}"],
+    ["Apex Legends", "\u{1F53A}"],
+    ["Fortnite", "\u{1F6E0}\uFE0F"],
+    ["Honor of Kings", "\u{1F451}"],
+    ["EA FC", "\u26BD"],
+    ["Esports", "\u{1F3AE}"]
+  ];
+  var pmNorm = (x) => String(x || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  function pmSportOf(mk, cats) {
+    const tags = mk.allTags || [];
+    for (const [name] of cats) {
+      const k = pmNorm(name);
+      const hit = tags.find((t) => pmNorm(t.label) === k || pmNorm(t.slug) === k);
+      if (hit) return { name, image: hit.image || "" };
+    }
+    return null;
+  }
+  function SportsTopicScreen({ kind, onBack, onOpen, onOpenMarket, onCopy }) {
+    const { lang } = useLang();
+    const t = (s) => translate(lang, s);
+    const cats = kind === "Esports" ? PM_ESPORT_CATS : PM_SPORT_CATS;
+    const [evts, setEvts] = (0, import_react4.useState)(null);
+    const [sport, setSport] = (0, import_react4.useState)(null);
+    const [league, setLeague] = (0, import_react4.useState)(null);
+    const [tab, setTab] = (0, import_react4.useState)("GAMES");
+    const [closing, setClosing] = (0, import_react4.useState)(false);
+    const goBack = () => setClosing(true);
+    (0, import_react4.useEffect)(() => {
+      let dead = false;
+      pmFetchTopic(PM_TAGS[kind], kind).then((list) => {
+        if (!dead) setEvts(list);
+      });
+      return () => {
+        dead = true;
+      };
+    }, [kind]);
+    const tree = (0, import_react4.useMemo)(() => {
+      const out = /* @__PURE__ */ new Map();
+      (evts || []).forEach((mk) => {
+        const sp = pmSportOf(mk, cats);
+        const key = sp ? sp.name : mk.league || t("Other");
+        if (!out.has(key)) out.set(key, { name: key, image: sp ? sp.image : mk.leagueIcon, emoji: (cats.find((c) => c[0] === key) || [])[1] || "\u{1F3C5}", leagues: /* @__PURE__ */ new Map(), items: [] });
+        const g = out.get(key);
+        if (!g.image && mk.leagueIcon) g.image = mk.leagueIcon;
+        g.items.push(mk);
+        const sk = pmNorm(key);
+        const lt = (mk.allTags || []).find((x) => !["sports", "esports", "games", "all"].includes(x.slug) && pmNorm(x.label) !== sk && pmNorm(x.slug) !== sk);
+        const lg = lt && lt.label || mk.league || key;
+        if (!g.leagues.has(lg)) g.leagues.set(lg, { name: lg, image: lt && lt.image || mk.leagueIcon || "", items: [] });
+        const L = g.leagues.get(lg);
+        if (!L.image && (lt && lt.image || mk.leagueIcon)) L.image = lt && lt.image || mk.leagueIcon;
+        L.items.push(mk);
+      });
+      const order = cats.map((c) => c[0]);
+      return [...out.values()].sort((a, b) => {
+        const ia = order.indexOf(a.name), ib = order.indexOf(b.name);
+        if (ia !== ib) return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+        return b.items.length - a.items.length;
+      });
+    }, [evts, cats, lang]);
+    const curSport = tree.find((g) => g.name === sport) || tree[0];
+    const leagues = curSport ? [...curSport.leagues.values()].sort((a, b) => b.items.length - a.items.length) : [];
+    const curLeague = leagues.find((l) => l.name === league) || leagues[0];
+    const pool = curLeague ? curLeague.items : [];
+    const games = pool.filter((mk) => mk.isSports && !mk.isSubMarket);
+    const props = pool.filter((mk) => !(mk.isSports && !mk.isSubMarket));
+    const shown = tab === "GAMES" ? games : props;
+    const groups = (0, import_react4.useMemo)(() => {
+      if (tab !== "GAMES") return [{ head: "", items: shown }];
+      const now = /* @__PURE__ */ new Date();
+      const day = (d) => new Date(d).setHours(0, 0, 0, 0);
+      const today = day(now), tomorrow = today + 864e5;
+      const map = /* @__PURE__ */ new Map();
+      shown.forEach((mk) => {
+        const k = mk.isLiveGame ? "live" : mk.startMs ? String(day(mk.startMs)) : "later";
+        if (!map.has(k)) map.set(k, []);
+        map.get(k).push(mk);
+      });
+      const label = (k) => {
+        if (k === "live") return t("Live now");
+        if (k === "later") return t("Upcoming");
+        const d = Number(k);
+        if (d === today) return t("Today");
+        if (d === tomorrow) return t("Tomorrow");
+        return new Date(d).toLocaleDateString(lang === "\u7B80\u4F53\u4E2D\u6587" ? "zh-CN" : "en-US", { weekday: "short", month: "long", day: "numeric" });
+      };
+      return [...map.entries()].sort((a, b) => a[0] === "live" ? -1 : b[0] === "live" ? 1 : a[0] === "later" ? 1 : b[0] === "later" ? -1 : Number(a[0]) - Number(b[0])).map(([k, items]) => ({ head: label(k), items }));
+    }, [shown, tab, lang]);
+    const pill = (on, onClick, icon, emoji, label) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick, className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 8, border: "none", background: on ? C.segOn : C.filterOff, color: on ? C.segInk : C.mute, boxShadow: on ? C.segRim : "none", borderRadius: 16, padding: "9px 14px", fontSize: 15, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }, children: [
+      icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: icon, alt: "", style: { width: 22, height: 22, borderRadius: 6, objectFit: "contain", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 19 }, children: emoji }),
+      label
+    ] }, label);
+    const tile = (on, onClick, icon, emoji, label) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick, className: "tap", style: { flexShrink: 0, width: 86, display: "grid", justifyItems: "center", gap: 6, border: "none", background: on ? C.segOn : C.filterOff, boxShadow: on ? C.segRim : "none", borderRadius: 18, padding: "12px 6px 10px", cursor: "pointer" }, children: [
+      icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: icon, alt: "", style: { width: 38, height: 38, borderRadius: 10, objectFit: "contain" } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 30, lineHeight: "38px" }, children: emoji }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12, fontWeight: 700, color: on ? C.segInk : C.mute, maxWidth: 74, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: label })
+    ] }, label);
+    const row = { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 12px" };
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: C.bg, height: "100%", minHeight: "100%", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", display: "flex", alignItems: "center", padding: "8px 16px 12px", flexShrink: 0 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontSize: 22, fontWeight: 800, letterSpacing: -0.5, pointerEvents: "none" }, children: t(kind) })
+      ] }),
+      evts == null ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", placeItems: "center", padding: "90px 0" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 28, height: 28, borderRadius: "50%", border: `3px solid ${C.line}`, borderTopColor: C.ink, animation: "spin .7s linear infinite" } }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: row, children: tree.map((g) => pill(g === curSport, () => {
+          setSport(g.name);
+          setLeague(null);
+        }, g.image, g.emoji, g.name)) }),
+        leagues.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: row, children: leagues.map((l) => tile(l === curLeague, () => setLeague(l.name), l.image, curSport.emoji, l.name)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "0 16px 14px" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seg, { items: ["GAMES", "PROPS"], val: tab, onChange: setTab, bg: C.filterOff }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "0 16px 24px", display: "grid", gap: 14, minWidth: 0, overflowX: "hidden" }, children: shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { icon: "\u{1F6F8}", title: "No Active Markets", sub: "It's quiet in this category right now. New prediction markets will be added soon." }) : groups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gap: 12 }, children: [
+          g.head && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 17, fontWeight: 800, letterSpacing: -0.3 }, children: g.head }),
+          g.items.map((mk) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MarketFeedCard, { mk, onOpen, onOpenMarket, onCopy }, mk.id))
+        ] }, g.head)) })
+      ] })
+    ] });
+  }
+  var TOPIC_NO_CAROUSEL = ["IPOs", "Live"];
+  var TOPIC_SORTS = [{ k: "Volume", t: true }, { k: "Newest", t: true }];
+  function TopicScreen({ kind, tag, mode, onBack, onOpen, onOpenMarket, onCopy }) {
+    const { lang } = useLang();
+    const t = (s) => translate(lang, s);
+    const [evts, setEvts] = (0, import_react4.useState)(null);
+    const [sub, setSub] = (0, import_react4.useState)("All");
+    const [sort, setSort] = (0, import_react4.useState)("Volume");
+    const [sheet, setSheet] = (0, import_react4.useState)(null);
+    const [gtab, setGtab] = (0, import_react4.useState)("GAMES");
+    const [day, setDay] = (0, import_react4.useState)(null);
+    const [closing, setClosing] = (0, import_react4.useState)(false);
+    const goBack = () => setClosing(true);
+    const flat = !!tag || TOPIC_NO_CAROUSEL.includes(kind);
+    const title = tag || kind;
+    (0, import_react4.useEffect)(() => {
+      let dead = false;
+      const load = kind === "Live" ? pmFetchSub("Live") : pmFetchTopic(PM_TAGS[kind], kind === "Sports" || kind === "Esports" ? kind : null);
+      Promise.resolve(load).then((list) => {
+        if (!dead) setEvts(Array.isArray(list) ? list : []);
+      }).catch(() => {
+        if (!dead) setEvts([]);
+      });
+      return () => {
+        dead = true;
+      };
+    }, [kind]);
+    const subs = (0, import_react4.useMemo)(() => {
+      const kk = pmNorm(kind);
+      const out = /* @__PURE__ */ new Map();
+      (evts || []).forEach((mk) => {
+        const tag2 = (mk.allTags || []).find((x) => pmNorm(x.label) !== kk && pmNorm(x.slug) !== kk && !["all", "trending", "live"].includes(x.slug));
+        if (!tag2) return;
+        if (!out.has(tag2.label)) out.set(tag2.label, { name: tag2.label, image: tag2.image || "", emoji: tag2.emoji || "", n: 0 });
+        const g = out.get(tag2.label);
+        g.n++;
+        if (!g.image && tag2.image) g.image = tag2.image;
+      });
+      return [...out.values()].sort((a, b) => b.n - a.n).slice(0, 20);
+    }, [evts, kind]);
+    const TAG_ALIASES = { cs2: ["counterstrike", "cs2", "csgo"], lol: ["lol", "leagueoflegends"], dota2: ["dota2", "dota"], atp: ["atp", "atptour"], wta: ["wta", "wtatour"] };
+    const tagged = (0, import_react4.useMemo)(() => {
+      if (!tag) return evts || [];
+      const keys = TAG_ALIASES[pmNorm(tag)] || [pmNorm(tag)];
+      return (evts || []).filter((mk) => (mk.allTags || []).some((x) => keys.includes(pmNorm(x.label)) || keys.includes(pmNorm(x.slug))));
+    }, [evts, tag]);
+    const dateMode = mode === "date" || kind === "Weather";
+    const days = (0, import_react4.useMemo)(() => {
+      if (!dateMode) return [];
+      const set = /* @__PURE__ */ new Map();
+      tagged.forEach((mk) => {
+        const ms = mk.resolveMs || mk.startMs || 0;
+        if (!ms) return;
+        const k = new Date(ms).setHours(0, 0, 0, 0);
+        if (!set.has(k)) set.set(k, 0);
+        set.set(k, set.get(k) + 1);
+      });
+      return [...set.keys()].sort((a, b) => a - b);
+    }, [tagged, dateMode]);
+    const dayLabel = (ms) => new Date(Number(ms)).toLocaleDateString(lang === "\u7B80\u4F53\u4E2D\u6587" ? "zh-CN" : "en-US", { month: "short", day: "numeric" });
+    const curDay = day != null && days.includes(day) ? day : days.find((d) => d >= (/* @__PURE__ */ new Date()).setHours(0, 0, 0, 0)) ?? days[0];
+    const shown = (0, import_react4.useMemo)(() => {
+      let list = tagged;
+      if (!flat && sub !== "All") list = list.filter((mk) => (mk.allTags || []).some((x) => x.label === sub));
+      if (mode === "games") list = list.filter((mk) => gtab === "GAMES" ? mk.isSports && !mk.isSubMarket : !(mk.isSports && !mk.isSubMarket));
+      if (dateMode && curDay != null) list = list.filter((mk) => new Date(mk.resolveMs || mk.startMs || 0).setHours(0, 0, 0, 0) === curDay);
+      if (sort === "Newest") return [...list].sort((a, b) => (b.createdMs || 0) - (a.createdMs || 0));
+      return [...list].sort((a, b) => (b.volNum || 0) - (a.volNum || 0));
+    }, [tagged, sub, sort, flat, mode, gtab, curDay, dateMode]);
+    const pill = (on, onClick, icon, emoji, label, node) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick, className: "tap", style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 8, border: "none", background: on ? C.segOn : C.filterOff, color: on ? C.segInk : C.mute, boxShadow: on ? C.segRim : "none", borderRadius: 16, padding: "9px 14px", fontSize: 15, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }, children: [
+      node ? node : icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: icon, alt: "", style: { width: 22, height: 22, borderRadius: 6, objectFit: "contain", flexShrink: 0 } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 19 }, children: emoji || "\u2022" }),
+      label
+    ] }, label);
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: C.bg, height: "100%", minHeight: "100%", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", display: "flex", alignItems: "center", padding: "8px 16px 12px", flexShrink: 0 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontSize: 22, fontWeight: 800, letterSpacing: -0.5, pointerEvents: "none" }, children: t(title) })
+      ] }),
+      evts == null ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", placeItems: "center", padding: "90px 0" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 28, height: 28, borderRadius: "50%", border: `3px solid ${C.line}`, borderTopColor: C.ink, animation: "spin .7s linear infinite" } }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" }, children: [
+        !flat && subs.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 12px" }, children: [
+          pill(sub === "All", () => setSub("All"), "", "", t("All"), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllIcon, {})),
+          subs.map((x) => pill(sub === x.name, () => setSub(x.name), x.image, x.emoji, x.name))
+        ] }),
+        mode === "games" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "0 16px 14px" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seg, { items: ["GAMES", "PROPS"], val: gtab, onChange: setGtab, bg: C.filterOff }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "0 16px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSheet("sort"), className: "tap", style: { display: "inline-flex", alignItems: "center", gap: 6, border: "none", background: C.filterOff, color: C.ink, borderRadius: 999, padding: "9px 16px", fontSize: 15, fontWeight: 700, cursor: "pointer" }, children: [
+            t(sort),
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 17, color: C.mute })
+          ] }),
+          dateMode && days.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSheet("date"), className: "tap", style: { display: "inline-flex", alignItems: "center", gap: 6, border: "none", background: C.filterOff, color: C.ink, borderRadius: 999, padding: "9px 16px", fontSize: 15, fontWeight: 700, cursor: "pointer" }, children: [
+            dayLabel(curDay),
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 17, color: C.mute })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "0 16px 24px", display: "grid", gap: 14, minWidth: 0, overflowX: "hidden" }, children: shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { icon: "\u{1F6F8}", title: "No Active Markets", sub: "It's quiet in this category right now. New prediction markets will be added soon." }) : shown.map((mk) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MarketFeedCard, { mk, onOpen, onOpenMarket, onCopy }, mk.id)) })
+      ] }),
+      sheet === "sort" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PickSheet, { title: "Sort By", items: TOPIC_SORTS, value: sort, onSelect: setSort, onClose: () => setSheet(null) }),
+      sheet === "date" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PickSheet, { title: "Date", items: days.map((d) => ({ k: dayLabel(d), ms: d })), value: dayLabel(curDay), onSelect: (k) => {
+        const hit = days.find((d) => dayLabel(d) === k);
+        if (hit != null) setDay(hit);
+      }, onClose: () => setSheet(null) })
+    ] });
+  }
+  var parseMoney = (v) => {
+    const m = /([\d.]+)\s*([KMB])?/i.exec(String(v || ""));
+    if (!m) return 0;
+    const mult = { k: 1e3, m: 1e6, b: 1e9 }[(m[2] || "").toLowerCase()] || 1;
+    return parseFloat(m[1]) * mult;
+  };
+  function ListTopicScreen({ title, kind, onOpenMarket, onCopy, onBack }) {
+    const { lang } = useLang();
+    const t = (s) => translate(lang, s);
+    const [sort, setSort] = (0, import_react4.useState)("Volume");
+    const [sheet, setSheet] = (0, import_react4.useState)(false);
+    const [memes, setMemes] = (0, import_react4.useState)(null);
+    const [closing, setClosing] = (0, import_react4.useState)(false);
+    const goBack = () => setClosing(true);
+    (0, import_react4.useEffect)(() => {
+      if (kind !== "meme") return;
+      let dead = false;
+      pmFetchMemeFeed().then((l) => {
+        if (!dead) setMemes(Array.isArray(l) && l.length ? l : MEMES);
+      }).catch(() => {
+        if (!dead) setMemes(MEMES);
+      });
+      return () => {
+        dead = true;
+      };
+    }, [kind]);
+    const items = (0, import_react4.useMemo)(() => {
+      if (kind === "stock") {
+        const list2 = STOCKS.filter((st) => st.sec === title || title === "Pre-IPO" && st.sec === "Pre-IPO");
+        const out = list2.length ? list2 : STOCKS;
+        return sort === "Volume" ? [...out].sort((a, b) => parseMoney(b.vol) - parseMoney(a.vol)) : out;
+      }
+      const source = memes || MEMES;
+      let list = source;
+      if (title === "New") list = [...source].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      else if (title === "Oldest") list = [...source].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      else if (title === "Market cap") list = [...source].sort((a, b) => (b.mcNum || parseMoney(b.mc)) - (a.mcNum || parseMoney(a.mc)));
+      else if (title === "Movers") list = [...source].sort((a, b) => (b.chgNum ?? parseFloat(b.chg)) - (a.chgNum ?? parseFloat(a.chg)));
+      else if (title === "Charities") list = source.filter((m) => /charit|donat|relief|aid/i.test(m.name));
+      else if (title === "Agents") list = source.filter((m) => /agent|\bai\b/i.test(m.name));
+      else if (title === "Live") list = source.filter((m) => /live|stream/i.test(m.name));
+      else if (title === "Last trade") list = [...source].sort((a, b) => (b.lastTradeAt || b.createdAt || 0) - (a.lastTradeAt || a.createdAt || 0));
+      const base = list.length ? list : source;
+      const sorted = sort === "Volume" ? [...base].sort((a, b) => (b.volNum || parseMoney(b.vol)) - (a.volNum || parseMoney(a.vol))) : [...base].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      return sorted.map((m) => ({ ...m, sub: m.sub || memeNaturalSub(m) }));
+    }, [kind, title, sort, memes]);
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: closing ? "sro" : "sr", onAnimationEnd: () => closing && onBack(), style: { background: C.bg, height: "100%", minHeight: "100%", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", display: "flex", alignItems: "center", padding: "8px 16px 12px", flexShrink: 0 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconBtn, { onClick: goBack, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 20 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", left: 0, right: 0, textAlign: "center", fontSize: 22, fontWeight: 800, letterSpacing: -0.5, pointerEvents: "none" }, children: t(title) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "0 16px 14px" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => setSheet(true), className: "tap", style: { display: "inline-flex", alignItems: "center", gap: 6, border: "none", background: C.filterOff, color: C.ink, borderRadius: 999, padding: "9px 16px", fontSize: 15, fontWeight: 700, cursor: "pointer" }, children: [
+          t(sort),
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 17, color: C.mute })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "0 16px 24px", display: "grid", gap: 14, minWidth: 0, overflowX: "hidden" }, children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { icon: "\u{1F6F8}", title: "No Active Markets", sub: "It's quiet in this category right now. New prediction markets will be added soon." }) : items.map((it, i) => kind === "stock" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockCard, { st: it, onOpenMarket, onCopy }, it.sym + i) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MemeCard, { mm: it, onOpenMarket, onCopy }, it.name + i)) })
+      ] }),
+      sheet && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PickSheet, { title: "Sort By", items: TOPIC_SORTS, value: sort, onSelect: setSort, onClose: () => setSheet(false) })
+    ] });
+  }
+  function AllTopicsScreen({ onBack, onToast, onTopic }) {
     const { lang } = useLang();
     const stockSubs = ["Pre-IPO", "Big Tech", "Finance", "Chips", "Software", "AI", "Crypto", "EV & Space", "Consumer", "Indices", "Goods", "FX"];
     const predSubs = [["Live", "Live"], ["Sports", "Sports"], ["Esports", "Esports"], ["Crypto", "Crypto"], ["Politics", "Politics"], ["Finance", "Finance"], ["IPOs", "IPO"], ["Geopolitics", "Geopolitics"], ["Tech", "Tech"], ["Culture", "Culture"], ["Elections", "Elections"], ["Economy", "Economy"], ["Weather", "Weather"]];
     const memeSubs = ["Movers", "New", "Charities", "Live", "Market cap", "Agents", "Oldest", "Last trade"];
-    const goTo = (label) => onToast(translate(lang, label) + ": " + translate(lang, "coming soon"));
-    const Tile = ({ icon, emoji, label }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, { onClick: () => goTo(label), style: { display: "flex", alignItems: "center", gap: 10, padding: 14 }, children: [
+    const goTo = (label) => onTopic && (PM_TAGS[label] || label === "Live") ? onTopic(label) : onToast(translate(lang, label) + ": " + translate(lang, "coming soon"));
+    const Tile = ({ icon, emoji, label, onClick }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, { onClick: onClick || (() => goTo(label)), style: { display: "flex", alignItems: "center", gap: 10, padding: 14 }, children: [
       icon ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: icon, alt: "", style: { width: 32, height: 32, objectFit: "contain" } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 26, lineHeight: 1 }, children: emoji }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: label }) })
     ] });
@@ -31760,14 +32120,14 @@ input,button{font-family:inherit}
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Trending" }),
             " \u{1F525}"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" }, children: ALL_TOPICS_TRENDING.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => goTo(t.name), className: "tap", style: { display: "inline-flex", alignItems: "center", gap: 7, border: "none", background: C.soft, borderRadius: 999, padding: "8px 14px 8px 8px", fontSize: 14, fontWeight: 600, color: C.ink, whiteSpace: "nowrap" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" }, children: ALL_TOPICS_TRENDING.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { onClick: () => !onTopic ? goTo(t.name) : t.list ? onTopic({ list: t.list, title: t.name }) : t.cat ? onTopic({ kind: t.cat, tag: t.name, mode: t.mode }) : goTo(t.name), className: "tap", style: { display: "inline-flex", alignItems: "center", gap: 7, border: "none", background: C.soft, borderRadius: 999, padding: "8px 14px 8px 8px", fontSize: 14, fontWeight: 600, color: C.ink, whiteSpace: "nowrap" }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: 24, height: 24, borderRadius: "50%", background: t.bg, display: "grid", placeItems: "center", fontSize: 13, flexShrink: 0 }, children: t.emoji }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: t.name })
           ] }, t.name)) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 20, fontWeight: 800, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Stocks" }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }, children: stockSubs.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tile, { icon: STOCK_SUB_ICONS[s], emoji: BUBBLE_STOCK_EMOJI[s], label: s }, s)) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }, children: stockSubs.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tile, { icon: STOCK_SUB_ICONS[s], emoji: BUBBLE_STOCK_EMOJI[s], label: s, onClick: () => onTopic && onTopic({ list: "stock", title: s }) }, s)) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 20, fontWeight: 800, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Predictions" }) }),
@@ -31775,7 +32135,7 @@ input,button{font-family:inherit}
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 20, fontWeight: 800, marginBottom: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(T, { children: "Meme coins" }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }, children: memeSubs.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tile, { icon: MEME_SUB_ICONS[s], emoji: BUBBLE_MEME_EMOJI[s], label: s }, s)) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }, children: memeSubs.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tile, { icon: MEME_SUB_ICONS[s], emoji: BUBBLE_MEME_EMOJI[s], label: s, onClick: () => onTopic && onTopic({ list: "meme", title: s }) }, s)) })
         ] })
       ] }) })
     ] });
@@ -33469,6 +33829,18 @@ input,button{font-family:inherit}
       "No Activity Yet": "\u6682\u65E0\u6D3B\u52A8\u8BB0\u5F55",
       "Your trades, balance changes, and market resolutions will be recorded here.": "\u60A8\u7684\u4EA4\u6613\u3001\u4F59\u989D\u53D8\u52A8\u548C\u5E02\u573A\u7ED3\u7B97\u5C06\u8BB0\u5F55\u5728\u6B64\u5904\u3002",
       "Explore Sampan": "\u63A2\u7D22 Sampan",
+      "GAMES": "\u6BD4\u8D5B",
+      "PROPS": "\u73A9\u6CD5",
+      "Live now": "\u6B63\u5728\u8FDB\u884C",
+      "Upcoming": "\u5373\u5C06\u5F00\u59CB",
+      "Today": "\u4ECA\u5929",
+      "Tomorrow": "\u660E\u5929",
+      "Other": "\u5176\u4ED6",
+      "No Active Markets": "\u6682\u65E0\u6D3B\u8DC3\u5E02\u573A",
+      "Sort By": "\u6392\u5E8F\u65B9\u5F0F",
+      "Newest": "\u6700\u65B0",
+      "Date": "\u65E5\u671F",
+      "It's quiet in this category right now. New prediction markets will be added soon.": "\u8BE5\u5206\u7C7B\u6682\u65F6\u6CA1\u6709\u5185\u5BB9\uFF0C\u65B0\u7684\u9884\u6D4B\u5E02\u573A\u5F88\u5FEB\u5C31\u4F1A\u4E0A\u7EBF\u3002",
       "No public positions": "\u6682\u65E0\u516C\u5F00\u6301\u4ED3",
       "No history yet": "\u6682\u65E0\u5386\u53F2\u8BB0\u5F55",
       // deposit
@@ -33698,7 +34070,12 @@ input,button{font-family:inherit}
       if (entry.s === "trader") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trader, { t: entry.p, onBack: pop, onCopy: (m, i) => setTrade({ m, side: i }), onOpen: openM }, entry.p.id);
       if (entry.s === "board") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Board, { onBack: pop, onTrader: openT });
       if (entry.s === "topics") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Topics, { onBack: pop, onToast: say });
-      if (entry.s === "alltopics") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllTopicsScreen, { onBack: pop, onToast: say });
+      if (entry.s === "alltopics") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AllTopicsScreen, { onBack: pop, onToast: say, onTopic: (k) => push("topic", k) });
+      if (entry.s === "topic") {
+        const p = typeof entry.p === "string" ? { kind: entry.p } : entry.p;
+        if (p.list) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ListTopicScreen, { title: p.title, kind: p.list, onBack: pop, onOpenMarket: openPM, onCopy: (m, i) => setTrade({ m, side: i }) });
+        return !p.tag && (p.kind === "Sports" || p.kind === "Esports") ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SportsTopicScreen, { kind: p.kind, onBack: pop, onOpen: openM, onOpenMarket: openPM, onCopy: (m, i) => setTrade({ m, side: i }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TopicScreen, { kind: p.kind, tag: p.tag, mode: p.mode, onBack: pop, onOpen: openM, onOpenMarket: openPM, onCopy: (m, i) => setTrade({ m, side: i }) });
+      }
       if (entry.s === "search") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SearchScreen, { onBack: pop, onOpen: openM, onOpenMarket: openPM, onCopy: (m, i) => setTrade({ m, side: i }) });
       if (entry.s === "deposit") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Deposit, { onBack: pop, onToast: say, mode0: entry.p });
       if (entry.s === "profileedit") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileEdit, { onBack: pop, onToast: say });
